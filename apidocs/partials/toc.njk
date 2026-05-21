@@ -1,1 +1,19 @@
-{# v0 stub — populated by the ToC roadmap phase. #}
+{# Per-page table of contents — populated by the toc-builder pipeline pass.
+   Hidden when there's nothing to show (single-section or homepage). #}
+{% macro renderEntries(entries) %}
+<ul>
+  {% for e in entries %}
+  <li>
+    <a href="#{{ e.anchor }}" title="{{ e.heading }}" data-toc-anchor="{{ e.anchor }}">{{ e.heading }}</a>
+    {%- if e.sections %}{{ renderEntries(e.sections) }}{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}
+
+{% if toc and toc.length %}
+<div class="toc-inner">
+  <h2 class="toc-title">On this page</h2>
+  {{ renderEntries(toc) }}
+</div>
+{% endif %}

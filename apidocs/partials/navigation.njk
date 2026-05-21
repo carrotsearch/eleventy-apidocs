@@ -1,8 +1,38 @@
-{# v0 stub — populated by the Navigation roadmap phase. #}
-{% if apidocs.navigation %}
-<ul>
-  {% for item in apidocs.navigation %}
-  <li><a href="/{% if item.slug %}{{ item.slug }}/{% endif %}">{{ item.title }}</a></li>
+{# Main navigation. Accepts two shapes for apidocs.navigation:
+
+   Flat (single chapter):
+     [ {slug, title}, ... ]
+
+   Chaptered (multiple groups):
+     { chapters: [ {title, articles: [{slug, title}, ...]}, ... ] }
+
+   The current page is marked .active by comparing page.url against the
+   entry's "/slug/" path. #}
+
+{% set nav = apidocs.navigation %}
+{% set currentUrl = page.url %}
+
+{% macro articleLink(article) %}
+  {%- set href = "/" + article.slug + ("/" if article.slug else "") -%}
+  {%- set isActive = currentUrl == href -%}
+  <li{% if isActive %} class="active"{% endif %}>
+    <a href="{{ href }}">{{ article.title }}</a>
+  </li>
+{% endmacro %}
+
+{% if nav.chapters %}
+<ul class="chapters">
+  {% for chapter in nav.chapters %}
+  <li class="chapter">
+    {% if chapter.title %}<h3 class="chapter-title">{{ chapter.title }}</h3>{% endif %}
+    <ul class="articles">
+      {% for article in chapter.articles %}{{ articleLink(article) }}{% endfor %}
+    </ul>
+  </li>
   {% endfor %}
+</ul>
+{% elif nav %}
+<ul class="articles">
+  {% for article in nav %}{{ articleLink(article) }}{% endfor %}
 </ul>
 {% endif %}

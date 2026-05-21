@@ -1,6 +1,18 @@
-[
-  { "slug": "", "title": "Home" },
-  { "slug": "getting-started", "title": "Getting started" },
-  { "slug": "code-blocks", "title": "Code blocks" },
-  { "slug": "images", "title": "Images" }
-]
+{
+  "chapters": [
+    {
+      "title": "Introduction",
+      "articles": [
+        { "slug": "", "title": "Home" },
+        { "slug": "getting-started", "title": "Getting started" }
+      ]
+    },
+    {
+      "title": "Content",
+      "articles": [
+        { "slug": "code-blocks", "title": "Code blocks" },
+        { "slug": "images", "title": "Images" }
+      ]
+    }
+  ]
+}

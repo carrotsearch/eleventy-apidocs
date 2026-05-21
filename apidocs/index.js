@@ -78,7 +78,13 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 
     const processed = await processContent(content, ctx);
     const title = extractTitle(processed) || "apidocs";
-    const wrapped = env.render("apidocs.njk", { content: processed, title, apidocs, page: this.page });
+    const wrapped = env.render("apidocs.njk", {
+      content: processed,
+      title,
+      apidocs,
+      page: this.page,
+      toc: ctx.toc
+    });
     const finalized = processDocument(wrapped, ctx);
     return relativizeHtml(finalized, this.page?.url || "/");
   });

@@ -62,6 +62,21 @@
     padding-block: 0.125rem;
     &:hover { color: var(--fg); text-decoration: underline; }
   }
+
+  & .chapter { margin-block-end: 1rem; }
+  & .chapter:last-child { margin-block-end: 0; }
+  & .chapter-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-faint);
+    margin-block: 0 0.35rem;
+  }
+  & li.active > a {
+    color: var(--link);
+    font-weight: 500;
+  }
 }
 
 .article {
@@ -77,8 +92,42 @@
   color: var(--fg-muted);
   font-size: var(--small);
   border-block-start: 1px solid var(--rule-faint);
+
+  & .toc-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-faint);
+    margin-block: 0 0.5rem;
+  }
+  & ul { list-style: none; margin: 0; padding: 0; }
+  & li { margin-block: 0.15rem; }
+  & ul ul {
+    padding-inline-start: 0.75rem;
+    font-size: 0.95em;
+    margin-block: 0.1rem 0.3rem;
+  }
+  & a {
+    color: var(--fg-muted);
+    text-decoration: none;
+    display: block;
+    padding-block: 0.1rem;
+    padding-inline-start: 0.625rem;
+    margin-inline-start: -0.625rem;
+    border-inline-start: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    &:hover { color: var(--fg); }
+  }
+  & a.active {
+    color: var(--link);
+    border-inline-start-color: var(--link);
+  }
 }
-.toc:empty { display: none; }
+/* Hide the ToC rail when there's nothing to show — and let the article
+   reclaim the column on desktop. :has lands the cascade based on whether
+   the partial emitted any content. */
+.toc:not(:has(.toc-inner)) { display: none; }
 
 .site-footer {
   grid-area: footer;
@@ -140,6 +189,17 @@
     max-block-size: calc(100dvh - var(--header-h));
     overflow-y: auto;
   }
+
+  /* Pages without a ToC: drop the right rail and let the article use the
+     freed width. */
+  .layout:not(:has(.toc-inner)) {
+    grid-template-columns: var(--nav-w) minmax(0, 1fr);
+    grid-template-areas:
+      "header header"
+      "nav    article"
+      "footer footer";
+  }
+  .layout:not(:has(.toc-inner)) .article { max-inline-size: 60rem; }
 }
 
 /* Modern thin scrollbars in scrollable rails. */
