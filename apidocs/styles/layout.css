@@ -2,7 +2,6 @@
    Components inside (nav, toc, callouts) use container queries — see content.css. */
 
 :root {
-  --shell-max:    78rem;
   --header-h:     4rem;
   --gutter:       clamp(1rem, 3vw, 2rem);
   --nav-w:        14rem;
@@ -146,8 +145,6 @@
       "header header"
       "nav    article"
       "footer footer";
-    max-inline-size: var(--shell-max);
-    margin-inline: auto;
   }
 
   .site-header {
@@ -157,7 +154,6 @@
 
   .main-nav {
     border-block-end: none;
-    border-inline-end: 1px solid var(--rule-faint);
     align-self: start;
     position: sticky;
     inset-block-start: var(--header-h);
