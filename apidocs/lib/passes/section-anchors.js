@@ -20,8 +20,8 @@ export function sectionAnchors($) {
     const $heading = $(section).children("h2, h3, h4, h5").first();
     if (!$heading.length || $heading.find("a.anchor").length) return;
 
-    $heading.append(
-      ` <a class="anchor" href="#${escapeAttr(id)}" aria-label="Link to this section">${ICON}</a>`
+    $heading.prepend(
+      `<a class="anchor" href="#${escapeAttr(id)}" aria-label="Link to this section">${ICON}</a>`
     );
   });
 }

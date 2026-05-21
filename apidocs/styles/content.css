@@ -19,20 +19,29 @@ article > p:first-of-type {
   margin-block-end: var(--leading);
 }
 
-/* Section anchor links (injected by the HTML pipeline in Phase 2). */
+/* Section anchor links (injected by the HTML pipeline in Phase 2).
+   Prepended inside the heading and pulled into the left gutter with a
+   negative inline-margin so the heading text stays at its natural x. */
 .anchor {
-  opacity: 0;
-  margin-inline-start: 0.25em;
-  font-size: 0.7em;
-  vertical-align: middle;
+  display: inline-block;
+  inline-size: 1em;
+  margin-inline-start: -1em;
+  padding-inline-end: 0.25em;
   color: var(--fg-faint);
   text-decoration: none;
+  opacity: 0;
   transition: opacity 0.15s;
 
-  &:hover { opacity: 1; color: var(--link); }
+  & svg {
+    width: 0.7em;
+    height: 0.7em;
+    vertical-align: 0.075em;
+  }
+
+  &:hover, &:focus-visible { opacity: 1; color: var(--link); }
 }
 
-:is(h2, h3, h4, h5):hover .anchor { opacity: 1; }
+:is(h2, h3, h4, h5):hover > .anchor { opacity: 1; }
 
 /* :target — native multi-page browser behavior. */
 :target {
