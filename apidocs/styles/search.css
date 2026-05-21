@@ -1,0 +1,91 @@
+/* Search trigger pill in the header, plus the modal dialog hosting
+   Pagefind UI. The UI itself is themed via its own CSS custom properties. */
+
+.search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg);
+  color: var(--fg-muted);
+  border: 1px solid var(--rule-faint);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: start;
+
+  &:hover {
+    color: var(--fg);
+    border-color: var(--rule);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+  }
+
+  & svg {
+    flex: 0 0 auto;
+  }
+  & .search-trigger-label {
+    flex: 1 1 auto;
+  }
+  & .search-trigger-kbd {
+    font-family: inherit;
+    font-size: 0.75em;
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--rule-faint);
+    border-radius: 0.25rem;
+    color: var(--fg-faint);
+    background: var(--bg-dim);
+  }
+}
+
+/* On narrow viewports, collapse the trigger to just the magnifier icon. */
+@media (max-width: 32rem) {
+  .search-trigger .search-trigger-label,
+  .search-trigger .search-trigger-kbd {
+    display: none;
+  }
+  .search-trigger {
+    inline-size: auto;
+    padding: 0.4rem;
+  }
+}
+
+.search-dialog {
+  inline-size: min(40rem, 92vw);
+  max-block-size: 80vh;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.25);
+  overflow: hidden;
+
+  &::backdrop {
+    background: rgb(0 0 0 / 0.4);
+    backdrop-filter: blur(2px);
+  }
+
+  & .search-ui {
+    padding: 1rem;
+    max-block-size: 80vh;
+    overflow-y: auto;
+  }
+}
+
+/* Pagefind UI theming. Variable names per pagefindui.com/docs. */
+.search-dialog {
+  --pagefind-ui-scale: 0.9;
+  --pagefind-ui-primary: var(--link);
+  --pagefind-ui-text: var(--fg);
+  --pagefind-ui-background: var(--bg);
+  --pagefind-ui-border: var(--rule-faint);
+  --pagefind-ui-tag: var(--bg-dim);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 0.4rem;
+  --pagefind-ui-font: inherit;
+}

@@ -37,7 +37,7 @@
 }
 
 .site-header .logo         { grid-area: logo; }
-.site-header .search       { grid-area: search-toggle; min-inline-size: 2rem; }
+.site-header .search       { grid-area: search-toggle; justify-self: stretch; max-inline-size: 24rem; }
 .site-header .theme-switch { grid-area: theme; }
 
 .logo a {

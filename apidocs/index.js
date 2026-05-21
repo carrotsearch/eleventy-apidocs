@@ -98,6 +98,27 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     [path.join(themeRoot, "assets/js")]: "assets/apidocs/js"
   });
 
+  // Pagefind: index the built site, emit /pagefind/ next to the HTML. The
+  // search UI is loaded from there by the layout's <link>/<script> tags.
+  eleventyConfig.on("eleventy.after", async ({ directories, dir }) => {
+    const output = directories?.output || dir?.output;
+    if (!output) return;
+    const siteDir = path.resolve(output);
+    try {
+      const { createIndex } = await import("pagefind");
+      const { errors, index } = await createIndex({ verbose: false });
+      if (errors?.length) {
+        console.warn("[apidocs] pagefind init:", errors);
+        return;
+      }
+      if (!index) return;
+      await index.addDirectory({ path: siteDir });
+      await index.writeFiles({ outputPath: path.join(siteDir, "pagefind") });
+    } catch (err) {
+      console.warn("[apidocs] pagefind failed:", err?.message || err);
+    }
+  });
+
   return {
     dir: { input: opts.contentDir },
     htmlTemplateEngine: false,

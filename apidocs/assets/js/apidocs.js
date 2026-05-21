@@ -4,3 +4,4 @@ import "./theme-switch.js";
 import "./code-box.js";
 import "./lightbox.js";
 import "./toc-scrollspy.js";
+import "./search.js";
