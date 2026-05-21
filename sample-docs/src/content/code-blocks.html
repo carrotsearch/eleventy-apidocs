@@ -1,0 +1,91 @@
+<article>
+  <h1>Code blocks</h1>
+  <section id="basics">
+    <h2>Basics</h2>
+    <p>
+      Code blocks use the <code>&lt;pre data-language="..."&gt;</code> contract.
+      Shiki provides dual-theme syntax highlighting (no client JS for the colors;
+      the page just swaps CSS variables on theme change).
+    </p>
+    <pre data-language="javascript">function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+const message = greet("apidocs");</pre>
+  </section>
+
+  <section id="highlight">
+    <h2>Highlighting lines</h2>
+    <p>
+      Add a directive comment to mark lines for emphasis. <code>highlight-line</code>
+      marks the comment's own line; <code>highlight-next-line</code> marks the line
+      after; <code>highlight-range{N-M}</code> marks an arbitrary range. The
+      directive line itself is stripped from the rendered code.
+    </p>
+    <pre data-language="javascript">function ping() {
+  console.log("warming up");
+  // highlight-next-line
+  console.log("this line is highlighted");
+  console.log("done");
+}</pre>
+    <p>Multi-line range:</p>
+    <pre data-language="javascript">// highlight-range{2-4}
+const config = {
+  host: "localhost",
+  port: 8080,
+  scheme: "https"
+};</pre>
+  </section>
+
+  <section id="hide">
+    <h2>Hiding lines</h2>
+    <p>
+      <code>hide-line</code>, <code>hide-next-line</code>, and
+      <code>hide-range{N-M}</code> drop lines from the rendered output — useful for
+      omitting boilerplate while keeping the runnable source intact.
+    </p>
+    <pre data-language="javascript">// hide-next-line
+import { internal } from "./private.js";
+export function publicApi() {
+  return "visible in the docs";
+}</pre>
+  </section>
+
+  <section id="embed">
+    <h2>Embedding files</h2>
+    <p>
+      Reference an external file with <code>data-embed</code>. The path is
+      resolved relative to the source HTML. The language is inferred from the
+      file extension unless overridden.
+    </p>
+    <pre data-embed="../embeds/eleventy.config.js"></pre>
+  </section>
+
+  <section id="embed-fragment">
+    <h2>Embedding a fragment</h2>
+    <p>
+      <code>data-fragment</code> extracts a labelled chunk delimited by
+      <code>fragment-start{id}</code> and <code>fragment-end{id}</code> markers
+      in the source file.
+    </p>
+    <pre data-embed="../embeds/eleventy.config.js" data-fragment="minimal"></pre>
+  </section>
+
+  <section id="embed-jsonpath">
+    <h2>Embedding via JSONPath</h2>
+    <p>
+      For structured data, <code>data-jsonpath</code> extracts matching nodes
+      from a JSON file. Each match becomes its own block.
+    </p>
+    <pre data-embed="../embeds/api-spec.json" data-jsonpath="$.paths['/users'].get"></pre>
+  </section>
+
+  <section id="copy">
+    <h2>Copy to clipboard</h2>
+    <p>
+      Hover any code block above to reveal a copy button in the top-right
+      corner. Click it to copy the unhighlighted source text. The button
+      flashes green on success or red on failure.
+    </p>
+  </section>
+</article>

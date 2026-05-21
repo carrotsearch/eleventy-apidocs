@@ -58,8 +58,13 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     if (!outputPath || !outputPath.endsWith(".html")) return content;
     const apidocs = await getShellData();
 
+    const sourceDir = this.page?.inputPath
+      ? path.dirname(path.resolve(this.page.inputPath))
+      : process.cwd();
+
     const ctx = {
       page: this.page,
+      sourceDir,
       transformers: opts.transformers,
       finalizers: opts.finalizers,
       variables: opts.variables,

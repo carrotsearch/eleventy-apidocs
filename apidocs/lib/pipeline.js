@@ -20,6 +20,8 @@
 import * as cheerio from "cheerio";
 import { linkRewriter } from "./passes/link-rewriter.js";
 import { sectionAnchors } from "./passes/section-anchors.js";
+import { embedCode } from "./passes/embed-code.js";
+import { codeHighlight } from "./passes/code-highlight.js";
 import { fragmentIds } from "./passes/fragment-ids.js";
 import { currentYear } from "./passes/current-year.js";
 import { substituteVariables } from "./passes/variables.js";
@@ -48,6 +50,8 @@ export async function processContent(html, ctx) {
 
   linkRewriter($);
   sectionAnchors($);
+  await embedCode($, ctx);
+  await codeHighlight($, ctx);
   fragmentIds($);
 
   for (const fn of ctx.finalizers ?? []) {

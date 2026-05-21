@@ -78,34 +78,6 @@ pre code {
   font-size: inherit;
 }
 
-/* Code blocks (placeholder styling — Shiki in Phase 3 replaces the body). */
-pre {
-  font-family: var(--font-mono);
-  font-size: calc(1em / var(--scale));
-  color: var(--code-fg);
-  background: var(--code-bg);
-  padding: var(--leading);
-  border-radius: 0.5rem;
-  margin-block: var(--leading);
-  margin-inline: calc(-1 * var(--gutter));
-  overflow-x: auto;
-  max-block-size: 65vh;
-  line-height: 1.5;
-}
-
-@container article (min-width: 36rem) {
-  pre { margin-inline: 0; }
-}
-
-pre > code mark {
-  display: block;
-  color: inherit;
-  background: var(--code-hl);
-  margin-inline: calc(-1 * var(--leading));
-  padding-inline: calc(var(--leading) - 0.25rem);
-  border-inline-start: 0.25rem solid var(--accent);
-}
-
 /* Callouts */
 .info, .warning, .box {
   margin-block: var(--leading);
