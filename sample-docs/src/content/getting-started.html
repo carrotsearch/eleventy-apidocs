@@ -1,0 +1,27 @@
+<article>
+  <h1>Getting started</h1>
+  <section id="install">
+    <h2>Install test</h2>
+    <p>Add the theme to your project:</p>
+    <pre><code>pnpm add -D @11ty/eleventy
+pnpm add @carrotsearch/eleventy-apidocs</code></pre>
+  </section>
+  <section id="configure">
+    <h2>Configure Eleventy</h2>
+    <p>
+      In <code>eleventy.config.js</code>, register the plugin and point it at your
+      content directory:
+    </p>
+    <pre><code>import apidocs from "@carrotsearch/eleventy-apidocs";
+
+export default async function (eleventyConfig) {
+  return apidocs(eleventyConfig, {
+    contentDir: "src/content"
+  });
+}</code></pre>
+  </section>
+  <section id="next">
+    <h2>Next</h2>
+    <p>Go back to the <a href="/">home page</a>.</p>
+  </section>
+</article>

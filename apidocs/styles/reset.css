@@ -1,0 +1,22 @@
+/* Minimal reset — only what we actually rely on. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+img, picture, svg, video, canvas {
+  display: block;
+  max-inline-size: 100%;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+/* Anchors without href are buttons in disguise — treat as interactive only when href exists. */
+a:not([href]) { color: inherit; cursor: default; }

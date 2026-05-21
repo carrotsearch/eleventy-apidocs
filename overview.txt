@@ -1,0 +1,34 @@
+Some time ago I developed:
+
+https://github.com/carrotsearch/gatsby-theme-apidocs
+https://carrotsearch.github.io/apidocs/hello-apidocs/
+
+The primary motivation was to have a consistent framework for writing HTML-based product
+documentation. Multiple products, same framework, versioned and updateable.
+
+Now that Gatsby is dead, I'd like to write a much simpler replacement.
+
+
+Critical features:
+
+- distributed as a versioned npm package I can update across all projects
+- source documentation is written in HTML, not Markdown!
+- the framework applies the relevant optimizations (img src sets, JS/CSS compression, prefetching etc).
+- option for custom processors of the input HTML to inject e.g. metadata of API options
+- no "works only from the / URL" nonsense! I want the site to work from any relative path without rebuilding!
+- responsible desktop/mobile friendly layout
+- light/dark scheme
+- code highlighting
+- local site search: a search based on a pregenerated fuzzysort index (or some other engine).
+
+
+Nice to have:
+
+- no React, plain HTML utilizing the latest web APIs (Transitions?)
+
+
+I don't know if there's any existig framework I could adapt (Astro?).
+
+Read the gatsby-theme-apidocs repo and docs carefully to see what the features are.
+
+Ultrathink to help me decide the best approach.

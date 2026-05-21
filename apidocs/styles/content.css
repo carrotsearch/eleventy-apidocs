@@ -1,0 +1,202 @@
+/* Article body — sections, anchors, code blocks, callouts, dl, figure, table.
+   Modernization vs Gatsby:
+   - Single :target selector — Eleventy is multi-page, no manual .target injection needed.
+   - light-dark() colors flow from tokens.
+   - Container queries on figures/callouts: full-bleed when the article is wide. */
+
+article {
+  position: relative;
+  container-name: article;
+  container-type: inline-size;
+}
+
+article > p:first-of-type {
+  font-size: calc(var(--scale) * 1rem);
+  font-weight: 300;
+  color: var(--fg-muted);
+  padding-block-end: var(--leading);
+  border-block-end: 1px solid var(--rule);
+  margin-block-end: var(--leading);
+}
+
+/* Section anchor links (injected by the HTML pipeline in Phase 2). */
+.anchor {
+  opacity: 0;
+  margin-inline-start: 0.25em;
+  font-size: 0.7em;
+  vertical-align: middle;
+  color: var(--fg-faint);
+  text-decoration: none;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 1; color: var(--link); }
+}
+
+:is(h2, h3, h4, h5):hover .anchor { opacity: 1; }
+
+/* :target — native multi-page browser behavior. */
+:target {
+  scroll-margin-block-start: calc(var(--header-h) + 1rem);
+}
+
+section:target > :is(h2, h3, h4, h5),
+code:target,
+li:target,
+dt:target,
+p:target {
+  background: var(--accent-soft);
+  box-shadow: 0 -0.125em 0 var(--accent-soft), 0 0.125em 0 var(--accent);
+  border-radius: 2px;
+}
+
+/* Inline code */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--inline-fg);
+  background: var(--inline-bg);
+  padding: 0.125em 0.35em;
+  border-radius: 4px;
+  word-wrap: break-word;
+}
+code a:not(.anchor) { color: var(--inline-link); }
+:is(h1, h2, h3, h4, h5) code,
+pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+/* Code blocks (placeholder styling — Shiki in Phase 3 replaces the body). */
+pre {
+  font-family: var(--font-mono);
+  font-size: calc(1em / var(--scale));
+  color: var(--code-fg);
+  background: var(--code-bg);
+  padding: var(--leading);
+  border-radius: 0.5rem;
+  margin-block: var(--leading);
+  margin-inline: calc(-1 * var(--gutter));
+  overflow-x: auto;
+  max-block-size: 65vh;
+  line-height: 1.5;
+}
+
+@container article (min-width: 36rem) {
+  pre { margin-inline: 0; }
+}
+
+pre > code mark {
+  display: block;
+  color: inherit;
+  background: var(--code-hl);
+  margin-inline: calc(-1 * var(--leading));
+  padding-inline: calc(var(--leading) - 0.25rem);
+  border-inline-start: 0.25rem solid var(--accent);
+}
+
+/* Callouts */
+.info, .warning, .box {
+  margin-block: var(--leading);
+  margin-inline: calc(-1 * var(--gutter));
+  padding: var(--leading);
+  border-inline-start: 0.375rem solid var(--rule);
+  background: var(--bg-dim);
+  overflow: hidden; /* contain margin collapse of children */
+}
+.info    { background: var(--info-bg); border-inline-start-color: var(--info-bd); }
+.warning { background: var(--warn-bg); border-inline-start-color: var(--warn-bd); }
+
+.info > :is(strong, b):first-child,
+.warning > :is(strong, b):first-child,
+.box > :is(strong, b):first-child {
+  display: block;
+  margin-block-end: 0.25rem;
+}
+
+@container article (min-width: 36rem) {
+  .info, .warning, .box { margin-inline: 0; border-radius: 0 0.5rem 0.5rem 0; }
+}
+
+/* Figures */
+figure {
+  margin-block: var(--leading);
+  margin-inline: 0;
+}
+figure img, figure picture, figure svg { display: block; max-inline-size: 100%; height: auto; }
+figcaption {
+  font-size: var(--small);
+  font-style: italic;
+  color: var(--fg-muted);
+  text-align: center;
+  margin-block-start: 0.5rem;
+}
+
+/* Light/dark image variants — CSS controls visibility, not JS. */
+:where([data-theme="dark"], :root:not([data-theme])) img.light,
+:where([data-theme="dark"], :root:not([data-theme])) picture.light { display: none; }
+:where([data-theme="light"], :root:not([data-theme])) img.dark,
+:where([data-theme="light"], :root:not([data-theme])) picture.dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) img.light, :root:not([data-theme]) picture.light { display: none; }
+  :root:not([data-theme]) img.dark,  :root:not([data-theme]) picture.dark  { display: block; }
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) img.dark,  :root:not([data-theme]) picture.dark  { display: none; }
+  :root:not([data-theme]) img.light, :root:not([data-theme]) picture.light { display: block; }
+}
+
+/* Definition lists — API reference shape. */
+dl { margin-block: var(--leading); }
+dt { font-weight: 700; margin-block-start: var(--leading); }
+dt:first-child { margin-block-start: 0; }
+dd { margin: 0.25rem 0 var(--leading) var(--leading); }
+dd > p:first-child { margin-block-start: 0; }
+
+@container article (min-width: 48rem) {
+  dl { --dl-indent: 10rem; }
+  dl.narrow  { --dl-indent: 5rem; }
+  dl.compact > dd { margin-block-end: 0.25rem; }
+  dt {
+    float: inline-start;
+    clear: inline-start;
+    inline-size: var(--dl-indent);
+    text-align: end;
+    word-wrap: break-word;
+    margin-block-start: 0;
+  }
+  dd { margin: 0 0 var(--leading) calc(var(--dl-indent) + 1rem); }
+}
+
+/* API sections — monospace headings, separated by rules. */
+article section.api {
+  margin-block-start: var(--leading);
+  border-block-start: 1px solid var(--rule-faint);
+}
+article section.api > :is(h2, h3, h4, h5) {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+/* Tables */
+article table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  margin-block: var(--leading);
+  font-size: var(--small);
+  border-block: 2px solid var(--fg-muted);
+}
+article thead { border-block-end: 1px solid var(--fg-muted); }
+article :is(td, th) { padding: 0.5rem; vertical-align: top; text-align: start; }
+article thead th { text-align: center; }
+article td p:first-child { margin-block-start: 0; }
+
+/* Spacing utilities ported from the original. */
+.lead { font-size: calc(var(--scale) * 1rem); }
+.hug  { margin-block-start: 0; }
+
+/* Current year span — replaced at build time in Phase 2. */
+.current-year { font-variant-numeric: tabular-nums; }

@@ -1,0 +1,32 @@
+{
+  "name": "@carrotsearch/eleventy-apidocs",
+  "version": "0.1.0",
+  "description": "Eleventy plugin for HTML-source product documentation",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./layouts/*": "./layouts/*",
+    "./partials/*": "./partials/*",
+    "./assets/*": "./assets/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "lib/",
+    "layouts/",
+    "partials/",
+    "assets/"
+  ],
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "peerDependencies": {
+    "@11ty/eleventy": ">=3.0.0"
+  },
+  "dependencies": {
+    "lightningcss": "^1.32.0",
+    "nunjucks": "^3.2.4"
+  },
+  "license": "MIT"
+}

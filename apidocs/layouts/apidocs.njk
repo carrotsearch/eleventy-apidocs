@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>{{ title or "apidocs" }}</title>
+    <link rel="stylesheet" href="/assets/apidocs/css/apidocs.css">
+    <script>
+      // FOUC-prevention: apply the persisted theme before paint.
+      (function () {
+        try {
+          var saved = localStorage.getItem("apidocs-theme");
+          if (saved === "light" || saved === "dark") {
+            document.documentElement.setAttribute("data-theme", saved);
+          }
+        } catch (e) { /* private mode etc. */ }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="layout">
+      <header class="site-header">
+        <div class="logo">{{ apidocs.logo | safe }}</div>
+        <div class="search">{% include "search.njk" ignore missing %}</div>
+        <div class="theme-switch">{% include "theme-switch.njk" ignore missing %}</div>
+      </header>
+      <nav class="main-nav">{% include "navigation.njk" ignore missing %}</nav>
+      <main class="article">{{ content | safe }}</main>
+      <nav class="toc">{% include "toc.njk" ignore missing %}</nav>
+      <footer class="site-footer">{{ apidocs.footer | safe }}</footer>
+    </div>
+    <script type="module" src="/assets/apidocs/js/apidocs.js"></script>
+  </body>
+</html>

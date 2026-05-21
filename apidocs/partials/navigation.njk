@@ -1,0 +1,8 @@
+{# v0 stub — populated by the Navigation roadmap phase. #}
+{% if apidocs.navigation %}
+<ul>
+  {% for item in apidocs.navigation %}
+  <li><a href="/{% if item.slug %}{{ item.slug }}/{% endif %}">{{ item.title }}</a></li>
+  {% endfor %}
+</ul>
+{% endif %}

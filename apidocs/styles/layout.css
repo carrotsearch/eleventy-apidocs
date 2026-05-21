@@ -1,0 +1,151 @@
+/* Page shell. grid-template-areas at three breakpoints.
+   Components inside (nav, toc, callouts) use container queries — see content.css. */
+
+:root {
+  --shell-max:    78rem;
+  --header-h:     4rem;
+  --gutter:       clamp(1rem, 3vw, 2rem);
+  --nav-w:        14rem;
+  --toc-w:        13rem;
+}
+
+.layout {
+  display: grid;
+  min-height: 100dvh;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-areas:
+    "header"
+    "nav"
+    "article"
+    "toc"
+    "footer";
+}
+
+.site-header {
+  grid-area: header;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas: "logo theme search-toggle";
+  align-items: center;
+  gap: 0.75rem;
+  block-size: var(--header-h);
+  padding-inline: var(--gutter);
+  background: var(--bg-dim);
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+}
+
+.site-header .logo         { grid-area: logo; }
+.site-header .search       { grid-area: search-toggle; min-inline-size: 2rem; }
+.site-header .theme-switch { grid-area: theme; }
+
+.logo a {
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.main-nav {
+  grid-area: nav;
+  padding: var(--gutter);
+  border-block-end: 1px solid var(--rule-faint);
+  font-size: 0.95rem;
+
+  & ul { list-style: none; margin: 0; padding: 0; }
+  & li { margin-block: 0.35rem; }
+  & a {
+    color: var(--fg-muted);
+    text-decoration: none;
+    display: inline-block;
+    padding-block: 0.125rem;
+    &:hover { color: var(--fg); text-decoration: underline; }
+  }
+}
+
+.article {
+  grid-area: article;
+  min-inline-size: 0;
+  padding-inline: var(--gutter);
+  padding-block: calc(0.75 * var(--leading)) calc(3 * var(--leading));
+}
+
+.toc {
+  grid-area: toc;
+  padding: var(--gutter);
+  color: var(--fg-muted);
+  font-size: var(--small);
+  border-block-start: 1px solid var(--rule-faint);
+}
+.toc:empty { display: none; }
+
+.site-footer {
+  grid-area: footer;
+  padding: var(--gutter);
+  background: var(--bg-dim);
+  color: var(--fg-muted);
+  font-size: var(--small);
+}
+
+/* Tablet — nav becomes a left rail. */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: var(--nav-w) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "header header"
+      "nav    article"
+      "footer footer";
+    max-inline-size: var(--shell-max);
+    margin-inline: auto;
+  }
+
+  .site-header {
+    grid-template-columns: var(--nav-w) 1fr auto;
+    grid-template-areas: "logo search-toggle theme";
+  }
+
+  .main-nav {
+    border-block-end: none;
+    border-inline-end: 1px solid var(--rule-faint);
+    align-self: start;
+    position: sticky;
+    inset-block-start: var(--header-h);
+    max-block-size: calc(100dvh - var(--header-h));
+    overflow-y: auto;
+  }
+
+  .toc:empty + .article { /* nothing */ }
+}
+
+/* Desktop — add the ToC rail. */
+@media (min-width: 64rem) {
+  .layout {
+    grid-template-columns: var(--nav-w) minmax(0, 1fr) var(--toc-w);
+    grid-template-areas:
+      "header header  header"
+      "nav    article toc"
+      "footer footer  footer";
+  }
+
+  .article { max-inline-size: 48rem; }
+
+  .toc {
+    border: 0;
+    padding-block-start: calc(0.75 * var(--leading));
+    align-self: start;
+    position: sticky;
+    inset-block-start: var(--header-h);
+    max-block-size: calc(100dvh - var(--header-h));
+    overflow-y: auto;
+  }
+}
+
+/* Modern thin scrollbars in scrollable rails. */
+@supports (scrollbar-width: thin) {
+  .main-nav, .toc {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "sample-docs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "eleventy --serve --quiet",
+    "build": "eleventy",
+    "clean": "rm -rf _site"
+  },
+  "dependencies": {
+    "@carrotsearch/eleventy-apidocs": "workspace:*"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

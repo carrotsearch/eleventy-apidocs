@@ -1,0 +1,43 @@
+/* Theme switch — single button, sun ↔ moon icon, CSS-only icon swap.
+   The button stays in the DOM before JS upgrades the custom element. */
+apidocs-theme-switch {
+  display: inline-flex;
+}
+
+apidocs-theme-switch button {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover  { background: var(--bg); color: var(--fg); border-color: var(--rule-faint); }
+  &:focus-visible {
+    outline: none;
+    border-color: var(--link);
+    box-shadow: 0 0 0 3px var(--focus-ring);
+  }
+}
+
+apidocs-theme-switch svg {
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  grid-area: 1 / 1;
+  transition: opacity 0.2s, transform 0.3s;
+}
+
+/* Show the sun in light mode, the moon in dark. */
+apidocs-theme-switch .sun  { opacity: 1; transform: rotate(0deg); }
+apidocs-theme-switch .moon { opacity: 0; transform: rotate(-90deg); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) apidocs-theme-switch .sun  { opacity: 0; transform: rotate(90deg); }
+  :root:not([data-theme]) apidocs-theme-switch .moon { opacity: 1; transform: rotate(0deg); }
+}
+:root[data-theme="dark"] apidocs-theme-switch .sun   { opacity: 0; transform: rotate(90deg); }
+:root[data-theme="dark"] apidocs-theme-switch .moon  { opacity: 1; transform: rotate(0deg); }
