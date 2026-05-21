@@ -1,0 +1,59 @@
+<article>
+  <h1>Images</h1>
+  <p>
+    The image pipeline rewrites raster <code>&lt;img&gt;</code> tags into a
+    responsive <code>&lt;picture&gt;</code> with AVIF, WebP, and fallback
+    sources, srcsets sized for the article width, and a tiny LQIP background
+    that holds the aspect ratio while the picture loads. SVG files referenced
+    by <code>&lt;img&gt;</code> are inlined into the document.
+  </p>
+
+  <section id="standalone">
+    <h2>Standalone images</h2>
+    <p>
+      A bare <code>&lt;img&gt;</code> tag is enough — no shortcode or template
+      directive needed. The pipeline picks it up at build time.
+    </p>
+    <img src="images/explorer.jpg" alt="Lingo4g Explorer screenshot">
+  </section>
+
+  <section id="figure">
+    <h2>Figures with captions</h2>
+    <p>
+      Wrap the image in <code>&lt;figure&gt;</code> for a caption and, in this
+      theme, click-to-zoom. The full-viewport view animates with the View
+      Transitions API where supported.
+    </p>
+    <figure>
+      <img src="images/explorer.jpg" alt="Lingo4g Explorer">
+      <figcaption>Lingo4g Explorer — click to zoom.</figcaption>
+    </figure>
+  </section>
+
+  <section id="light-dark">
+    <h2>Light and dark variants</h2>
+    <p>
+      Provide two <code>&lt;img&gt;</code> tags marked <code>light</code> and
+      <code>dark</code>. The active theme decides which one is visible — no
+      JavaScript, no flicker.
+    </p>
+    <figure>
+      <img class="light" src="images/workbench-light.png" alt="Lingo3g Workbench, light theme">
+      <img class="dark" src="images/workbench-dark.png" alt="Lingo3g Workbench, dark theme">
+      <figcaption>Workbench shown in the page's current theme.</figcaption>
+    </figure>
+  </section>
+
+  <section id="svg">
+    <h2>Inline SVG</h2>
+    <p>
+      An <code>&lt;img&gt;</code> pointing at an SVG file is replaced with the
+      file's <code>&lt;svg&gt;</code> element inlined into the document, so
+      CSS variables and theme switches reach into the diagram itself.
+    </p>
+    <figure>
+      <img src="images/diagram.svg" alt="Example SVG diagram">
+      <figcaption>Inlined SVG — selectable, themable, zoomable.</figcaption>
+    </figure>
+  </section>
+</article>

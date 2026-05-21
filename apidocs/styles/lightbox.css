@@ -1,0 +1,85 @@
+/* Lightbox — a <dialog> that fills the viewport and shows the zoomed
+   image. The View Transitions API animates the in-page picture to the
+   dialog clone (and back on close); the CSS here just sets the static
+   modal shell and cursors. */
+
+figure {
+  cursor: zoom-in;
+}
+
+body.apidocs-lightbox-open {
+  /* Prevent background scroll while the modal is open. */
+  overflow: hidden;
+}
+
+dialog.apidocs-lightbox {
+  inline-size: 100vw;
+  block-size: 100vh;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: hsl(0 0% 0% / 0.92);
+  color: #fff;
+  cursor: zoom-out;
+  overscroll-behavior: contain;
+}
+
+dialog.apidocs-lightbox::backdrop {
+  background: hsl(0 0% 0% / 0.6);
+}
+
+dialog.apidocs-lightbox > .frame {
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  gap: 1rem;
+}
+
+dialog.apidocs-lightbox > .frame > :is(picture, img, svg) {
+  display: block;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  block-size: auto;
+  inline-size: auto;
+  border-radius: 0.25rem;
+}
+
+dialog.apidocs-lightbox > .frame > picture > img {
+  display: block;
+  max-inline-size: 100%;
+  max-block-size: calc(100vh - 6rem);
+  inline-size: auto;
+  block-size: auto;
+}
+
+dialog.apidocs-lightbox > .frame > figcaption {
+  color: #fff;
+  font-size: var(--small);
+  text-align: center;
+  font-style: italic;
+  max-inline-size: 50rem;
+}
+
+/* Tame the default View Transitions animation: a touch slower than the
+   browser default, and ease-out so the deceleration feels right. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(apidocs-lightbox-image) {
+    animation-duration: 0.35s;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(apidocs-lightbox-image),
+  ::view-transition-old(apidocs-lightbox-image),
+  ::view-transition-new(apidocs-lightbox-image) {
+    animation: none !important;
+  }
+}

@@ -62,9 +62,14 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       ? path.dirname(path.resolve(this.page.inputPath))
       : process.cwd();
 
+    // Eleventy output dir for this page (e.g. "_site"). Derived from the
+    // resolved output path, with the page's URL suffix stripped.
+    const outputDir = deriveOutputDir(outputPath, this.page?.url);
+
     const ctx = {
       page: this.page,
       sourceDir,
+      outputDir,
       transformers: opts.transformers,
       finalizers: opts.finalizers,
       variables: opts.variables,
@@ -98,4 +103,18 @@ function extractTitle(html) {
   const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   if (!m) return null;
   return m[1].replace(/<[^>]+>/g, "").trim();
+}
+
+// Given Eleventy's resolved output path (e.g. "_site/code-blocks/index.html")
+// and the page's URL (e.g. "/code-blocks/"), strip the URL-derived suffix to
+// recover the Eleventy output root (e.g. "_site").
+function deriveOutputDir(outputPath, pageUrl) {
+  if (!outputPath) return "_site";
+  const url = pageUrl || "/";
+  const suffix = url.replace(/^\//, "") + "index.html";
+  if (outputPath.endsWith(suffix)) {
+    const dir = outputPath.slice(0, outputPath.length - suffix.length);
+    return dir.replace(/\/$/, "") || ".";
+  }
+  return path.dirname(outputPath);
 }

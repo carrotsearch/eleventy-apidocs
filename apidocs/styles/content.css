@@ -115,6 +115,24 @@ figcaption {
   margin-block-start: 0.5rem;
 }
 
+/* LQIP wrapper — holds the aspect ratio while the responsive picture loads
+   and shows a tiny base64 preview as a blurred background. The image-processor
+   pass replaces every raster <img> with this structure. */
+.lqip {
+  display: block;
+  position: relative;
+  max-inline-size: 100%;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.lqip > picture { display: block; }
+.lqip > picture > img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
 /* Light/dark image variants — CSS controls visibility, not JS. */
 :where([data-theme="dark"], :root:not([data-theme])) img.light,
 :where([data-theme="dark"], :root:not([data-theme])) picture.light { display: none; }

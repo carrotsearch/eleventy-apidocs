@@ -1,5 +1,6 @@
 [
   { "slug": "", "title": "Home" },
   { "slug": "getting-started", "title": "Getting started" },
-  { "slug": "code-blocks", "title": "Code blocks" }
+  { "slug": "code-blocks", "title": "Code blocks" },
+  { "slug": "images", "title": "Images" }
 ]

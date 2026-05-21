@@ -3,13 +3,29 @@ import path from "node:path";
 // Rewrites absolute URLs (leading "/") to be relative to the given page URL,
 // so the generated site works from any URL prefix without a rebuild.
 //
-// Covers href="..." and src="..." in v0. srcset / inline style url() are
-// roadmap items along with the responsive-image and Pagefind phases.
+// Covers href, src, and srcset. Inline style url() is a roadmap item.
 export function relativizeHtml(html, fromUrl) {
   if (!fromUrl) return html;
-  return html.replace(/\b(href|src)="([^"]+)"/g, (match, attr, url) => {
+  let out = html.replace(/\b(href|src)="([^"]+)"/g, (match, attr, url) => {
     return `${attr}="${relativizeUrl(url, fromUrl)}"`;
   });
+  out = out.replace(/\bsrcset="([^"]+)"/g, (match, value) => {
+    const rewritten = value
+      .split(",")
+      .map(part => {
+        const trimmed = part.trim();
+        if (!trimmed) return trimmed;
+        // "url [descriptor]" — split on whitespace; descriptor may be absent.
+        const ws = trimmed.indexOf(" ");
+        if (ws === -1) return relativizeUrl(trimmed, fromUrl);
+        const url = trimmed.slice(0, ws);
+        const descriptor = trimmed.slice(ws);
+        return relativizeUrl(url, fromUrl) + descriptor;
+      })
+      .join(", ");
+    return `srcset="${rewritten}"`;
+  });
+  return out;
 }
 
 function relativizeUrl(url, fromUrl) {

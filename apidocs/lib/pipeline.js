@@ -18,6 +18,8 @@
 // layout-injected markup, matching the Gatsby behavior.
 
 import * as cheerio from "cheerio";
+import { svgInliner } from "./passes/svg-inliner.js";
+import { imageProcessor } from "./passes/image-processor.js";
 import { linkRewriter } from "./passes/link-rewriter.js";
 import { sectionAnchors } from "./passes/section-anchors.js";
 import { embedCode } from "./passes/embed-code.js";
@@ -48,6 +50,8 @@ export async function processContent(html, ctx) {
     await fn($, ctx);
   }
 
+  await svgInliner($, ctx);
+  await imageProcessor($, ctx);
   linkRewriter($);
   sectionAnchors($);
   await embedCode($, ctx);
