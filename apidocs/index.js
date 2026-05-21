@@ -4,6 +4,7 @@ import nunjucks from "nunjucks";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { relativizeHtml } from "./lib/relativize.js";
 import { buildCss } from "./lib/build-css.js";
+import { processContent, processDocument } from "./lib/pipeline.js";
 
 const themeRoot = path.dirname(fileURLToPath(import.meta.url));
 
@@ -56,9 +57,20 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   eleventyConfig.addTransform("apidocs-shell", async function (content, outputPath) {
     if (!outputPath || !outputPath.endsWith(".html")) return content;
     const apidocs = await getShellData();
-    const title = extractTitle(content) || "apidocs";
-    const wrapped = env.render("apidocs.njk", { content, title, apidocs, page: this.page });
-    return relativizeHtml(wrapped, this.page?.url || "/");
+
+    const ctx = {
+      page: this.page,
+      transformers: opts.transformers,
+      finalizers: opts.finalizers,
+      variables: opts.variables,
+      buildYear: new Date().getFullYear()
+    };
+
+    const processed = await processContent(content, ctx);
+    const title = extractTitle(processed) || "apidocs";
+    const wrapped = env.render("apidocs.njk", { content: processed, title, apidocs, page: this.page });
+    const finalized = processDocument(wrapped, ctx);
+    return relativizeHtml(finalized, this.page?.url || "/");
   });
 
   for (const f of [opts.navigation, opts.logo, opts.footer]) {

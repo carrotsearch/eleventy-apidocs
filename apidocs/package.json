@@ -25,6 +25,7 @@
     "@11ty/eleventy": ">=3.0.0"
   },
   "dependencies": {
+    "cheerio": "^1.2.0",
     "lightningcss": "^1.32.0",
     "nunjucks": "^3.2.4"
   },

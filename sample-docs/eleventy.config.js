@@ -5,6 +5,10 @@ export default async function (eleventyConfig) {
     navigation: "src/navigation.json",
     logo: "src/logo.html",
     footer: "src/footer.html",
-    contentDir: "src/content"
+    contentDir: "src/content",
+    variables: {
+      VERSION: "0.1.0",
+      SITE_OWNER: "Carrot Search"
+    }
   });
 }
