@@ -58,6 +58,11 @@ function openLightbox(figure, source) {
       img.setAttribute("sizes", "100vw");
     }
   }
+  // Pin the clone's aspect-ratio to the image's natural dimensions so the
+  // View Transitions snapshot box matches the image content exactly (no
+  // letterbox padding inside the captured box).
+  const ar = aspectRatioOf(clone);
+  if (ar) clone.style.setProperty("--ar", ar);
   frame.appendChild(clone);
 
   const caption = figure.querySelector("figcaption");
@@ -117,6 +122,38 @@ function closeLightbox() {
     lastSource = null;
     frame.replaceChildren();
   });
+}
+
+// Derive an `<picture|img|svg>`'s intrinsic aspect ratio. For raster
+// images the width/height attributes set by the image pipeline are the
+// authoritative source. For inlined SVGs we read the viewBox.
+function aspectRatioOf(el) {
+  if (el.tagName === "PICTURE") {
+    const img = el.querySelector("img");
+    if (!img) return null;
+    return arFromWH(img.getAttribute("width"), img.getAttribute("height"));
+  }
+  if (el.tagName === "IMG") {
+    return arFromWH(el.getAttribute("width"), el.getAttribute("height"));
+  }
+  if (el.tagName === "svg" || el.tagName === "SVG") {
+    const vb = el.getAttribute("viewBox");
+    if (vb) {
+      const parts = vb.trim().split(/[\s,]+/).map(Number);
+      if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+        return `${parts[2]} / ${parts[3]}`;
+      }
+    }
+    return arFromWH(el.getAttribute("width"), el.getAttribute("height"));
+  }
+  return null;
+}
+
+function arFromWH(w, h) {
+  const wn = parseFloat(w);
+  const hn = parseFloat(h);
+  if (wn > 0 && hn > 0) return `${wn} / ${hn}`;
+  return null;
 }
 
 function onClick(e) {
