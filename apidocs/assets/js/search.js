@@ -152,12 +152,12 @@ function init() {
     (async () => {
       await pagesReady;
       if (q !== lastQuery) return;
-      if (!pagefind) { renderPages([]); return; }
+      if (!pagefind) { renderPages([], q); return; }
       const r = await pagefind.debouncedSearch(q, PAGE_DEBOUNCE_MS);
       if (r === null || q !== lastQuery) return;
       const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
       if (q !== lastQuery) return;
-      renderPages(pageHits);
+      renderPages(pageHits, q);
     })();
   }
 
@@ -174,11 +174,11 @@ function init() {
     updateEmptyState();
   }
 
-  function renderPages(pageHits) {
+  function renderPages(pageHits, query) {
     lists.pages.replaceChildren();
     if (pageHits.length) {
       groups.pages.hidden = false;
-      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page));
+      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page, query));
     } else {
       groups.pages.hidden = true;
     }
@@ -211,13 +211,13 @@ function init() {
     return li;
   }
 
-  function renderPageHit(page) {
+  function renderPageHit(page, query) {
     const li = document.createElement("li");
     li.className = "search-hit search-hit-page";
     const a = document.createElement("a");
     a.href = page.url;
     a.innerHTML = `
-      <span class="search-hit-title">${escapeHtml(page.meta?.title || page.url)}</span>
+      <span class="search-hit-title">${highlightTitle(page.meta?.title || page.url, query)}</span>
       <span class="search-hit-excerpt">${page.excerpt || ""}</span>
     `;
     li.appendChild(a);
@@ -232,7 +232,7 @@ function init() {
         const subA = document.createElement("a");
         subA.href = sub.url;
         subA.innerHTML = `
-          <span class="search-subhit-title">${escapeHtml(sub.title || "")}</span>
+          <span class="search-subhit-title">${highlightTitle(sub.title || "", query)}</span>
           <span class="search-subhit-excerpt">${sub.excerpt || ""}</span>
         `;
         subLi.appendChild(subA);
@@ -241,6 +241,23 @@ function init() {
       li.appendChild(subList);
     }
     return li;
+  }
+
+  // Highlight matched query tokens in a plain title. Pagefind only marks
+  // up excerpt body content, so heading text comes back unhighlighted —
+  // we mirror its word-prefix matcher client-side so the highlight lands
+  // where the user typed.
+  function highlightTitle(text, query) {
+    const escaped = escapeHtml(text || "");
+    if (!escaped || !query) return escaped;
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean).map(escapeRegex);
+    if (!tokens.length) return escaped;
+    const re = new RegExp(`\\b(${tokens.join("|")})`, "gi");
+    return escaped.replace(re, "<mark>$1</mark>");
+  }
+
+  function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   function symbolHref(sym) {

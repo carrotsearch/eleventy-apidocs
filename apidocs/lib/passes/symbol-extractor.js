@@ -5,7 +5,7 @@
 // Per element:
 //   name   = data-api-name | <dt> text | first <h*> text inside <section> | own text
 //   kind   = data-api-kind | inferred from tag (dt→option, section→section)
-//   anchor = own id | nearest ancestor with id
+//   anchor = own id | first heading id inside (for section.api) | nearest ancestor with id
 //   url    = ctx.page.url
 
 export function extractSymbols($, ctx) {
@@ -44,6 +44,10 @@ function readName($el) {
 function readAnchor($el) {
   const own = $el.attr("id");
   if (own) return own;
+  if ($el.is("section")) {
+    const $h = $el.children("h1, h2, h3, h4, h5, h6").first();
+    if ($h.length && $h.attr("id")) return $h.attr("id");
+  }
   const $ancestor = $el.parents("[id]").first();
   return $ancestor.attr("id") || null;
 }

@@ -1,7 +1,7 @@
 <article>
   <h1>Getting started</h1>
-  <section id="overview">
-    <h2>Overview</h2>
+  <section>
+    <h2 id="overview">Overview</h2>
     <p>
       <code>@carrotsearch/eleventy-apidocs</code> is an Eleventy plugin that turns
       a tree of authored HTML files into a navigable documentation site with
@@ -15,20 +15,20 @@
     </p>
   </section>
 
-  <section id="install">
-    <h2>Install</h2>
+  <section>
+    <h2 id="install">Install</h2>
     <p>Add Eleventy and the theme to your project:</p>
     <pre data-language="bash">pnpm add -D @11ty/eleventy
 pnpm add @carrotsearch/eleventy-apidocs</pre>
-    <section id="install-requirements">
-      <h3>Requirements</h3>
+    <section>
+      <h3 id="install:requirements">Requirements</h3>
       <p>
         Node 20.11 or later is required. The plugin is published as ESM and
         expects an ESM consumer config.
       </p>
     </section>
-    <section id="install-workspace">
-      <h3>Workspaces</h3>
+    <section>
+      <h3 id="install:workspaces">Workspaces</h3>
       <p>
         Inside a pnpm workspace, you can reference the theme with
         <code>workspace:*</code> while it lives in the same repo as your docs.
@@ -36,8 +36,8 @@ pnpm add @carrotsearch/eleventy-apidocs</pre>
     </section>
   </section>
 
-  <section id="configure">
-    <h2>Configure Eleventy</h2>
+  <section>
+    <h2 id="configure-eleventy">Configure Eleventy</h2>
     <p>
       In <code>eleventy.config.js</code>, register the plugin and point it at
       your content directory:
@@ -49,8 +49,8 @@ export default async function (eleventyConfig) {
     contentDir: "src/content"
   });
 }</pre>
-    <section id="configure-options">
-      <h3>Options</h3>
+    <section>
+      <h3 id="configure-eleventy:options">Options</h3>
       <p>
         The plugin accepts the following options. Each one is optional — paths
         default to conventional locations under <code>src/</code>.
@@ -85,8 +85,8 @@ export default async function (eleventyConfig) {
         </dd>
       </dl>
     </section>
-    <section id="configure-pipeline">
-      <h3>Custom pipeline passes</h3>
+    <section>
+      <h3 id="configure-eleventy:custom-pipeline-passes">Custom pipeline passes</h3>
       <p>
         Pass <code>transformers</code> and <code>finalizers</code> to hook
         into the HTML pipeline before and after the built-in passes. Each
@@ -95,29 +95,36 @@ export default async function (eleventyConfig) {
     </section>
   </section>
 
-  <section id="authoring">
-    <h2>Authoring contract</h2>
+  <section>
+    <h2 id="authoring-contract">Authoring contract</h2>
     <p>
       Each article is a single HTML file. The expected outer shape is an
       <code>&lt;article&gt;</code> with an <code>&lt;h1&gt;</code> title and one
-      or more <code>&lt;section&gt;</code> blocks, each with a stable
-      <code>id</code>:
+      or more <code>&lt;section&gt;</code> blocks. The first heading inside
+      each section carries a stable <code>id</code>:
     </p>
     <pre data-language="html">&lt;article&gt;
   &lt;h1&gt;Title&lt;/h1&gt;
-  &lt;section id="intro"&gt;
-    &lt;h2&gt;Intro&lt;/h2&gt;
+  &lt;section&gt;
+    &lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
     &lt;p&gt;…&lt;/p&gt;
+    &lt;section&gt;
+      &lt;h3 id="intro:details"&gt;Details&lt;/h3&gt;
+      &lt;p&gt;…&lt;/p&gt;
+    &lt;/section&gt;
   &lt;/section&gt;
 &lt;/article&gt;</pre>
     <p>
-      Section <code>id</code>s anchor the per-page table of contents and act
-      as stable deep links. Nested sections appear as nested ToC entries.
+      Heading <code>id</code>s anchor the per-page table of contents and act
+      as stable deep links. Nested sections appear as nested ToC entries;
+      by convention their ids carry the parent's id as a colon-separated
+      prefix (<code>intro:details</code>), so each heading's id reads as
+      a path from the page root.
     </p>
   </section>
 
-  <section id="next">
-    <h2>Next steps</h2>
+  <section>
+    <h2 id="next-steps">Next steps</h2>
     <p>
       Browse the rest of the sample docs to see what the theme renders:
     </p>

@@ -48,7 +48,7 @@ article > p:first-of-type {
   scroll-margin-block-start: calc(var(--header-h) + 1rem);
 }
 
-section:target > :is(h2, h3, h4, h5),
+:is(h2, h3, h4, h5):target,
 code:target,
 li:target,
 dt:target,
