@@ -2,6 +2,24 @@
   "name": "@carrotsearch/eleventy-apidocs",
   "version": "0.1.0",
   "description": "Eleventy plugin for HTML-source product documentation",
+  "keywords": [
+    "eleventy",
+    "eleventy-plugin",
+    "documentation",
+    "api-docs",
+    "static-site",
+    "html",
+    "pagefind",
+    "shiki"
+  ],
+  "homepage": "https://github.com/carrotsearch/eleventy-apidocs#readme",
+  "bugs": "https://github.com/carrotsearch/eleventy-apidocs/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carrotsearch/eleventy-apidocs.git",
+    "directory": "apidocs"
+  },
+  "license": "MIT",
   "type": "module",
   "main": "./index.js",
   "exports": {
@@ -16,6 +34,7 @@
     "lib/",
     "layouts/",
     "partials/",
+    "styles/",
     "assets/"
   ],
   "scripts": {
@@ -38,6 +57,5 @@
     "nunjucks": "^3.2.4",
     "pagefind": "^1.5.2",
     "shiki": "^4.1.0"
-  },
-  "license": "MIT"
+  }
 }

@@ -107,5 +107,4 @@ What ships today:
 - Bundled, minified CSS (lightningcss) and JS (esbuild)
 - Prev/next navigation and speculation-rules prefetch
 
-Remaining for a v1 release: LICENSE file, version bump, finalize the
-`files` allowlist, `npm publish`.
+Remaining for a v1 release: version bump and `npm publish`.
