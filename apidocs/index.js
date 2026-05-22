@@ -56,9 +56,12 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 
   // Bundle the theme CSS once before each build. lightningcss collapses
   // @imports and minifies in one pass, so the site ships a single .css file.
-  eleventyConfig.on("eleventy.before", async () => {
+  // The bundle is written directly into the Eleventy output dir to keep it
+  // out of any watched/passthrough source path — see lib/build-css.js.
+  eleventyConfig.on("eleventy.before", async ({ directories, dir }) => {
     symbols = [];
-    await buildCss(themeRoot);
+    const output = directories?.output || dir?.output;
+    if (output) await buildCss(themeRoot, output);
   });
 
   // Watch CSS source so dev rebuilds pick up token/layout edits.
@@ -108,7 +111,6 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   }
 
   eleventyConfig.addPassthroughCopy({
-    [path.join(themeRoot, "assets/css")]: "assets/apidocs/css",
     [path.join(themeRoot, "assets/js")]: "assets/apidocs/js",
     [fuzzysortPath]: "assets/apidocs/js/fuzzysort.js"
   });
