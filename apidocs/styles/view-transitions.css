@@ -10,10 +10,25 @@
 .main-nav    { view-transition-name: apidocs-nav; }
 .site-footer { view-transition-name: apidocs-footer; }
 
-/* The spec's default 250ms feels lethargic on sibling-page navigations. */
+/* Swap pages instantly — the named shell groups below keep the header,
+   nav, and footer rooted across the swap, so there's nothing to crossfade. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 180ms;
+  animation-duration: 0s;
+}
+
+/* Named shell groups exist purely to anchor the persistent chrome; their
+   old/new snapshots are positionally identical, so no crossfade either. */
+::view-transition-group(apidocs-header),
+::view-transition-group(apidocs-nav),
+::view-transition-group(apidocs-footer),
+::view-transition-old(apidocs-header),
+::view-transition-new(apidocs-header),
+::view-transition-old(apidocs-nav),
+::view-transition-new(apidocs-nav),
+::view-transition-old(apidocs-footer),
+::view-transition-new(apidocs-footer) {
+  animation-duration: 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {
