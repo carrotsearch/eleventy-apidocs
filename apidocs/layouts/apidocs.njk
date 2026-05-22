@@ -26,7 +26,10 @@
         <div class="theme-switch">{% include "theme-switch.njk" ignore missing %}</div>
       </header>
       <nav class="main-nav">{% include "navigation.njk" ignore missing %}</nav>
-      <main class="article" data-pagefind-body>{{ content | safe }}</main>
+      <main class="article" data-pagefind-body>
+        {{ content | safe }}
+        {% include "prev-next.njk" ignore missing %}
+      </main>
       <nav class="toc">{% include "toc.njk" ignore missing %}</nav>
       <footer class="site-footer">{{ apidocs.footer | safe }}</footer>
     </div>

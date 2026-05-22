@@ -1,0 +1,46 @@
+/* Prev/next article navigation at the end of each article.
+   Renders as two equal columns; when only one link exists, it sticks to its
+   side (prev → start, next → end) and the other column stays empty. */
+
+.prev-next {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gutter);
+  margin-block-start: calc(2 * var(--leading));
+  padding-block-start: var(--leading);
+  border-block-start: 1px solid var(--rule-faint);
+}
+
+.prev-next-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule-faint);
+  border-radius: 0.5rem;
+  color: var(--fg);
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover, &:focus-visible {
+    border-color: var(--rule);
+    background: var(--bg-dim);
+  }
+}
+
+.prev-next-prev { grid-column: 1; align-items: flex-start; text-align: start; }
+.prev-next-next { grid-column: 2; align-items: flex-end;   text-align: end; }
+
+.prev-next-direction {
+  font-size: var(--small);
+  color: var(--fg-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.prev-next-title {
+  color: var(--link);
+  font-weight: 500;
+}
+
+.prev-next-link:hover .prev-next-title { color: var(--link-hover); }

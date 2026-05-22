@@ -89,12 +89,15 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 
     const processed = await processContent(content, ctx);
     const title = extractTitle(processed) || "apidocs";
+    const { prev, next } = neighborsFor(apidocs.navigation, this.page?.url);
     const wrapped = env.render("apidocs.njk", {
       content: processed,
       title,
       apidocs,
       page: this.page,
-      toc: ctx.toc
+      toc: ctx.toc,
+      prev,
+      next
     });
     const finalized = processDocument(wrapped, ctx);
     return relativizeHtml(finalized, this.page?.url || "/");
@@ -151,6 +154,33 @@ function extractTitle(html) {
   const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   if (!m) return null;
   return m[1].replace(/<[^>]+>/g, "").trim();
+}
+
+// Flatten the navigation manifest (chaptered or flat) into an ordered list
+// and return the {prev, next} entries surrounding the current page.
+function neighborsFor(navigation, currentUrl) {
+  const flat = flattenArticles(navigation);
+  if (!flat.length || !currentUrl) return { prev: null, next: null };
+  const idx = flat.findIndex(a => articleHref(a) === currentUrl);
+  if (idx < 0) return { prev: null, next: null };
+  return {
+    prev: idx > 0 ? flat[idx - 1] : null,
+    next: idx < flat.length - 1 ? flat[idx + 1] : null
+  };
+}
+
+function flattenArticles(navigation) {
+  if (!navigation) return [];
+  if (Array.isArray(navigation)) return navigation;
+  if (Array.isArray(navigation.chapters)) {
+    return navigation.chapters.flatMap(c => c.articles || []);
+  }
+  return [];
+}
+
+function articleHref(article) {
+  const slug = article.slug || "";
+  return "/" + slug + (slug ? "/" : "");
 }
 
 // Given Eleventy's resolved output path (e.g. "_site/code-blocks/index.html")
