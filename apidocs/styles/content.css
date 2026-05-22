@@ -104,6 +104,10 @@ pre code {
    so we need to zero it explicitly. */
 :is(.info, .warning, .box) > *:first-child { margin-block-start: 0; }
 
+/* Code blocks inside callouts: drop the negative inline margin that pulls
+   bare code boxes into the gutter so they align with the callout's text. */
+:is(.info, .warning, .box) apidocs-code-box { margin-inline: 0; }
+
 /* Icon on info/warning heading. Box stays plain — generic container. */
 .info > :is(strong, b):first-child::before,
 .warning > :is(strong, b):first-child::before {
