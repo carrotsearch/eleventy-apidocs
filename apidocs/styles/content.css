@@ -99,10 +99,11 @@ pre code {
   margin-block-end: 0.25rem;
 }
 
-/* No-heading case: drop the first child's leading top-margin so the
-   inner padding stays symmetric. overflow:hidden blocks margin collapse,
-   so we need to zero it explicitly. */
+/* No-heading / trailing element cases: drop the leading top/bottom margins
+   so the callout's inner padding stays symmetric. overflow:hidden blocks
+   margin collapse, so we need to zero them explicitly. */
 :is(.info, .warning, .box) > *:first-child { margin-block-start: 0; }
+:is(.info, .warning, .box) > *:last-child  { margin-block-end: 0; }
 
 /* Code blocks inside callouts: drop the negative inline margin that pulls
    bare code boxes into the gutter so they align with the callout's text. */
