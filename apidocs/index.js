@@ -1,7 +1,6 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
 import nunjucks from "nunjucks";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { relativizeHtml } from "./lib/relativize.js";
@@ -10,8 +9,6 @@ import { buildJs } from "./lib/build-js.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
 
 const themeRoot = path.dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
-const fuzzysortPath = require.resolve("fuzzysort");
 
 export default function apidocs(eleventyConfig, userOptions = {}) {
   const opts = {
@@ -113,10 +110,6 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   for (const f of [opts.navigation, opts.logo, opts.footer]) {
     if (f) eleventyConfig.addWatchTarget(f);
   }
-
-  eleventyConfig.addPassthroughCopy({
-    [fuzzysortPath]: "assets/apidocs/js/fuzzysort.js"
-  });
 
   // Post-build: emit the fuzzysort symbol manifest, then run Pagefind.
   eleventyConfig.on("eleventy.after", async ({ directories, dir }) => {
