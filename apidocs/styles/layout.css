@@ -152,6 +152,11 @@
     grid-template-areas: "logo search-toggle theme";
   }
 
+  /* Pull the search box left by the header column gap so its left edge
+     lines up with the article text's left edge (both sit on nav-w + gutter
+     from the viewport once the gap is cancelled). */
+  .site-header .search { margin-inline-start: -0.75rem; }
+
   .main-nav {
     border-block-end: none;
     align-self: start;
