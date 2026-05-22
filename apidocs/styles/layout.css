@@ -80,7 +80,7 @@
      the chapter title has much less, so without a nudge it would sit
      visibly higher. Push the first chapter title down to land on h1's
      visible top. */
-  & .chapter:first-child .chapter-title { padding-block-start: 0.35rem; }
+  & .chapter:first-child .chapter-title { padding-block-start: 0.55rem; }
   & li.active > a {
     color: var(--link);
     font-weight: 500;
@@ -110,7 +110,7 @@
     color: var(--fg-faint);
     margin-block: 0 0.5rem;
     /* Same nudge as the first chapter title — land on h1's visible top. */
-    padding-block-start: 0.35rem;
+    padding-block-start: 0.55rem;
   }
   & ul { list-style: none; margin: 0; padding: 0; }
   & li { margin-block: 0.15rem; }
