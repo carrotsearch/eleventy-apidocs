@@ -137,6 +137,13 @@ figure {
   margin-inline: 0;
 }
 figure img, figure picture, figure svg { display: block; max-inline-size: 100%; height: auto; }
+
+/* Standalone media — match the rhythm of paragraphs and figures when an
+   image isn't wrapped in <figure>. The image pipeline rewraps raster <img>
+   in .lqip, so cover that too; nested matches inside a figure are excluded. */
+article :is(img, picture, .lqip):not(figure :is(img, picture, .lqip)) {
+  margin-block: var(--leading);
+}
 figcaption {
   font-size: var(--small);
   font-style: italic;
@@ -163,18 +170,16 @@ figcaption {
   block-size: auto;
 }
 
-/* Light/dark image variants — CSS controls visibility, not JS. */
-:where([data-theme="dark"], :root:not([data-theme])) img.light,
-:where([data-theme="dark"], :root:not([data-theme])) picture.light { display: none; }
-:where([data-theme="light"], :root:not([data-theme])) img.dark,
-:where([data-theme="light"], :root:not([data-theme])) picture.dark { display: none; }
+/* Light/dark image variants — CSS controls visibility, not JS.
+   The image pipeline propagates the .light/.dark class to the .lqip wrapper,
+   so all three selectors need to match for raster and inline cases alike. */
+:root[data-theme="dark"]  :is(img, picture, .lqip).light,
+:root[data-theme="light"] :is(img, picture, .lqip).dark { display: none; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) img.light, :root:not([data-theme]) picture.light { display: none; }
-  :root:not([data-theme]) img.dark,  :root:not([data-theme]) picture.dark  { display: block; }
+  :root:not([data-theme]) :is(img, picture, .lqip).light { display: none; }
 }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme]) img.dark,  :root:not([data-theme]) picture.dark  { display: none; }
-  :root:not([data-theme]) img.light, :root:not([data-theme]) picture.light { display: block; }
+  :root:not([data-theme]) :is(img, picture, .lqip).dark  { display: none; }
 }
 
 /* Definition lists — API reference shape. */
