@@ -1,8 +1,12 @@
 // Unified search dialog. fuzzysort against /symbols.json for API hits,
 // Pagefind's JS API for prose hits. Single keyboard cursor moves across
 // both groups in visual order; Enter navigates; Esc closes.
+//
+// fuzzysort runs synchronously on every keystroke (sub-ms). Pagefind has
+// its own debouncedSearch and lags by PAGE_DEBOUNCE_MS, so API hits paint
+// instantly and prose hits stream in beside them.
 
-const DEBOUNCE_MS = 80;
+const PAGE_DEBOUNCE_MS = 80;
 const API_LIMIT = 8;
 const PAGE_LIMIT = 8;
 const SUB_LIMIT = 2; // sub-results per page
@@ -28,18 +32,25 @@ function init() {
   let symbols = null;
   let pagefind = null;
   let fuzzysort = null;
-  let loadingPromise = null;
+  let apiReady = null;   // resolves when symbols.json + fuzzysort are loaded
+  let pagesReady = null; // resolves when pagefind.js is loaded
   let lastQuery = "";
-  let debounceTimer = 0;
   let activeIndex = -1;
   let rows = []; // flat list of {anchor element, href}
+  let apiRendered = false;
+  let pagesRendered = false;
 
   function ensureLoaded() {
-    if (loadingPromise) return loadingPromise;
-    loadingPromise = Promise.all([loadSymbols(), loadPagefind(), loadFuzzysort()]).catch(err => {
-      console.warn("[apidocs] search load failed:", err.message);
-    });
-    return loadingPromise;
+    if (!apiReady) {
+      apiReady = Promise.all([loadSymbols(), loadFuzzysort()]).catch(err => {
+        console.warn("[apidocs] search api load failed:", err.message);
+      });
+    }
+    if (!pagesReady) {
+      pagesReady = loadPagefind().catch(err => {
+        console.warn("[apidocs] search pages load failed:", err.message);
+      });
+    }
   }
 
   async function loadSymbols() {
@@ -81,7 +92,7 @@ function init() {
     input.value = "";
     lastQuery = "";
     clearResults();
-    showEmptyState("type");
+    updateEmptyState();
     requestAnimationFrame(() => input.focus());
   }
 
@@ -96,11 +107,20 @@ function init() {
     groups.pages.hidden = true;
     rows = [];
     activeIndex = -1;
+    apiRendered = false;
+    pagesRendered = false;
   }
 
-  function showEmptyState(which) {
-    emptyEl.hidden = which !== "type";
-    noHitsEl.hidden = which !== "none";
+  function updateEmptyState() {
+    if (!lastQuery) {
+      emptyEl.hidden = false;
+      noHitsEl.hidden = true;
+      return;
+    }
+    emptyEl.hidden = true;
+    const hasHits = !groups.api.hidden || !groups.pages.hidden;
+    // Only declare "no results" once both sides have reported back.
+    noHitsEl.hidden = !(apiRendered && pagesRendered && !hasHits);
   }
 
   async function search(query) {
@@ -109,51 +129,73 @@ function init() {
     lastQuery = q;
     if (!q) {
       clearResults();
-      showEmptyState("type");
+      updateEmptyState();
       return;
     }
-    await ensureLoaded();
+    ensureLoaded();
+    apiRendered = false;
+    pagesRendered = false;
+    updateEmptyState();
 
-    const apiHits = fuzzysort
-      ? fuzzysort.go(q, symbols || [], { key: "name", limit: API_LIMIT, threshold: -10000 })
-      : [];
+    // API path — synchronous, paints on every keystroke.
+    (async () => {
+      await apiReady;
+      if (q !== lastQuery) return;
+      const apiHits = fuzzysort
+        ? fuzzysort.go(q, symbols || [], { key: "name", limit: API_LIMIT, threshold: -10000 })
+        : [];
+      if (q !== lastQuery) return;
+      renderApi(apiHits);
+    })();
 
-    let pageHits = [];
-    if (pagefind) {
-      const r = await pagefind.debouncedSearch(q, DEBOUNCE_MS);
-      if (r === null || q !== lastQuery) return; // superseded
-      pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
-    }
-
-    if (q !== lastQuery) return;
-    render(apiHits, pageHits);
+    // Pages path — pagefind handles its own debouncing.
+    (async () => {
+      await pagesReady;
+      if (q !== lastQuery) return;
+      if (!pagefind) { renderPages([]); return; }
+      const r = await pagefind.debouncedSearch(q, PAGE_DEBOUNCE_MS);
+      if (r === null || q !== lastQuery) return;
+      const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
+      if (q !== lastQuery) return;
+      renderPages(pageHits);
+    })();
   }
 
-  function render(apiHits, pageHits) {
-    clearResults();
-    showEmptyState(apiHits.length || pageHits.length ? null : "none");
-
+  function renderApi(apiHits) {
+    lists.api.replaceChildren();
     if (apiHits.length) {
       groups.api.hidden = false;
-      for (const hit of apiHits) {
-        const li = renderApiHit(hit);
-        lists.api.appendChild(li);
-        rows.push(li.querySelector("a"));
-      }
+      for (const hit of apiHits) lists.api.appendChild(renderApiHit(hit));
+    } else {
+      groups.api.hidden = true;
     }
+    apiRendered = true;
+    rebuildRows();
+    updateEmptyState();
+  }
+
+  function renderPages(pageHits) {
+    lists.pages.replaceChildren();
     if (pageHits.length) {
       groups.pages.hidden = false;
-      for (const page of pageHits) {
-        const li = renderPageHit(page);
-        lists.pages.appendChild(li);
-        rows.push(li.querySelector(":scope > a"));
-        for (const sub of li.querySelectorAll(".search-subhit a")) {
-          rows.push(sub);
-        }
-      }
+      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page));
+    } else {
+      groups.pages.hidden = true;
     }
+    pagesRendered = true;
+    rebuildRows();
+    updateEmptyState();
+  }
 
-    if (rows.length) setActive(0);
+  function rebuildRows() {
+    const prevHref = activeIndex >= 0 ? rows[activeIndex]?.href : null;
+    rows = [
+      ...lists.api.querySelectorAll(":scope > .search-hit > a"),
+      ...lists.pages.querySelectorAll(":scope > .search-hit > a, .search-subhit > a")
+    ];
+    if (!rows.length) { activeIndex = -1; return; }
+    const restored = prevHref ? rows.findIndex(a => a.href === prevHref) : -1;
+    setActive(restored >= 0 ? restored : 0);
   }
 
   function renderApiHit(hit) {
@@ -230,11 +272,7 @@ function init() {
     if (e.target === dialog) close();
   });
 
-  input.addEventListener("input", () => {
-    clearTimeout(debounceTimer);
-    const q = input.value;
-    debounceTimer = window.setTimeout(() => search(q), DEBOUNCE_MS);
-  });
+  input.addEventListener("input", () => search(input.value));
 
   input.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") {
