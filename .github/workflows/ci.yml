@@ -5,7 +5,9 @@ on:
     branches: [main]
   pull_request:
 
-# Cancel an in-flight run when a new commit lands on the same ref.
+# Cancel an in-flight CI run when a new commit lands on the same ref.
+# The deploy job below uses its own concurrency group ("pages") so it
+# queues rather than cancels — Pages doesn't tolerate parallel deploys.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -32,3 +34,33 @@ jobs:
       - run: pnpm test
 
       - run: pnpm build
+
+      # Only stage the artifact when we're about to deploy.
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          path: docs/_site
+
+  deploy:
+    needs: test-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    # Pages only allows one active deployment at a time; queue rather than
+    # cancel so a fast-follow push doesn't drop the previous deploy mid-flight.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
