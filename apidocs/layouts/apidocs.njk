@@ -6,7 +6,6 @@
     <meta name="color-scheme" content="light dark">
     <title>{{ title or "apidocs" }}</title>
     <link rel="stylesheet" href="/assets/apidocs/css/apidocs.css">
-    <link rel="stylesheet" href="/pagefind/pagefind-ui.css">
     <script>
       // FOUC-prevention: apply the persisted theme before paint.
       (function () {
@@ -31,7 +30,6 @@
       <nav class="toc">{% include "toc.njk" ignore missing %}</nav>
       <footer class="site-footer">{{ apidocs.footer | safe }}</footer>
     </div>
-    <script src="/pagefind/pagefind-ui.js" defer></script>
     <script type="module" src="/assets/apidocs/js/apidocs.js"></script>
   </body>
 </html>

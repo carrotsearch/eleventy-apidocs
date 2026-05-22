@@ -1,5 +1,5 @@
-/* Search trigger pill in the header, plus the modal dialog hosting
-   Pagefind UI. The UI itself is themed via its own CSS custom properties. */
+/* Search — header trigger pill + a custom <dialog> driving fuzzysort
+   (API) and Pagefind's JS API (pages). All UI is ours; no PagefindUI. */
 
 .search-trigger {
   display: inline-flex;
@@ -16,21 +16,11 @@
   font-size: 0.9rem;
   text-align: start;
 
-  &:hover {
-    color: var(--fg);
-    border-color: var(--rule);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--link);
-    outline-offset: 2px;
-  }
+  &:hover { color: var(--fg); border-color: var(--rule); }
+  &:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 
-  & svg {
-    flex: 0 0 auto;
-  }
-  & .search-trigger-label {
-    flex: 1 1 auto;
-  }
+  & svg { flex: 0 0 auto; }
+  & .search-trigger-label { flex: 1 1 auto; }
   & .search-trigger-kbd {
     font-family: inherit;
     font-size: 0.75em;
@@ -42,21 +32,15 @@
   }
 }
 
-/* On narrow viewports, collapse the trigger to just the magnifier icon. */
 @media (max-width: 32rem) {
   .search-trigger .search-trigger-label,
-  .search-trigger .search-trigger-kbd {
-    display: none;
-  }
-  .search-trigger {
-    inline-size: auto;
-    padding: 0.4rem;
-  }
+  .search-trigger .search-trigger-kbd { display: none; }
+  .search-trigger { inline-size: auto; padding: 0.4rem; }
 }
 
 .search-dialog {
-  inline-size: min(40rem, 92vw);
-  max-block-size: 80vh;
+  inline-size: min(44rem, 92vw);
+  block-size: min(36rem, 80vh);
   padding: 0;
   border: 1px solid var(--rule);
   border-radius: 0.6rem;
@@ -64,28 +48,161 @@
   color: var(--fg);
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.25);
   overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
 
   &::backdrop {
     background: rgb(0 0 0 / 0.4);
     backdrop-filter: blur(2px);
   }
+}
 
-  & .search-ui {
-    padding: 1rem;
-    max-block-size: 80vh;
-    overflow-y: auto;
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-block-end: 1px solid var(--rule-faint);
+  background: var(--bg);
+
+  & .search-form-icon {
+    flex: 0 0 auto;
+    color: var(--fg-faint);
+  }
+  & .search-input {
+    flex: 1 1 auto;
+    inline-size: 100%;
+    padding: 0.4rem 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 1rem;
+  }
+  & .search-input::placeholder { color: var(--fg-faint); }
+  & .search-close {
+    flex: 0 0 auto;
+    padding: 0.15rem 0.45rem;
+    border: 1px solid var(--rule-faint);
+    border-radius: 0.25rem;
+    background: var(--bg-dim);
+    color: var(--fg-faint);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.75rem;
+    &:hover { color: var(--fg); }
   }
 }
 
-/* Pagefind UI theming. Variable names per pagefindui.com/docs. */
-.search-dialog {
-  --pagefind-ui-scale: 0.9;
-  --pagefind-ui-primary: var(--link);
-  --pagefind-ui-text: var(--fg);
-  --pagefind-ui-background: var(--bg);
-  --pagefind-ui-border: var(--rule-faint);
-  --pagefind-ui-tag: var(--bg-dim);
-  --pagefind-ui-border-width: 1px;
-  --pagefind-ui-border-radius: 0.4rem;
-  --pagefind-ui-font: inherit;
+.search-results {
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.search-group { margin-block: 0.5rem 0.75rem; }
+.search-group-title {
+  margin: 0;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.search-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.search-hit > a,
+.search-subhit > a {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.4rem 0.875rem;
+  text-decoration: none;
+  color: var(--fg);
+  border-inline-start: 2px solid transparent;
+
+  &:hover { background: var(--bg-dim); }
+  &.is-active {
+    background: var(--bg-dim);
+    border-inline-start-color: var(--link);
+  }
+  & mark {
+    background: transparent;
+    color: var(--link);
+    font-weight: 600;
+  }
+}
+
+.search-hit-api > a {
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.search-hit-name {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.search-hit-kind {
+  justify-self: end;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--rule-faint);
+  border-radius: 0.25rem;
+}
+
+.search-hit-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.search-hit-excerpt,
+.search-subhit-excerpt {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+
+.search-subhits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-inline-start: 1px solid var(--rule-faint);
+  margin-inline-start: 1.6rem;
+}
+.search-subhit > a {
+  padding-inline-start: 0.75rem;
+}
+.search-subhit-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+
+.search-empty,
+.search-nohits {
+  margin: 0;
+  padding: 1.25rem 0.875rem;
+  text-align: center;
+  color: var(--fg-faint);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 32rem) {
+  .search-dialog {
+    inline-size: 100vw;
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
 }

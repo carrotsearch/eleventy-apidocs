@@ -52,10 +52,38 @@ export default async function (eleventyConfig) {
     <section id="configure-options">
       <h3>Options</h3>
       <p>
-        The plugin accepts paths to a navigation manifest, a logo fragment,
-        and a footer fragment. Each is optional — defaults are picked up from
-        <code>src/</code> if present.
+        The plugin accepts the following options. Each one is optional — paths
+        default to conventional locations under <code>src/</code>.
       </p>
+      <dl class="options">
+        <dt class="api" id="opt-navigation">navigation</dt>
+        <dd>
+          Path to the navigation manifest, either a flat array of articles
+          or a chaptered shape. Default: <code>src/navigation.json</code>.
+        </dd>
+        <dt class="api" id="opt-logo">logo</dt>
+        <dd>
+          Path to an HTML fragment rendered in the header's logo slot.
+          Default: <code>src/logo.html</code>.
+        </dd>
+        <dt class="api" id="opt-footer">footer</dt>
+        <dd>
+          Path to an HTML fragment rendered in the page footer.
+          Default: <code>src/footer.html</code>.
+        </dd>
+        <dt class="api" id="opt-contentDir">contentDir</dt>
+        <dd>
+          Directory of article HTML files, relative to the project root.
+          Eleventy's input directory is set from this. Default:
+          <code>src/content</code>.
+        </dd>
+        <dt class="api" id="opt-variables">variables</dt>
+        <dd>
+          Map of <code>$NAME$</code> placeholders to replacement values. The
+          pipeline substitutes them into every emitted page at build time.
+          Default: <code>{}</code>.
+        </dd>
+      </dl>
     </section>
     <section id="configure-pipeline">
       <h3>Custom pipeline passes</h3>

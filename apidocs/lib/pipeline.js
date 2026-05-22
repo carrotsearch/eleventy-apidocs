@@ -26,6 +26,7 @@ import { embedCode } from "./passes/embed-code.js";
 import { codeHighlight } from "./passes/code-highlight.js";
 import { fragmentIds } from "./passes/fragment-ids.js";
 import { buildToc } from "./passes/toc-builder.js";
+import { extractSymbols } from "./passes/symbol-extractor.js";
 import { currentYear } from "./passes/current-year.js";
 import { substituteVariables } from "./passes/variables.js";
 
@@ -61,6 +62,9 @@ export async function processContent(html, ctx) {
   // Build ToC after anchor injection so heading text excludes the
   // anchor icon, and after fragmentIds so every section has an id.
   ctx.toc = buildToc($);
+  // Symbol harvest also runs after fragmentIds so anchor resolution
+  // can fall back to the nearest section id.
+  extractSymbols($, ctx);
 
   for (const fn of ctx.finalizers ?? []) {
     await fn($, ctx);

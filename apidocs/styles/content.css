@@ -174,7 +174,8 @@ article section.api {
   margin-block-start: var(--leading);
   border-block-start: 1px solid var(--rule-faint);
 }
-article section.api > :is(h2, h3, h4, h5) {
+article section.api > :is(h2, h3, h4, h5),
+article dt.api {
   font-family: var(--font-mono);
   letter-spacing: 0;
   font-weight: 600;

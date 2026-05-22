@@ -1,5 +1,7 @@
 import path from "node:path";
+import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import nunjucks from "nunjucks";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { relativizeHtml } from "./lib/relativize.js";
@@ -7,6 +9,8 @@ import { buildCss } from "./lib/build-css.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
 
 const themeRoot = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+const fuzzysortPath = require.resolve("fuzzysort");
 
 export default function apidocs(eleventyConfig, userOptions = {}) {
   const opts = {
@@ -28,6 +32,11 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     { autoescape: false }
   );
 
+  // Build-scoped symbol accumulator. Reset before each build; the
+  // apidocs-shell transform pushes harvested .api elements into it via
+  // ctx.symbols; eleventy.after writes the manifest to symbols.json.
+  let symbols = [];
+
   let cachedShell = null;
   async function getShellData() {
     if (cachedShell) return cachedShell;
@@ -48,6 +57,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // Bundle the theme CSS once before each build. lightningcss collapses
   // @imports and minifies in one pass, so the site ships a single .css file.
   eleventyConfig.on("eleventy.before", async () => {
+    symbols = [];
     await buildCss(themeRoot);
   });
 
@@ -73,7 +83,8 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       transformers: opts.transformers,
       finalizers: opts.finalizers,
       variables: opts.variables,
-      buildYear: new Date().getFullYear()
+      buildYear: new Date().getFullYear(),
+      symbols
     };
 
     const processed = await processContent(content, ctx);
@@ -95,15 +106,25 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 
   eleventyConfig.addPassthroughCopy({
     [path.join(themeRoot, "assets/css")]: "assets/apidocs/css",
-    [path.join(themeRoot, "assets/js")]: "assets/apidocs/js"
+    [path.join(themeRoot, "assets/js")]: "assets/apidocs/js",
+    [fuzzysortPath]: "assets/apidocs/js/fuzzysort.js"
   });
 
-  // Pagefind: index the built site, emit /pagefind/ next to the HTML. The
-  // search UI is loaded from there by the layout's <link>/<script> tags.
+  // Post-build: emit the fuzzysort symbol manifest, then run Pagefind.
   eleventyConfig.on("eleventy.after", async ({ directories, dir }) => {
     const output = directories?.output || dir?.output;
     if (!output) return;
     const siteDir = path.resolve(output);
+
+    // Symbols manifest for the client-side fuzzysort index.
+    try {
+      const symbolsFile = path.join(siteDir, "symbols.json");
+      await fs.writeFile(symbolsFile, JSON.stringify(symbols));
+    } catch (err) {
+      console.warn("[apidocs] symbols.json write failed:", err?.message || err);
+    }
+
+    // Pagefind index for prose search.
     try {
       const { createIndex } = await import("pagefind");
       const { errors, index } = await createIndex({ verbose: false });
