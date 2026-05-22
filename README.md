@@ -76,21 +76,36 @@ pnpm install         # install workspace deps
 pnpm dev             # serve docs with hot reload
 pnpm build           # build docs to docs/_site/
 pnpm clean           # remove docs/_site/
+pnpm test            # run the pipeline unit tests
 pnpm format          # run Prettier
 ```
 
+GitHub Actions runs `pnpm test` and `pnpm build` on every push and pull
+request &mdash; see `.github/workflows/ci.yml`.
+
 ## Status
 
-v0 scaffolding only. The framework currently provides:
+Feature-complete against the original `gatsby-theme-apidocs`. Not yet
+published to npm &mdash; consume via `workspace:*` or a git dependency
+until then.
 
-- HTML-source content with auto-wrapped page shell
-- Per-page relative URLs (portable across URL prefixes)
-- Light/dark theme variables with FOUC-prevention
-- Responsive desktop/mobile layout
-- Static asset passthrough from the theme
+What ships today:
 
-Roadmap (each item is its own port from the Gatsby version): full CSS port,
-theme switch, HTML processing pipeline (`$VAR$` substitution, ToC, anchor
-links, highlight-line), Shiki code highlighting, responsive images via
-`@11ty/eleventy-img`, Pagefind search, prev/next navigation, lightbox,
-View Transitions.
+- Plain HTML source, no frontmatter, auto-wrapped page shell
+- Per-page relative URLs that survive any URL prefix without rebuild
+- HTML pipeline: section anchors, fragment IDs, ToC, internal link
+  rewriting, `$VAR$` substitution, code embeds, inline SVG, plus
+  consumer-supplied transformers and finalizers
+- Responsive images via `@11ty/eleventy-img` with srcset, LQIP, and
+  separate light/dark variants
+- Shiki code highlighting with `highlight-line` directive
+- Pagefind prose search + fuzzysort symbol search in one dialog
+  (&#8984;K / Ctrl+K, or `/`)
+- Light/dark theme switch with FOUC-prevention
+- ToC scrollspy, lightbox, code-block copy button
+- Cross-document View Transitions
+- Bundled, minified CSS (lightningcss) and JS (esbuild)
+- Prev/next navigation and speculation-rules prefetch
+
+Remaining for a v1 release: LICENSE file, version bump, finalize the
+`files` allowlist, `npm publish`.
