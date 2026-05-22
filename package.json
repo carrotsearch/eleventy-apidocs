@@ -5,6 +5,7 @@
     "dev": "pnpm -F sample-docs dev",
     "build": "pnpm -F sample-docs build",
     "clean": "pnpm -F sample-docs clean",
+    "test": "pnpm -F @carrotsearch/eleventy-apidocs test",
     "format": "prettier --write ."
   },
   "devDependencies": {
