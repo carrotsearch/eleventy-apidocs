@@ -52,18 +52,24 @@
       <dl>
         <dt class="api" id="processOrder:options:notify">notify</dt>
         <dd>
-          When <code>true</code>, sends a confirmation email after the order
-          is persisted. Defaults to <code>true</code> outside of test runs.
+          <p>
+            When <code>true</code>, sends a confirmation email after the order
+            is persisted. Defaults to <code>true</code> outside of test runs.
+          </p>
         </dd>
         <dt class="api" id="processOrder:options:idempotencyKey">idempotencyKey</dt>
         <dd>
-          A client-supplied key used to de-duplicate retried requests.
-          Required when the call is made from a worker that may be replayed.
+          <p>
+            A client-supplied key used to de-duplicate retried requests.
+            Required when the call is made from a worker that may be replayed.
+          </p>
         </dd>
         <dt class="api" id="processOrder:options:dryRun">dryRun</dt>
         <dd>
-          When <code>true</code>, runs validation and pricing but doesn&rsquo;t
-          enqueue the order. Useful for previewing totals before commit.
+          <p>
+            When <code>true</code>, runs validation and pricing but doesn&rsquo;t
+            enqueue the order. Useful for previewing totals before commit.
+          </p>
         </dd>
       </dl>
     </section>
@@ -146,16 +152,22 @@
       </p>
       <dl class="compact">
         <dt class="api" id="getUsers:limit">limit</dt>
-        <dd>Page size, 1&ndash;100. Default <code>20</code>.</dd>
+        <dd>
+          <p>Page size, 1&ndash;100. Default <code>20</code>.</p>
+        </dd>
         <dt class="api" id="getUsers:cursor">cursor</dt>
         <dd>
-          Opaque pagination token from a previous response&rsquo;s
-          <code>next</code> field.
+          <p>
+            Opaque pagination token from a previous response&rsquo;s
+            <code>next</code> field.
+          </p>
         </dd>
         <dt class="api" id="getUsers:status">status</dt>
         <dd>
-          Filter by status: <code>active</code>, <code>pending</code>, or
-          <code>archived</code>. Omit to include all.
+          <p>
+            Filter by status: <code>active</code>, <code>pending</code>, or
+            <code>archived</code>. Omit to include all.
+          </p>
         </dd>
       </dl>
     </section>
@@ -165,12 +177,16 @@
       <p>Returns a single user by id, including inline organization details.</p>
       <dl class="compact">
         <dt class="api" id="getUser:id">id</dt>
-        <dd>The user&rsquo;s unique identifier.</dd>
+        <dd>
+          <p>The user&rsquo;s unique identifier.</p>
+        </dd>
         <dt class="api" id="getUser:include">include</dt>
         <dd>
-          Comma-separated list of expansions:
-          <code>organization</code>, <code>permissions</code>,
-          <code>activity</code>.
+          <p>
+            Comma-separated list of expansions:
+            <code>organization</code>, <code>permissions</code>,
+            <code>activity</code>.
+          </p>
         </dd>
       </dl>
     </section>

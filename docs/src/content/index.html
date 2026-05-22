@@ -28,54 +28,70 @@
     <dl class="compact">
       <dt><a href="page-structure.html">Page structure</a></dt>
       <dd>
-        <code>&lt;article&gt;</code> &rarr; <code>&lt;section&gt;</code> with
-        id-bearing headings. Anchor icons, scroll-margin, and the right-hand
-        ToC are generated from that shape alone.
+        <p>
+          <code>&lt;article&gt;</code> &rarr; <code>&lt;section&gt;</code> with
+          id-bearing headings. Anchor icons, scroll-margin, and the right-hand
+          ToC are generated from that shape alone.
+        </p>
       </dd>
 
       <dt><a href="code-blocks.html">Code blocks</a></dt>
       <dd>
-        Shiki dual-theme highlighting, <code>highlight-line</code> and
-        <code>hide-line</code> directives, copy-to-clipboard, file embeds with
-        fragment and JSONPath selectors.
+        <p>
+          Shiki dual-theme highlighting, <code>highlight-line</code> and
+          <code>hide-line</code> directives, copy-to-clipboard, file embeds with
+          fragment and JSONPath selectors.
+        </p>
       </dd>
 
       <dt><a href="images.html">Images</a></dt>
       <dd>
-        Raster <code>&lt;img&gt;</code> tags become responsive
-        <code>&lt;picture&gt;</code> with AVIF/WebP/fallback and LQIP
-        backgrounds. SVGs inline. <code>&lt;figure&gt;</code> opens in a
-        View-Transition zoom.
+        <p>
+          Raster <code>&lt;img&gt;</code> tags become responsive
+          <code>&lt;picture&gt;</code> with AVIF/WebP/fallback and LQIP
+          backgrounds. SVGs inline. <code>&lt;figure&gt;</code> opens in a
+          View-Transition zoom.
+        </p>
       </dd>
 
       <dt><a href="callouts.html">Callouts</a></dt>
       <dd>
-        <code>.info</code>, <code>.warning</code>, <code>.box</code> &mdash;
-        plain <code>&lt;div&gt;</code> markup with optional heading icons.
+        <p>
+          <code>.info</code>, <code>.warning</code>, <code>.box</code> &mdash;
+          plain <code>&lt;div&gt;</code> markup with optional heading icons.
+        </p>
       </dd>
 
       <dt><a href="api-reference.html">API reference style</a></dt>
       <dd>
-        Monospace section headings and definition-list options. Symbols are
-        harvested into a fuzzysort index for instant lookup.
+        <p>
+          Monospace section headings and definition-list options. Symbols are
+          harvested into a fuzzysort index for instant lookup.
+        </p>
       </dd>
 
       <dt><a href="search.html">Search</a></dt>
       <dd>
-        Pagefind builds a static prose index after each build; an in-page
-        fuzzysort symbol index is loaded on demand.
+        <p>
+          Pagefind builds a static prose index after each build; an in-page
+          fuzzysort symbol index is loaded on demand.
+        </p>
       </dd>
 
       <dt><a href="themes.html">Themes</a></dt>
       <dd>
-        Light/dark switch with FOUC-prevention, theme-aware image variants,
-        and CSS <code>light-dark()</code> tokens throughout.
+        <p>
+          Light/dark switch with FOUC-prevention, theme-aware image variants,
+          and CSS <code>light-dark()</code> tokens throughout.
+        </p>
       </dd>
 
       <dt><a href="deployment.html">Portable URLs</a></dt>
       <dd>
-        Every emitted link is relative to the current page, so the site works
-        from any subpath without rebuilding.
+        <p>
+          Every emitted link is relative to the current page, so the site works
+          from any subpath without rebuilding.
+        </p>
       </dd>
     </dl>
   </section>
@@ -88,19 +104,25 @@
     </p>
     <ol>
       <li>
-        <strong>Author in HTML.</strong> The browser&rsquo;s native language is
-        the most expressive substrate available, and round-tripping through
-        Markdown flavors costs more than it saves on a documentation site.
+        <p>
+          <strong>Author in HTML.</strong> The browser&rsquo;s native language is
+          the most expressive substrate available, and round-tripping through
+          Markdown flavors costs more than it saves on a documentation site.
+        </p>
       </li>
       <li>
-        <strong>Stay close to the platform.</strong> Web Components, View
-        Transitions, Speculation Rules, container queries, <code>light-dark()</code>
-        &mdash; if the browser ships it, prefer it to a framework abstraction.
+        <p>
+          <strong>Stay close to the platform.</strong> Web Components, View
+          Transitions, Speculation Rules, container queries, <code>light-dark()</code>
+          &mdash; if the browser ships it, prefer it to a framework abstraction.
+        </p>
       </li>
       <li>
-        <strong>One build pipeline, no plugin churn.</strong> A small set of
-        cheerio passes covers anchors, ToC, code, embeds, images, and symbol
-        extraction; new behavior is added as another pass, not as a new tool.
+        <p>
+          <strong>One build pipeline, no plugin churn.</strong> A small set of
+          cheerio passes covers anchors, ToC, code, embeds, images, and symbol
+          extraction; new behavior is added as another pass, not as a new tool.
+        </p>
       </li>
     </ol>
   </section>

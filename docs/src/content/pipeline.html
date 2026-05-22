@@ -13,17 +13,35 @@
     <h2 id="when">When passes run</h2>
     <p>The order from the plugin&rsquo;s perspective:</p>
     <ol>
-      <li>Eleventy renders the article and the apidocs layout into a single
-        HTML string.</li>
-      <li>The string is parsed into cheerio.</li>
-      <li><strong>Transformers</strong> run, in declared order.</li>
-      <li>Built-in content passes run: variable substitution, anchor
-        injection, ToC building, code highlighting, embedding, image
-        processing, SVG inlining, symbol extraction, fragment IDs, link
-        rewriting.</li>
-      <li><strong>Finalizers</strong> run, in declared order.</li>
-      <li>The cheerio document is serialized back to HTML.</li>
-      <li>URLs are relativized for portability.</li>
+      <li>
+        <p>
+          Eleventy renders the article and the apidocs layout into a single
+          HTML string.
+        </p>
+      </li>
+      <li>
+        <p>The string is parsed into cheerio.</p>
+      </li>
+      <li>
+        <p><strong>Transformers</strong> run, in declared order.</p>
+      </li>
+      <li>
+        <p>
+          Built-in content passes run: variable substitution, anchor
+          injection, ToC building, code highlighting, embedding, image
+          processing, SVG inlining, symbol extraction, fragment IDs, link
+          rewriting.
+        </p>
+      </li>
+      <li>
+        <p><strong>Finalizers</strong> run, in declared order.</p>
+      </li>
+      <li>
+        <p>The cheerio document is serialized back to HTML.</p>
+      </li>
+      <li>
+        <p>URLs are relativized for portability.</p>
+      </li>
     </ol>
     <p>
       In practice: use <code>transformers</code> when you want to inject or
@@ -49,34 +67,46 @@
     <dl>
       <dt class="api" id="ctx-page">ctx.page</dt>
       <dd>
-        Eleventy&rsquo;s page object. Has <code>url</code>,
-        <code>inputPath</code>, <code>outputPath</code>, and the
-        usual <code>fileSlug</code> / <code>date</code>.
+        <p>
+          Eleventy&rsquo;s page object. Has <code>url</code>,
+          <code>inputPath</code>, <code>outputPath</code>, and the
+          usual <code>fileSlug</code> / <code>date</code>.
+        </p>
       </dd>
       <dt class="api" id="ctx-sourceDir">ctx.sourceDir</dt>
       <dd>
-        Directory of the source HTML file. Use it to resolve relative paths
-        (file embeds, image sources, fixtures).
+        <p>
+          Directory of the source HTML file. Use it to resolve relative paths
+          (file embeds, image sources, fixtures).
+        </p>
       </dd>
       <dt class="api" id="ctx-outputDir">ctx.outputDir</dt>
       <dd>
-        Eleventy&rsquo;s output root for this build (e.g. <code>_site</code>).
-        Resolved from the page&rsquo;s output path.
+        <p>
+          Eleventy&rsquo;s output root for this build (e.g. <code>_site</code>).
+          Resolved from the page&rsquo;s output path.
+        </p>
       </dd>
       <dt class="api" id="ctx-variables">ctx.variables</dt>
       <dd>
-        The <code>options.variables</code> map. Available so passes can
-        substitute or read declared values.
+        <p>
+          The <code>options.variables</code> map. Available so passes can
+          substitute or read declared values.
+        </p>
       </dd>
       <dt class="api" id="ctx-symbols">ctx.symbols</dt>
       <dd>
-        Build-scoped accumulator for API symbols. Push entries here to
-        contribute to <code>symbols.json</code>.
+        <p>
+          Build-scoped accumulator for API symbols. Push entries here to
+          contribute to <code>symbols.json</code>.
+        </p>
       </dd>
       <dt class="api" id="ctx-toc">ctx.toc</dt>
       <dd>
-        Populated by the ToC builder mid-pipeline. Available to finalizers
-        as the nested entry tree the layout would render.
+        <p>
+          Populated by the ToC builder mid-pipeline. Available to finalizers
+          as the nested entry tree the layout would render.
+        </p>
       </dd>
     </dl>
   </section>
@@ -161,17 +191,23 @@ export default async function (eleventyConfig) {
     </p>
     <ul>
       <li>
-        Use specific selectors (<code>article p[data-flag]</code>) over
-        broad ones (<code>$("*")</code>).
+        <p>
+          Use specific selectors (<code>article p[data-flag]</code>) over
+          broad ones (<code>$("*")</code>).
+        </p>
       </li>
       <li>
-        Don&rsquo;t parse HTML by hand &mdash; <code>$.html()</code> /
-        <code>$.parseHTML()</code> are there for a reason.
+        <p>
+          Don&rsquo;t parse HTML by hand &mdash; <code>$.html()</code> /
+          <code>$.parseHTML()</code> are there for a reason.
+        </p>
       </li>
       <li>
-        Resolve filesystem paths via <code>ctx.sourceDir</code>, never with
-        <code>process.cwd()</code> &mdash; the latter is unstable when
-        Eleventy walks subdirectories.
+        <p>
+          Resolve filesystem paths via <code>ctx.sourceDir</code>, never with
+          <code>process.cwd()</code> &mdash; the latter is unstable when
+          Eleventy walks subdirectories.
+        </p>
       </li>
     </ul>
   </section>

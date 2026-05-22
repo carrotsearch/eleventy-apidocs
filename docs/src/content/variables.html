@@ -19,10 +19,18 @@ $SITE_OWNER$
 $API_BASE_URL$</pre>
     <p>The name rules:</p>
     <ul>
-      <li>Must start with an uppercase letter.</li>
-      <li>May contain uppercase letters, digits, and underscores.</li>
-      <li>No lowercase &mdash; intentional, to keep the placeholders visually
-        distinct from surrounding prose.</li>
+      <li>
+        <p>Must start with an uppercase letter.</p>
+      </li>
+      <li>
+        <p>May contain uppercase letters, digits, and underscores.</p>
+      </li>
+      <li>
+        <p>
+          No lowercase &mdash; intentional, to keep the placeholders visually
+          distinct from surrounding prose.
+        </p>
+      </li>
     </ul>
     <p>
       An unknown reference is left untouched, so an unreplaced
@@ -68,17 +76,23 @@ export default async function (eleventyConfig) {
     <p>The same applies to:</p>
     <dl class="compact">
       <dt>Article content</dt>
-      <dd>Every page under <code>contentDir</code>.</dd>
+      <dd>
+        <p>Every page under <code>contentDir</code>.</p>
+      </dd>
       <dt>Logo and footer fragments</dt>
       <dd>
-        Both are rendered as raw HTML before substitution, so a footer like
-        <code>&amp;copy; $SITE_OWNER$</code> resolves correctly.
+        <p>
+          Both are rendered as raw HTML before substitution, so a footer like
+          <code>&amp;copy; $SITE_OWNER$</code> resolves correctly.
+        </p>
       </dd>
       <dt>Embedded files</dt>
       <dd>
-        When a <code>&lt;pre data-embed&gt;</code> pulls in a file,
-        substitution applies to that file&rsquo;s contents too. The next
-        section has an example.
+        <p>
+          When a <code>&lt;pre data-embed&gt;</code> pulls in a file,
+          substitution applies to that file&rsquo;s contents too. The next
+          section has an example.
+        </p>
       </dd>
     </dl>
   </section>

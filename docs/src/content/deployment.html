@@ -16,13 +16,17 @@
     </p>
     <ul>
       <li>
-        <code>_site/symbols.json</code> &mdash; the API symbol manifest for
-        the fuzzysort index. See <a href="search.html#symbols">Search
-        &rarr; API symbols</a>.
+        <p>
+          <code>_site/symbols.json</code> &mdash; the API symbol manifest for
+          the fuzzysort index. See <a href="search.html#symbols">Search
+          &rarr; API symbols</a>.
+        </p>
       </li>
       <li>
-        <code>_site/pagefind/</code> &mdash; the Pagefind prose index. See
-        <a href="search.html#prose">Search &rarr; Prose search</a>.
+        <p>
+          <code>_site/pagefind/</code> &mdash; the Pagefind prose index. See
+          <a href="search.html#prose">Search &rarr; Prose search</a>.
+        </p>
       </li>
     </ul>
     <p>
@@ -107,27 +111,35 @@
     <dl>
       <dt>Static file servers</dt>
       <dd>
-        Nginx, Caddy, or anything that serves a directory. No special
-        configuration &mdash; point the document root at <code>_site/</code>.
+        <p>
+          Nginx, Caddy, or anything that serves a directory. No special
+          configuration &mdash; point the document root at <code>_site/</code>.
+        </p>
       </dd>
       <dt>GitHub Pages, Cloudflare Pages, Netlify, Vercel</dt>
       <dd>
-        Each has its own build command field; set it to
-        <code>pnpm build</code> and the publish directory to
-        <code>_site</code>. No further config.
+        <p>
+          Each has its own build command field; set it to
+          <code>pnpm build</code> and the publish directory to
+          <code>_site</code>. No further config.
+        </p>
       </dd>
       <dt>S3 + CloudFront (or equivalent)</dt>
       <dd>
-        Sync <code>_site/</code> to the bucket; serve via the CDN. Set
-        <code>index.html</code> as the default document so directory URLs
-        resolve correctly.
+        <p>
+          Sync <code>_site/</code> to the bucket; serve via the CDN. Set
+          <code>index.html</code> as the default document so directory URLs
+          resolve correctly.
+        </p>
       </dd>
       <dt>Inside another app</dt>
       <dd>
-        Because URLs are relative, you can mount the site at
-        <code>/docs/</code> of an existing application without rebuilding.
-        Whatever serves your <code>/docs/</code> route just needs to
-        respect <code>index.html</code> at directory paths.
+        <p>
+          Because URLs are relative, you can mount the site at
+          <code>/docs/</code> of an existing application without rebuilding.
+          Whatever serves your <code>/docs/</code> route just needs to
+          respect <code>index.html</code> at directory paths.
+        </p>
       </dd>
     </dl>
   </section>
