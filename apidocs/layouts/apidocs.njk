@@ -6,6 +6,15 @@
     <meta name="color-scheme" content="light dark">
     <title>{{ title or "apidocs" }}</title>
     <link rel="stylesheet" href="/assets/apidocs/css/apidocs.css">
+    <script type="speculationrules">
+      {
+        "prefetch": [{
+          "source": "document",
+          "where": { "href_matches": "/*" },
+          "eagerness": "moderate"
+        }]
+      }
+    </script>
     <script>
       // FOUC-prevention: apply the persisted theme before paint.
       (function () {

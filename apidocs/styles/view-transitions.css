@@ -1,0 +1,25 @@
+/* Cross-document view transitions — Chrome 126+. Browsers without support
+   navigate normally; this is pure progressive enhancement. */
+@view-transition {
+  navigation: auto;
+}
+
+/* Persistent shell — named elements get their own snapshot pair so they
+   visually stay put while the article and ToC crossfade as part of root. */
+.site-header { view-transition-name: apidocs-header; }
+.main-nav    { view-transition-name: apidocs-nav; }
+.site-footer { view-transition-name: apidocs-footer; }
+
+/* The spec's default 250ms feels lethargic on sibling-page navigations. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
