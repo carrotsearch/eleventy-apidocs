@@ -81,6 +81,10 @@ function openLightbox(figure, source) {
   }
 
   source.style.viewTransitionName = NAME;
+  // Scope the root crossfade timing for the duration of this transition.
+  // CSS in lightbox.css keys off the html class to fade the page out fast
+  // so the header is hidden before the image morph reaches the top.
+  document.documentElement.classList.add("apidocs-lightbox-opening");
   const t = document.startViewTransition(() => {
     source.style.viewTransitionName = "";
     clone.style.viewTransitionName = NAME;
@@ -88,7 +92,9 @@ function openLightbox(figure, source) {
   });
   // Keep the clone's view-transition-name so the close animation can
   // pick it up when the user dismisses.
-  t.finished.catch(() => {});
+  t.finished.finally(() => {
+    document.documentElement.classList.remove("apidocs-lightbox-opening");
+  });
 }
 
 function closeLightbox() {
@@ -111,6 +117,7 @@ function closeLightbox() {
 
   // The clone in the dialog currently owns NAME; flip it back to the
   // source so the snapshot animates to the in-page position.
+  document.documentElement.classList.add("apidocs-lightbox-closing");
   const t = document.startViewTransition(() => {
     if (clone) clone.style.viewTransitionName = "";
     if (lastSource) lastSource.style.viewTransitionName = NAME;
@@ -118,6 +125,7 @@ function closeLightbox() {
     document.body.classList.remove("apidocs-lightbox-open");
   });
   t.finished.finally(() => {
+    document.documentElement.classList.remove("apidocs-lightbox-closing");
     if (lastSource) lastSource.style.viewTransitionName = "";
     lastSource = null;
     frame.replaceChildren();

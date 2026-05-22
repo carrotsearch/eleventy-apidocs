@@ -81,6 +81,23 @@ dialog.apidocs-lightbox > .frame > figcaption {
     animation-duration: 0.35s;
     animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
+
+  /* Open: backdrop fades in fast so the header is hidden well before the
+     image's morph reaches the upper viewport. */
+  html.apidocs-lightbox-opening::view-transition-old(root),
+  html.apidocs-lightbox-opening::view-transition-new(root) {
+    animation-duration: 120ms;
+    animation-timing-function: ease-out;
+  }
+
+  /* Close: backdrop lingers and fades out only at the tail of the morph,
+     so the image animates back over the dark page until the very end. */
+  html.apidocs-lightbox-closing::view-transition-old(root),
+  html.apidocs-lightbox-closing::view-transition-new(root) {
+    animation-duration: 120ms;
+    animation-delay: 230ms;
+    animation-timing-function: ease-in;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
