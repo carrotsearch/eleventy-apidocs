@@ -311,11 +311,23 @@ function init() {
     if (link && dialog.contains(link)) close();
   });
 
+  // Show ⌘K on macOS, Ctrl K elsewhere. Both, plus "/", open the dialog.
+  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+  const kbd = trigger.querySelector("[data-search-kbd]");
+  if (kbd) kbd.textContent = isMac ? "⌘ K" : "Ctrl K";
+
   document.addEventListener("keydown", e => {
+    if (dialog.open) return;
+    const modK = (isMac ? e.metaKey : e.ctrlKey) && (e.key === "k" || e.key === "K");
+    if (modK) {
+      e.preventDefault();
+      open();
+      return;
+    }
     if (e.key !== "/") return;
     const t = e.target;
     const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
-    if (typing || dialog.open) return;
+    if (typing) return;
     e.preventDefault();
     open();
   });
