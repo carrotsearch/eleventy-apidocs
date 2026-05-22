@@ -134,10 +134,26 @@
     background: var(--bg-dim);
     border-inline-start-color: var(--link);
   }
-  & mark {
-    background: transparent;
-    color: var(--link);
+  /* Strong highlight for marks we add ourselves (title prefix matches and
+     fuzzysort symbol hits) — same recipe as the :target highlight in
+     content.css: soft-yellow band, orange under the baseline. */
+  & :is(.search-hit-title, .search-subhit-title, .search-hit-name) mark {
+    background: var(--accent-soft);
+    box-shadow: 0 -0.125em 0 var(--accent-soft), 0 0.125em 0 var(--accent);
+    color: inherit;
     font-weight: 600;
+    border-radius: 2px;
+  }
+
+  /* Pale highlight for Pagefind-emitted excerpt marks — they're a mix of
+     prefix matches and stem expansions, so dial the same recipe down. */
+  & :is(.search-hit-excerpt, .search-subhit-excerpt) mark {
+    background: color-mix(in srgb, var(--accent-soft) 40%, transparent);
+    box-shadow: 0 -0.125em 0 color-mix(in srgb, var(--accent-soft) 40%, transparent),
+                0 0.125em 0 color-mix(in srgb, var(--accent) 40%, transparent);
+    color: inherit;
+    font-weight: normal;
+    border-radius: 2px;
   }
 }
 
