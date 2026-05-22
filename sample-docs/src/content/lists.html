@@ -1,0 +1,125 @@
+<article>
+  <h1>Lists and definitions</h1>
+  <p>
+    Unordered, ordered, and definition lists all render with the same vertical
+    rhythm as body paragraphs. Definition lists carry extra responsibility in
+    this theme &mdash; they&rsquo;re the standard shape for option references
+    and they switch to a hanging-indent layout in wide containers.
+  </p>
+
+  <section>
+    <h2 id="bulleted">Bulleted and numbered</h2>
+    <p>Plain <code>&lt;ul&gt;</code> and <code>&lt;ol&gt;</code> &mdash; no
+       special markup:</p>
+    <ul>
+      <li>Authoring HTML keeps you close to what the browser eventually paints.</li>
+      <li>The pipeline only transforms what it recognizes; everything else is
+        passed through as-is.</li>
+      <li>That means odd-but-correct markup keeps working when the build runs
+        against an unfamiliar page.</li>
+    </ul>
+    <p>An ordered list with multi-paragraph items:</p>
+    <ol>
+      <li>
+        <p><strong>Source.</strong> Article HTML lives under
+          <code>src/content/</code>.</p>
+        <p>Eleventy walks the tree; one file per output page.</p>
+      </li>
+      <li>
+        <p><strong>Pipeline.</strong> The apidocs transform runs the page
+          through a sequence of cheerio passes.</p>
+        <p>
+          Anchors, code highlighting, embeds, image processing, ToC building,
+          and symbol extraction all happen here.
+        </p>
+      </li>
+      <li>
+        <p><strong>Layout.</strong> The processed content is wrapped in the
+          Nunjucks shell with logo, nav, ToC, and footer slots.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 id="definition-lists">Definition lists</h2>
+    <p>
+      Definition lists are the canonical shape for option references and
+      glossary entries. In a narrow container the term sits above its
+      description; once the article passes <code>48rem</code> wide the term
+      floats into a left column with the description hanging beside it.
+    </p>
+    <p>The plain form:</p>
+    <dl>
+      <dt>Article</dt>
+      <dd>A single HTML file under <code>src/content/</code>. Becomes one URL.</dd>
+      <dt>Section</dt>
+      <dd>
+        A <code>&lt;section&gt;</code> inside an article. Top-level sections
+        become ToC entries; nested ones nest in the ToC the same way.
+      </dd>
+      <dt>Symbol</dt>
+      <dd>
+        Any element with class <code>api</code>. Symbols are harvested into
+        a client-side fuzzysort index for instant lookup. See
+        <a href="api-reference.html">API reference style</a>.
+      </dd>
+    </dl>
+
+    <section>
+      <h3 id="definition-lists:modifiers">Width modifiers</h3>
+      <p>
+        Two class modifiers tune the layout for different content shapes:
+      </p>
+      <dl class="narrow">
+        <dt><code>.narrow</code></dt>
+        <dd>
+          Use when terms are short &mdash; option names, status codes,
+          single words. The term column shrinks from 10rem to 5rem so the
+          descriptions get more room.
+        </dd>
+        <dt><code>.compact</code></dt>
+        <dd>
+          Trims the gap between rows. Use for dense reference tables where
+          each row is a one-liner.
+        </dd>
+      </dl>
+      <p>The same option list with <code>.compact</code>:</p>
+      <dl class="compact">
+        <dt>retries</dt>
+        <dd>Number of retry attempts on transient failure.</dd>
+        <dt>timeout</dt>
+        <dd>Per-request timeout in milliseconds.</dd>
+        <dt>backoff</dt>
+        <dd>Exponential backoff base, in milliseconds.</dd>
+        <dt>jitter</dt>
+        <dd>Randomization fraction applied to the backoff.</dd>
+      </dl>
+    </section>
+  </section>
+
+  <section>
+    <h2 id="deep-linking">Deep linking into list items</h2>
+    <p>
+      Every <code>&lt;p&gt;</code>, <code>&lt;li&gt;</code>, and
+      <code>&lt;dt&gt;</code> that doesn&rsquo;t already have an
+      <code>id</code> gets an auto-generated one based on a short hash of its
+      text. That lets search results deep-link to the exact paragraph or term
+      they matched.
+    </p>
+    <p>
+      The hash is stable across builds for unchanged content, so bookmarks
+      survive routine edits elsewhere on the page. If you need a permanent,
+      human-readable anchor for a particular item &mdash; say a glossary
+      entry you link from many places &mdash; give it an explicit
+      <code>id</code> instead:
+    </p>
+    <pre data-language="html">&lt;dl&gt;
+  &lt;dt id="symbol"&gt;Symbol&lt;/dt&gt;
+  &lt;dd&gt;Any element with class &lt;code&gt;api&lt;/code&gt;.&lt;/dd&gt;
+&lt;/dl&gt;</pre>
+    <p>
+      Explicit ids take precedence over the auto-hash, so the deep link is
+      yours to control wherever it matters.
+    </p>
+  </section>
+</article>

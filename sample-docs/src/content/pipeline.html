@@ -1,0 +1,178 @@
+<article>
+  <h1>Pipeline extensions</h1>
+  <p>
+    The HTML pipeline is a sequence of cheerio passes &mdash; small async
+    functions that receive a parsed document and mutate it in place. Two
+    extension points let consumer projects splice their own passes in:
+    <code>transformers</code> run before the built-in passes,
+    <code>finalizers</code> run after. Both receive the same shape, so
+    deciding which to use is mostly a question of ordering.
+  </p>
+
+  <section>
+    <h2 id="when">When passes run</h2>
+    <p>The order from the plugin&rsquo;s perspective:</p>
+    <ol>
+      <li>Eleventy renders the article and the apidocs layout into a single
+        HTML string.</li>
+      <li>The string is parsed into cheerio.</li>
+      <li><strong>Transformers</strong> run, in declared order.</li>
+      <li>Built-in content passes run: variable substitution, anchor
+        injection, ToC building, code highlighting, embedding, image
+        processing, SVG inlining, symbol extraction, fragment IDs, link
+        rewriting.</li>
+      <li><strong>Finalizers</strong> run, in declared order.</li>
+      <li>The cheerio document is serialized back to HTML.</li>
+      <li>URLs are relativized for portability.</li>
+    </ol>
+    <p>
+      In practice: use <code>transformers</code> when you want to inject or
+      reshape markup <em>before</em> the built-ins see it (e.g. expanding
+      a custom shortcode into an embeddable shape). Use
+      <code>finalizers</code> when you want to operate on the
+      already-processed output (e.g. tagging external links, generating an
+      RSS payload, computing reading time).
+    </p>
+  </section>
+
+  <section>
+    <h2 id="signature">Pass signature</h2>
+    <p>
+      A pass is an async function that receives the cheerio root and a
+      context object:
+    </p>
+    <pre data-language="javascript">async function myPass($, ctx) {
+  // $ is the cheerio root for this page (cheerio.load(html))
+  // ctx is the per-page context
+}</pre>
+    <p>The context exposes:</p>
+    <dl>
+      <dt class="api" id="ctx-page">ctx.page</dt>
+      <dd>
+        Eleventy&rsquo;s page object. Has <code>url</code>,
+        <code>inputPath</code>, <code>outputPath</code>, and the
+        usual <code>fileSlug</code> / <code>date</code>.
+      </dd>
+      <dt class="api" id="ctx-sourceDir">ctx.sourceDir</dt>
+      <dd>
+        Directory of the source HTML file. Use it to resolve relative paths
+        (file embeds, image sources, fixtures).
+      </dd>
+      <dt class="api" id="ctx-outputDir">ctx.outputDir</dt>
+      <dd>
+        Eleventy&rsquo;s output root for this build (e.g. <code>_site</code>).
+        Resolved from the page&rsquo;s output path.
+      </dd>
+      <dt class="api" id="ctx-variables">ctx.variables</dt>
+      <dd>
+        The <code>options.variables</code> map. Available so passes can
+        substitute or read declared values.
+      </dd>
+      <dt class="api" id="ctx-symbols">ctx.symbols</dt>
+      <dd>
+        Build-scoped accumulator for API symbols. Push entries here to
+        contribute to <code>symbols.json</code>.
+      </dd>
+      <dt class="api" id="ctx-toc">ctx.toc</dt>
+      <dd>
+        Populated by the ToC builder mid-pipeline. Available to finalizers
+        as the nested entry tree the layout would render.
+      </dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2 id="transformers">Transformers</h2>
+    <p>
+      Transformers run after Nunjucks but before any built-in pass. Wire
+      them via <code>options.transformers</code>:
+    </p>
+    <pre data-language="javascript">import apidocs from "@carrotsearch/eleventy-apidocs";
+
+async function expandShortcodes($, ctx) {
+  // Rewrite &lt;option name="foo" type="string"&gt;…&lt;/option&gt; into
+  // the canonical &lt;dt class="api"&gt; / &lt;dd&gt; pair.
+  $("option[name]").each((_, el) =&gt; {
+    const $el = $(el);
+    const name = $el.attr("name");
+    const type = $el.attr("type");
+    const dd = $el.html();
+    $el.replaceWith(`
+      &lt;dt class="api" id="${name}"&gt;${name} &lt;em&gt;${type}&lt;/em&gt;&lt;/dt&gt;
+      &lt;dd&gt;${dd}&lt;/dd&gt;
+    `);
+  });
+}
+
+export default async function (eleventyConfig) {
+  return apidocs(eleventyConfig, {
+    transformers: [expandShortcodes]
+  });
+}</pre>
+    <p>
+      By the time the built-in passes see the page, the shortcode is
+      indistinguishable from hand-authored markup &mdash; anchor injection,
+      symbol extraction, and fragment IDs all apply to the rewritten
+      structure automatically.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="finalizers">Finalizers</h2>
+    <p>
+      Finalizers run last, with full access to the processed document.
+      They&rsquo;re the place for cross-cutting concerns that depend on the
+      built-in passes having already run:
+    </p>
+    <pre data-language="javascript">async function markExternalLinks($, ctx) {
+  $("a[href^='http']").each((_, el) =&gt; {
+    const $a = $(el);
+    if ($a.attr("data-external") !== undefined) return;
+    $a.attr("target", "_blank");
+    $a.attr("rel", "noopener noreferrer");
+  });
+}
+
+async function reportSymbols($, ctx) {
+  console.log(`[symbols] ${ctx.page.url}: ${ctx.symbols.length} entries`);
+}
+
+export default async function (eleventyConfig) {
+  return apidocs(eleventyConfig, {
+    finalizers: [markExternalLinks, reportSymbols]
+  });
+}</pre>
+    <p>
+      Because finalizers run after symbol extraction,
+      <code>ctx.symbols</code> contains every symbol harvested up to and
+      including the current page &mdash; useful for emitting per-page
+      cross-reference data, validating that every symbol has a unique
+      anchor, or building a search-results preview.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="staying-fast">Staying fast</h2>
+    <p>
+      Passes run on every page on every build, so the time you spend in a
+      pass is multiplied by the size of the site. The built-ins keep their
+      cheerio traversals tightly scoped (one selector per pass, no
+      whole-document iteration); custom passes should do the same.
+    </p>
+    <ul>
+      <li>
+        Use specific selectors (<code>article p[data-flag]</code>) over
+        broad ones (<code>$("*")</code>).
+      </li>
+      <li>
+        Don&rsquo;t parse HTML by hand &mdash; <code>$.html()</code> /
+        <code>$.parseHTML()</code> are there for a reason.
+      </li>
+      <li>
+        Resolve filesystem paths via <code>ctx.sourceDir</code>, never with
+        <code>process.cwd()</code> &mdash; the latter is unstable when
+        Eleventy walks subdirectories.
+      </li>
+    </ul>
+  </section>
+</article>

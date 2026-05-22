@@ -1,0 +1,135 @@
+<article>
+  <h1>Tables</h1>
+  <p>
+    Plain <code>&lt;table&gt;</code> markup. The theme styles every table the
+    same way: a thin rule above and below the table, a divider under the
+    header row, and tight vertical rhythm sized down half a step from body
+    text. No striping or grid lines &mdash; columns should read by alignment,
+    not borders.
+  </p>
+
+  <section>
+    <h2 id="basic">Basic table</h2>
+    <p>A simple three-column reference:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>HTTP code</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>ok</code></td>
+          <td>200</td>
+          <td>Request completed successfully.</td>
+        </tr>
+        <tr>
+          <td><code>created</code></td>
+          <td>201</td>
+          <td>A new resource was created.</td>
+        </tr>
+        <tr>
+          <td><code>not_found</code></td>
+          <td>404</td>
+          <td>The requested resource doesn&rsquo;t exist.</td>
+        </tr>
+        <tr>
+          <td><code>conflict</code></td>
+          <td>409</td>
+          <td>The request conflicts with the current state.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Header cells (<code>&lt;th&gt;</code> inside <code>&lt;thead&gt;</code>)
+      are centered; body cells (<code>&lt;td&gt;</code>) are left-aligned and
+      top-aligned. Wrap long content however the cell needs.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="alignment">Cell alignment</h2>
+    <p>
+      Headers are centered by default; body cells are start-aligned. Override
+      either with an explicit <code>style</code> or a class:
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Description</th>
+          <th style="text-align: end">Calls/s</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>GET /users</code></td>
+          <td>List users, paginated.</td>
+          <td style="text-align: end">12,400</td>
+        </tr>
+        <tr>
+          <td><code>GET /users/:id</code></td>
+          <td>Fetch a single user by id.</td>
+          <td style="text-align: end">48,920</td>
+        </tr>
+        <tr>
+          <td><code>POST /users</code></td>
+          <td>Create a new user.</td>
+          <td style="text-align: end">312</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2 id="rich-cells">Rich cell content</h2>
+    <p>
+      Cells aren&rsquo;t restricted to a single paragraph &mdash; multi-line
+      prose, lists, and inline code all work:
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>data-language</code></td>
+          <td>
+            <p>
+              Sets the Shiki grammar for the block. When the value is
+              <code>text</code> the block is rendered without highlighting.
+            </p>
+            <p>Common values:</p>
+            <ul>
+              <li><code>javascript</code>, <code>typescript</code></li>
+              <li><code>html</code>, <code>css</code></li>
+              <li><code>bash</code>, <code>json</code>, <code>yaml</code></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td><code>data-embed</code></td>
+          <td>
+            <p>
+              Loads the block&rsquo;s contents from a file relative to the
+              page. The first line is replaced with the file&rsquo;s text.
+            </p>
+            <p>
+              See <a href="code-blocks.html#embed">Embedding files</a> for
+              the path resolution rules.
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The first paragraph inside a cell has its top margin trimmed so the
+      content lines up with the header row.
+    </p>
+  </section>
+</article>

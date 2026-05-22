@@ -8,11 +8,26 @@
       ]
     },
     {
-      "title": "Content",
+      "title": "Authoring",
       "articles": [
+        { "slug": "page-structure", "title": "Page structure" },
         { "slug": "code-blocks", "title": "Code blocks" },
         { "slug": "images", "title": "Images" },
-        { "slug": "callouts", "title": "Callouts" }
+        { "slug": "callouts", "title": "Callouts" },
+        { "slug": "tables", "title": "Tables" },
+        { "slug": "lists", "title": "Lists and definitions" },
+        { "slug": "variables", "title": "Variables" }
+      ]
+    },
+    {
+      "title": "Reference",
+      "articles": [
+        { "slug": "api-reference", "title": "API reference style" },
+        { "slug": "navigation", "title": "Navigation" },
+        { "slug": "search", "title": "Search" },
+        { "slug": "themes", "title": "Themes" },
+        { "slug": "pipeline", "title": "Pipeline extensions" },
+        { "slug": "deployment", "title": "Deployment" }
       ]
     }
   ]

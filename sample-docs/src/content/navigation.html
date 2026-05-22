@@ -1,0 +1,133 @@
+<article>
+  <h1>Navigation</h1>
+  <p>
+    The left-hand nav and the prev/next links at the bottom of every page
+    are both driven by a single JSON manifest. Group articles into chapters
+    or list them flat, point the plugin at the file, and the nav, headings,
+    and inter-page links fall out automatically.
+  </p>
+
+  <section>
+    <h2 id="manifest">The manifest</h2>
+    <p>
+      <code>navigation.json</code> (path configurable via
+      <code>options.navigation</code>) takes one of two shapes. Most sites
+      want the chaptered form:
+    </p>
+    <pre data-language="json">{
+  "chapters": [
+    {
+      "title": "Introduction",
+      "articles": [
+        { "slug": "",                "title": "Home" },
+        { "slug": "getting-started", "title": "Getting started" }
+      ]
+    },
+    {
+      "title": "Authoring",
+      "articles": [
+        { "slug": "page-structure", "title": "Page structure" },
+        { "slug": "code-blocks",    "title": "Code blocks" }
+      ]
+    }
+  ]
+}</pre>
+    <p>
+      Each chapter has a <code>title</code> (rendered as a small uppercase
+      heading in the nav) and an <code>articles</code> array. A flat,
+      chapter-less site can skip the wrapping and use an array directly:
+    </p>
+    <pre data-language="json">[
+  { "slug": "",        "title": "Home" },
+  { "slug": "install", "title": "Install" },
+  { "slug": "usage",   "title": "Usage" }
+]</pre>
+    <p>
+      The chaptered shape is what the prev/next computation walks &mdash; it
+      flattens the chapters in declared order and treats the whole thing as
+      one sequence.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="entries">Article entries</h2>
+    <dl>
+      <dt class="api" id="entry-slug">slug</dt>
+      <dd>
+        <p>
+          The URL path after the site root, without leading or trailing
+          slashes. The empty string <code>""</code> is the home page (mounted
+          at <code>/</code>). A slug of <code>"getting-started"</code> maps
+          to <code>/getting-started/</code>.
+        </p>
+        <p>
+          Slugs must match the directory structure produced by Eleventy.
+          With the default <code>contentDir: "src/content"</code> setup, a
+          file at <code>src/content/foo/bar.html</code> becomes the slug
+          <code>foo/bar</code>.
+        </p>
+      </dd>
+      <dt class="api" id="entry-title">title</dt>
+      <dd>
+        The label shown in the nav. Independent of the page&rsquo;s
+        <code>&lt;h1&gt;</code>, so the nav can read &ldquo;Install&rdquo; even
+        though the page itself is titled
+        &ldquo;Installing @carrotsearch/eleventy-apidocs&rdquo;.
+      </dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2 id="rendering">How it renders</h2>
+    <p>
+      The left-hand <code>&lt;nav&gt;</code> walks the chapters in declared
+      order, prints each <code>title</code> as a small uppercase heading,
+      and lists each article as a link. The link to the current page gets
+      an <code>aria-current</code> attribute and a styled background so
+      visitors always know where they are.
+    </p>
+    <p>
+      Reordering the manifest reorders the nav. Renaming a chapter renames
+      the heading. The data file is the single source of truth &mdash; the
+      content directory is the source of pages, not of order.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="prev-next">Prev/next links</h2>
+    <p>
+      The footer of every article carries a two-column block: the previous
+      article on the left, the next on the right. The sequence is the
+      flattened article list, in manifest order &mdash; chapters are
+      transparent for this purpose, so the last article of one chapter
+      points to the first article of the next.
+    </p>
+    <p>
+      Articles at the ends of the sequence get a half-empty footer: the
+      home page has only a &ldquo;next&rdquo;, the last article has only a
+      &ldquo;previous&rdquo;. The grid keeps a fixed two-column layout
+      regardless, so the remaining link doesn&rsquo;t shift position.
+    </p>
+    <div class="info">
+      <strong>What if a page isn&rsquo;t in the manifest?</strong>
+      <p>
+        Pages whose slug doesn&rsquo;t appear in <code>navigation.json</code>
+        still build and are reachable by URL, but they show no prev/next
+        block. Use this for pages you want to publish but keep out of the
+        main reading sequence &mdash; release notes, error pages, deep-linked
+        appendices.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="watching">Live reloads</h2>
+    <p>
+      The plugin watches the navigation file with
+      <code>addWatchTarget</code>, so editing
+      <code>navigation.json</code> during <code>pnpm dev</code> triggers a
+      rebuild without restarting the server. The logo and footer fragments
+      are watched the same way.
+    </p>
+  </section>
+</article>

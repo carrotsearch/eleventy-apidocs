@@ -1,0 +1,129 @@
+<article>
+  <h1>Themes</h1>
+  <p>
+    The theme ships with light and dark palettes built on the
+    <code>light-dark()</code> CSS function. A visitor&rsquo;s preference is
+    persisted in <code>localStorage</code> and applied before paint so the
+    page never flashes the wrong palette during load.
+  </p>
+
+  <section>
+    <h2 id="switch">The switch</h2>
+    <p>
+      A small button in the header toggles between three states:
+      <em>light</em>, <em>dark</em>, and <em>auto</em> (follow the
+      OS preference). The current state is stored under
+      <code>apidocs-theme</code> in <code>localStorage</code>.
+    </p>
+    <p>
+      The switch is a Web Component &mdash; no framework, no client-side
+      router. Toggling it sets <code>data-theme</code> on the
+      <code>&lt;html&gt;</code> root, which cascades into every
+      <code>light-dark()</code> value declared in the theme&rsquo;s tokens.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="fouc">FOUC prevention</h2>
+    <p>
+      The layout includes a tiny inline script in <code>&lt;head&gt;</code>
+      that reads the saved preference and applies it to
+      <code>&lt;html&gt;</code> before the browser paints the first frame.
+      That avoids the brief flash of light theme that&rsquo;d otherwise show
+      while the page loads in dark mode.
+    </p>
+    <pre data-language="html">&lt;script&gt;
+  // Runs synchronously before any styles paint.
+  try {
+    const saved = localStorage.getItem("apidocs-theme");
+    if (saved === "light" || saved === "dark") {
+      document.documentElement.setAttribute("data-theme", saved);
+    }
+  } catch (e) { /* private mode etc. */ }
+&lt;/script&gt;</pre>
+    <p>
+      The <code>try/catch</code> is there because Safari throws on
+      <code>localStorage</code> access from private windows. When the saved
+      value is missing or invalid, the OS preference wins via
+      <code>prefers-color-scheme</code> in CSS.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="tokens">Color tokens</h2>
+    <p>
+      All theme-aware colors are CSS custom properties resolved with
+      <code>light-dark()</code> in <code>tokens.css</code>:
+    </p>
+    <pre data-language="css">:root {
+  --bg:       light-dark(#ffffff, #0d1117);
+  --fg:       light-dark(#1f2328, #e6edf3);
+  --rule:     light-dark(#d0d7de, #30363d);
+  --accent:   light-dark(#0969da, #58a6ff);
+}</pre>
+    <p>
+      A single source of truth for both palettes means there&rsquo;s no
+      separate <code>.dark</code> stylesheet to keep in sync. Authoring new
+      colors means adding one token; the active <code>data-theme</code>
+      decides which value the browser resolves.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="images">Theme-aware images</h2>
+    <p>
+      For screenshots, diagrams, or any image whose light/dark variant is
+      meaningfully different, ship both and let CSS pick:
+    </p>
+    <pre data-language="html">&lt;figure&gt;
+  &lt;img class="light" src="images/dashboard-light.png" alt="…"&gt;
+  &lt;img class="dark"  src="images/dashboard-dark.png"  alt="…"&gt;
+  &lt;figcaption&gt;Dashboard, shown in the current theme.&lt;/figcaption&gt;
+&lt;/figure&gt;</pre>
+    <p>
+      Both images go through the image pipeline as usual. CSS visibility
+      rules (not JavaScript) decide which one is shown, so the toggle is
+      instant and there&rsquo;s no flicker on theme change. See
+      <a href="images.html#light-dark">Images &rarr; Light and dark
+      variants</a> for the rendered example.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="syntax">Code syntax themes</h2>
+    <p>
+      Shiki highlights every code block with a paired theme &mdash; one for
+      light, one for dark. The pipeline emits both color sets up front;
+      switching themes swaps which one is visible via a CSS variable, with
+      no client-side JavaScript involved in the actual repaint.
+    </p>
+    <p>
+      The defaults are <code>github-light</code> and
+      <code>github-dark-dimmed</code>. They&rsquo;re chosen for contrast
+      with the body palette without being so saturated they jump off the
+      page when you scroll past a code block.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="custom">Customizing</h2>
+    <p>
+      Color tokens live in <code>apidocs/styles/tokens.css</code>. To override
+      them in a consumer project, ship a stylesheet that comes after the
+      theme&rsquo;s and redeclare what you need on <code>:root</code> &mdash;
+      every consumer rule wins through normal cascade order. A custom build
+      hook can register that stylesheet through Eleventy&rsquo;s
+      <code>addPassthroughCopy</code> the same way the theme registers its
+      own assets.
+    </p>
+    <div class="info">
+      <strong>Test both palettes</strong>
+      <p>
+        New color tokens, new SVG fills, and new screenshots all need a
+        round-trip through the theme switch. The light/dark switch is one
+        click away in the header &mdash; use it before each commit to
+        catch contrast regressions early.
+      </p>
+    </div>
+  </section>
+</article>

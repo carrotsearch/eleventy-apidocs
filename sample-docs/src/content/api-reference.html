@@ -1,0 +1,178 @@
+<article>
+  <h1>API reference style</h1>
+  <p>
+    Two pieces of markup turn an ordinary article into an API reference page:
+    <code>&lt;section class="api"&gt;</code> for methods, endpoints, or
+    components, and <code>&lt;dt class="api"&gt;</code> for the options under
+    them. Both render with a monospace heading and both feed the client-side
+    symbol search index.
+  </p>
+
+  <section>
+    <h2 id="sections">API sections</h2>
+    <p>
+      Adding <code>class="api"</code> to a <code>&lt;section&gt;</code> draws
+      a rule above it and renders its heading in the monospace family at a
+      semi-bold weight. Use it for each addressable unit of the API &mdash; a
+      function, a class, an endpoint, a CLI subcommand:
+    </p>
+    <pre data-language="html">&lt;section class="api"&gt;
+  &lt;h3 id="processOrder"&gt;processOrder(order, options)&lt;/h3&gt;
+  &lt;p&gt;Validates and enqueues an order for fulfillment.&lt;/p&gt;
+&lt;/section&gt;</pre>
+    <p>The same markup, rendered:</p>
+    <section class="api">
+      <h3 id="processOrder">processOrder(order, options)</h3>
+      <p>
+        Validates the order, computes totals, and enqueues it for
+        fulfillment. Returns a promise that resolves to the persisted order
+        record. Throws <code>ValidationError</code> if the order fails
+        validation before enqueue.
+      </p>
+    </section>
+    <section class="api">
+      <h3 id="cancelOrder">cancelOrder(orderId)</h3>
+      <p>
+        Marks an order as cancelled and emits a <code>order.cancelled</code>
+        event. Idempotent &mdash; calling it again on an already-cancelled
+        order is a no-op.
+      </p>
+    </section>
+  </section>
+
+  <section>
+    <h2 id="options">Option lists</h2>
+    <p>
+      Inside an API section, a definition list with <code>dt.api</code>
+      terms documents the options. Each term renders in monospace, matching
+      the heading style.
+    </p>
+    <section class="api">
+      <h3 id="processOrder:options">Options</h3>
+      <dl>
+        <dt class="api" id="processOrder:options:notify">notify</dt>
+        <dd>
+          When <code>true</code>, sends a confirmation email after the order
+          is persisted. Defaults to <code>true</code> outside of test runs.
+        </dd>
+        <dt class="api" id="processOrder:options:idempotencyKey">idempotencyKey</dt>
+        <dd>
+          A client-supplied key used to de-duplicate retried requests.
+          Required when the call is made from a worker that may be replayed.
+        </dd>
+        <dt class="api" id="processOrder:options:dryRun">dryRun</dt>
+        <dd>
+          When <code>true</code>, runs validation and pricing but doesn&rsquo;t
+          enqueue the order. Useful for previewing totals before commit.
+        </dd>
+      </dl>
+    </section>
+  </section>
+
+  <section>
+    <h2 id="symbol-index">The symbol index</h2>
+    <p>
+      Every <code>.api</code> element is harvested at build time into
+      <code>symbols.json</code> at the site root. The Web Component that
+      powers symbol search lazy-loads that manifest the first time you press
+      <kbd>/</kbd> and queries it through fuzzysort. See
+      <a href="search.html#symbols">Search &rarr; API symbols</a> for the
+      runtime side.
+    </p>
+    <p>Each harvested entry looks like:</p>
+    <pre data-language="json">{
+  "name": "processOrder",
+  "kind": "section",
+  "url": "/api-reference/",
+  "anchor": "processOrder"
+}</pre>
+
+    <section>
+      <h3 id="symbol-index:name">name</h3>
+      <p>
+        The display string. By default the extractor reads the
+        <code>&lt;h*&gt;</code> text for sections and the <code>&lt;dt&gt;</code>
+        text for options. Override it with <code>data-api-name</code> when the
+        rendered text isn&rsquo;t the searchable identifier &mdash; for
+        instance when you want <code>processOrder()</code> on screen but
+        <code>processOrder</code> in the index.
+      </p>
+      <pre data-language="html">&lt;section class="api"&gt;
+  &lt;h3 id="processOrder"
+      data-api-name="processOrder"&gt;processOrder(order, options)&lt;/h3&gt;
+&lt;/section&gt;</pre>
+    </section>
+
+    <section>
+      <h3 id="symbol-index:kind">kind</h3>
+      <p>
+        A short label rendered next to the entry in the search results.
+        Inferred by default: <code>section</code> for
+        <code>&lt;section class="api"&gt;</code>, <code>option</code> for
+        <code>&lt;dt class="api"&gt;</code>. Override with
+        <code>data-api-kind</code> when you want a more specific label:
+      </p>
+      <pre data-language="html">&lt;section class="api" data-api-kind="endpoint"&gt;
+  &lt;h3 id="getUsers"&gt;GET /users&lt;/h3&gt;
+&lt;/section&gt;</pre>
+      <p>Common values are <code>method</code>, <code>endpoint</code>,
+        <code>event</code>, <code>option</code>, <code>flag</code>.</p>
+    </section>
+
+    <section>
+      <h3 id="symbol-index:anchor">anchor</h3>
+      <p>
+        The fragment used in the deep link. Comes from the element&rsquo;s own
+        <code>id</code>, falling back to the section&rsquo;s first heading id,
+        falling back to the nearest ancestor with an id. The extractor warns
+        if it can&rsquo;t find an anchor &mdash; symbols without one are
+        unreachable from the index.
+      </p>
+    </section>
+  </section>
+
+  <section>
+    <h2 id="combined">Putting it together</h2>
+    <p>
+      A complete API page typically alternates section headings with their
+      option lists. Here&rsquo;s a compact endpoint reference for two
+      operations:
+    </p>
+    <section class="api" data-api-kind="endpoint">
+      <h3 id="getUsers">GET /users</h3>
+      <p>
+        Returns a paginated list of users. Results are sorted by creation
+        time, newest first.
+      </p>
+      <dl class="compact">
+        <dt class="api" id="getUsers:limit">limit</dt>
+        <dd>Page size, 1&ndash;100. Default <code>20</code>.</dd>
+        <dt class="api" id="getUsers:cursor">cursor</dt>
+        <dd>
+          Opaque pagination token from a previous response&rsquo;s
+          <code>next</code> field.
+        </dd>
+        <dt class="api" id="getUsers:status">status</dt>
+        <dd>
+          Filter by status: <code>active</code>, <code>pending</code>, or
+          <code>archived</code>. Omit to include all.
+        </dd>
+      </dl>
+    </section>
+
+    <section class="api" data-api-kind="endpoint">
+      <h3 id="getUser">GET /users/:id</h3>
+      <p>Returns a single user by id, including inline organization details.</p>
+      <dl class="compact">
+        <dt class="api" id="getUser:id">id</dt>
+        <dd>The user&rsquo;s unique identifier.</dd>
+        <dt class="api" id="getUser:include">include</dt>
+        <dd>
+          Comma-separated list of expansions:
+          <code>organization</code>, <code>permissions</code>,
+          <code>activity</code>.
+        </dd>
+      </dl>
+    </section>
+  </section>
+</article>

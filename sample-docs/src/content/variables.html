@@ -1,0 +1,113 @@
+<article>
+  <h1>Variables</h1>
+  <p>
+    Any token of the form <code>$NAME$</code> in the source is replaced at
+    build time with the value declared in <code>options.variables</code>.
+    Substitution runs as the final pass over the fully rendered page, so the
+    same syntax reaches content, embedded files, and shell fragments like the
+    logo and footer.
+  </p>
+
+  <section>
+    <h2 id="syntax">Syntax</h2>
+    <p>
+      A variable reference is a name in <code>SCREAMING_SNAKE_CASE</code>
+      bracketed by dollar signs:
+    </p>
+    <pre data-language="text">$VERSION$
+$SITE_OWNER$
+$API_BASE_URL$</pre>
+    <p>The name rules:</p>
+    <ul>
+      <li>Must start with an uppercase letter.</li>
+      <li>May contain uppercase letters, digits, and underscores.</li>
+      <li>No lowercase &mdash; intentional, to keep the placeholders visually
+        distinct from surrounding prose.</li>
+    </ul>
+    <p>
+      An unknown reference is left untouched, so an unreplaced
+      <code>$FOO$</code> will appear verbatim in the output. That makes
+      stale references obvious in review rather than silently disappearing.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="configuration">Configuration</h2>
+    <p>Declare the map in <code>eleventy.config.js</code>:</p>
+    <pre data-language="javascript">import apidocs from "@carrotsearch/eleventy-apidocs";
+
+export default async function (eleventyConfig) {
+  return apidocs(eleventyConfig, {
+    contentDir: "src/content",
+    variables: {
+      VERSION:      "0.1.0",
+      SITE_OWNER:   "Carrot Search",
+      API_BASE_URL: "https://api.example.com"
+    }
+  });
+}</pre>
+    <p>
+      Values are coerced with <code>String()</code> on insertion, so numbers,
+      booleans, and dates all work without ceremony. The build that produced
+      this page used <code>VERSION = "$VERSION$"</code> and
+      <code>SITE_OWNER = "$SITE_OWNER$"</code> &mdash; the footer further
+      down picks up the latter.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="where">Where substitution applies</h2>
+    <p>
+      The variable pass is the last step in the document pipeline. By that
+      point Nunjucks has already rendered the layout shell around the
+      content, so any <code>$NAME$</code> token anywhere in the resulting
+      HTML is fair game &mdash; including in attribute values:
+    </p>
+    <pre data-language="html">&lt;p&gt;Running version &lt;code&gt;$VERSION$&lt;/code&gt;.&lt;/p&gt;
+&lt;a href="$API_BASE_URL$/healthz"&gt;Status&lt;/a&gt;</pre>
+    <p>The same applies to:</p>
+    <dl class="compact">
+      <dt>Article content</dt>
+      <dd>Every page under <code>contentDir</code>.</dd>
+      <dt>Logo and footer fragments</dt>
+      <dd>
+        Both are rendered as raw HTML before substitution, so a footer like
+        <code>&amp;copy; $SITE_OWNER$</code> resolves correctly.
+      </dd>
+      <dt>Embedded files</dt>
+      <dd>
+        When a <code>&lt;pre data-embed&gt;</code> pulls in a file,
+        substitution applies to that file&rsquo;s contents too. The next
+        section has an example.
+      </dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2 id="in-embeds">Variables in embedded files</h2>
+    <p>
+      Substitution runs over embed contents as they&rsquo;re loaded, before
+      they&rsquo;re inserted into the page. That lets a single config
+      snippet pull values from the build:
+    </p>
+    <pre data-embed="../embeds/eleventy.config.js" data-fragment="with-variables"></pre>
+    <p>
+      When this page builds, the <code>$VERSION$</code> and
+      <code>$SITE_OWNER$</code> references inside the embed are resolved
+      using the same map as the rest of the page &mdash; so the snippet
+      readers see is the snippet the page itself was built with.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="not-a-template">This isn&rsquo;t a template language</h2>
+    <p>
+      Variable substitution is intentionally tiny: token replacement, no
+      conditionals, no loops, no function calls. If you need branching or
+      iteration in content, write a custom
+      <a href="pipeline.html">pipeline pass</a> &mdash; the cheerio API gives
+      you the full document to manipulate, which is a better tool for that
+      job than a string-replace engine.
+    </p>
+  </section>
+</article>

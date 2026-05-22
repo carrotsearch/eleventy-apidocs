@@ -1,0 +1,150 @@
+<article>
+  <h1>Deployment</h1>
+  <p>
+    The built site is a folder of static files. There&rsquo;s no server-side
+    component, no runtime configuration, and no rebuild required to deploy
+    to a new path. The relativize pass rewrites every internal URL to be
+    page-relative, so <code>_site/</code> works under any URL prefix.
+  </p>
+
+  <section>
+    <h2 id="build">Build</h2>
+    <p>
+      <code>pnpm build</code> runs Eleventy, which writes the site under
+      <code>_site/</code> (or whatever <code>--output</code> you pass).
+      After Eleventy completes, two additional artifacts are produced:
+    </p>
+    <ul>
+      <li>
+        <code>_site/symbols.json</code> &mdash; the API symbol manifest for
+        the fuzzysort index. See <a href="search.html#symbols">Search
+        &rarr; API symbols</a>.
+      </li>
+      <li>
+        <code>_site/pagefind/</code> &mdash; the Pagefind prose index. See
+        <a href="search.html#prose">Search &rarr; Prose search</a>.
+      </li>
+    </ul>
+    <p>
+      Both run from the same <code>eleventy.after</code> hook, so the
+      output directory is fully self-contained the moment the build
+      command exits.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="portable">Portable URLs</h2>
+    <p>
+      The relativize pass walks every emitted HTML page after the layout
+      and content pipeline are done. For each absolute URL it finds, it
+      computes the page-relative equivalent and rewrites the attribute:
+    </p>
+    <table>
+      <thead>
+        <tr><th>Page</th><th>Original</th><th>Rewritten</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/</code></td>
+          <td><code>/code-blocks/</code></td>
+          <td><code>./code-blocks/</code></td>
+        </tr>
+        <tr>
+          <td><code>/code-blocks/</code></td>
+          <td><code>/images/</code></td>
+          <td><code>../images/</code></td>
+        </tr>
+        <tr>
+          <td><code>/code-blocks/</code></td>
+          <td><code>/assets/apidocs/css/apidocs.css</code></td>
+          <td><code>../assets/apidocs/css/apidocs.css</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The rewrite covers <code>href</code>, <code>src</code>,
+      <code>srcset</code>, and CSS <code>url(...)</code> references. Absolute
+      URLs to external hosts are left alone. Protocol-relative URLs
+      (<code>//cdn.example.com/...</code>) are left alone too &mdash;
+      they&rsquo;re explicitly anchored to the current scheme.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="verify">Verifying the build</h2>
+    <p>
+      Two checks confirm the site is portable:
+    </p>
+    <ol>
+      <li>
+        <p>
+          No leading-slash URLs survive in emitted HTML. From the
+          workspace root:
+        </p>
+        <pre data-language="bash">grep -rE 'href="/|src="/' sample-docs/_site/ && echo "FAILED" || echo "OK"</pre>
+      </li>
+      <li>
+        <p>
+          Serving the directory from any prefix renders correctly. The
+          quickest local test:
+        </p>
+        <pre data-language="bash">python3 -m http.server -d sample-docs/_site 8000
+# visit http://localhost:8000/ &mdash; site loads
+# move _site under some/prefix/ on another server and load
+# http://that-server/some/prefix/ &mdash; site still loads</pre>
+      </li>
+    </ol>
+    <p>
+      If both checks pass, the build is portable to any subpath without
+      rebuilding. That includes deploying preview branches under
+      <code>https://example.com/pr-1234/</code> or shipping the site
+      bundled inside a desktop app at a <code>file://</code> path.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="hosts">Common hosts</h2>
+    <dl>
+      <dt>Static file servers</dt>
+      <dd>
+        Nginx, Caddy, or anything that serves a directory. No special
+        configuration &mdash; point the document root at <code>_site/</code>.
+      </dd>
+      <dt>GitHub Pages, Cloudflare Pages, Netlify, Vercel</dt>
+      <dd>
+        Each has its own build command field; set it to
+        <code>pnpm build</code> and the publish directory to
+        <code>_site</code>. No further config.
+      </dd>
+      <dt>S3 + CloudFront (or equivalent)</dt>
+      <dd>
+        Sync <code>_site/</code> to the bucket; serve via the CDN. Set
+        <code>index.html</code> as the default document so directory URLs
+        resolve correctly.
+      </dd>
+      <dt>Inside another app</dt>
+      <dd>
+        Because URLs are relative, you can mount the site at
+        <code>/docs/</code> of an existing application without rebuilding.
+        Whatever serves your <code>/docs/</code> route just needs to
+        respect <code>index.html</code> at directory paths.
+      </dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2 id="prefetch">Speculation rules prefetch</h2>
+    <p>
+      The layout includes a <code>&lt;script type="speculationrules"&gt;</code>
+      block that asks the browser to prefetch every same-origin link on
+      hover/focus, at &ldquo;moderate&rdquo; eagerness. On a static host
+      that means navigations between docs feel near-instantaneous: the next
+      page is already in cache by the time the click registers.
+    </p>
+    <p>
+      Combined with cross-document View Transitions, the result is a feel
+      that&rsquo;s closer to an SPA than a static site &mdash; without
+      shipping any router code.
+    </p>
+  </section>
+</article>

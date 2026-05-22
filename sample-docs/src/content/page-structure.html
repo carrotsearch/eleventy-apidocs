@@ -1,0 +1,141 @@
+<article>
+  <h1>Page structure</h1>
+  <p>
+    Each article is a single HTML file. The theme reads its structure from
+    standard tags: <code>&lt;article&gt;</code> wraps the page,
+    <code>&lt;section&gt;</code> wraps each topic, and id-bearing headings
+    drive anchors, deep links, and the right-hand table of contents.
+  </p>
+
+  <section>
+    <h2 id="article-shape">Article shape</h2>
+    <p>
+      The pipeline expects an <code>&lt;article&gt;</code> with an
+      <code>&lt;h1&gt;</code> title and one or more nested
+      <code>&lt;section&gt;</code> blocks. The first heading inside each
+      section carries a stable <code>id</code>:
+    </p>
+    <pre data-language="html">&lt;article&gt;
+  &lt;h1&gt;Title&lt;/h1&gt;
+  &lt;section&gt;
+    &lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+    &lt;p&gt;…&lt;/p&gt;
+    &lt;section&gt;
+      &lt;h3 id="intro:details"&gt;Details&lt;/h3&gt;
+      &lt;p&gt;…&lt;/p&gt;
+    &lt;/section&gt;
+  &lt;/section&gt;
+&lt;/article&gt;</pre>
+    <p>
+      The <code>&lt;h1&gt;</code> is the page title (used in the
+      <code>&lt;title&gt;</code> tag too). Heading levels track section depth:
+      <code>&lt;h2&gt;</code> for top-level sections, <code>&lt;h3&gt;</code>
+      for nested ones, and so on through <code>&lt;h5&gt;</code>.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="ids-and-anchors">IDs and anchors</h2>
+    <p>
+      Every <code>&lt;h2&gt;</code>&ndash;<code>&lt;h5&gt;</code> with an
+      <code>id</code> gets a small link icon prepended that pulls into the
+      left gutter and shows on hover. The id is the URL fragment for that
+      heading, so <code>page-structure.html#ids-and-anchors</code> lands here.
+    </p>
+    <p>
+      By convention nested ids carry the parent&rsquo;s id as a
+      colon-separated prefix:
+    </p>
+    <pre data-language="html">&lt;h2 id="config"&gt;Configuration&lt;/h2&gt;
+&lt;h3 id="config:options"&gt;Options&lt;/h3&gt;
+&lt;h3 id="config:options:advanced"&gt;Advanced options&lt;/h3&gt;</pre>
+    <p>
+      Nothing in the pipeline enforces the convention &mdash; ids only need
+      to be unique inside the page &mdash; but the prefixed form reads as a
+      path from the page root and keeps the ToC&rsquo;s deep links self-describing.
+    </p>
+    <div class="info">
+      <strong>Targeted headings glow</strong>
+      <p>
+        When the URL fragment matches a heading id, the heading gets a soft
+        highlight band. The same applies to <code>p</code>, <code>li</code>,
+        <code>dt</code>, and <code>code</code> targets &mdash; useful when a
+        search result deep-links into a paragraph mid-page.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="toc">Table of contents</h2>
+    <p>
+      The right-hand ToC is built from <code>&lt;article&gt; &gt; &lt;section&gt;</code>
+      top-level entries and any nested <code>&lt;section&gt;</code> children.
+      Each entry uses the first id-bearing heading inside the section. Sections
+      whose first heading lacks an id are skipped &mdash; they&rsquo;re
+      structural, not navigable.
+    </p>
+    <section>
+      <h3 id="toc:omit">Omitting from the ToC</h3>
+      <p>
+        Two opt-outs control how a section participates:
+      </p>
+      <dl class="narrow">
+        <dt class="api"><code>data-toc="omit"</code></dt>
+        <dd>Skip this section entirely, including its descendants.</dd>
+        <dt class="api"><code>data-toc="omit-children"</code></dt>
+        <dd>Include this section but not its nested ones &mdash; useful for a
+          long FAQ-style section where the children are noise in the ToC.</dd>
+      </dl>
+      <pre data-language="html">&lt;section data-toc="omit-children"&gt;
+  &lt;h2 id="faq"&gt;FAQ&lt;/h2&gt;
+  &lt;section&gt;&lt;h3 id="faq:q1"&gt;…&lt;/h3&gt;&lt;/section&gt;
+  &lt;section&gt;&lt;h3 id="faq:q2"&gt;…&lt;/h3&gt;&lt;/section&gt;
+&lt;/section&gt;</pre>
+    </section>
+  </section>
+
+  <section>
+    <h2 id="lead">Lead paragraph</h2>
+    <p>
+      The first <code>&lt;p&gt;</code> directly inside <code>&lt;article&gt;</code>
+      &mdash; the one before any <code>&lt;section&gt;</code> &mdash; is
+      automatically styled as a lead: larger type, lighter weight, with a
+      rule underneath separating it from the body. Use it for the
+      one-paragraph summary of the page.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="links">Internal links</h2>
+    <p>
+      Write internal links the way you author the files &mdash; with
+      <code>.html</code> suffixes:
+    </p>
+    <pre data-language="html">&lt;a href="code-blocks.html"&gt;Code blocks&lt;/a&gt;
+&lt;a href="code-blocks.html#embed"&gt;Embedding a file&lt;/a&gt;</pre>
+    <p>
+      The link-rewriter pass strips the <code>.html</code> and turns the URL
+      into a clean directory form (<code>code-blocks/</code>). Query strings
+      and fragments are preserved. To opt out of rewriting on a particular
+      link, mark it <code>data-external</code>.
+    </p>
+    <p>
+      Absolute URLs (anything starting with a protocol, with
+      <code>//</code>, or with <code>mailto:</code>) are left alone. After
+      rewriting, the relativize pass turns every internal URL into a
+      page-relative form so the site is portable to any URL prefix &mdash;
+      see <a href="deployment.html">Deployment</a> for the details.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="page-title">Page title</h2>
+    <p>
+      The <code>&lt;title&gt;</code> tag for each page is taken from its
+      <code>&lt;h1&gt;</code>. No frontmatter, no
+      <code>title:</code> data file &mdash; the heading is the source of
+      truth. If a page has no <code>&lt;h1&gt;</code>, the title falls back
+      to <code>"apidocs"</code>.
+    </p>
+  </section>
+</article>
