@@ -9,9 +9,9 @@
   --bg-sunken:    light-dark(hsl(0 0% 98%),  hsl(207 23% 14%));
 
   /* Text */
-  --fg:           light-dark(hsl(0 0% 10%),    hsl(0 0% 95%));
-  --fg-muted:     light-dark(hsl(0 0% 32%),    hsl(0 0% 75%));
-  --fg-faint:     light-dark(hsl(0 0% 50%),    hsl(0 0% 55%));
+  --fg:           light-dark(hsl(0 0% 0%),    hsl(0 0% 95%));
+  --fg-muted:     light-dark(hsl(0 0% 25%),    hsl(0 0% 75%));
+  --fg-faint:     light-dark(hsl(0 0% 35%),    hsl(0 0% 55%));
 
   /* Interactive */
   --link:         light-dark(hsl(203 82% 35%), hsl(203 85% 70%));

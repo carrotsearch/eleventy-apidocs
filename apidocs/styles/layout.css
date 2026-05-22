@@ -123,7 +123,7 @@
     color: var(--fg-muted);
     text-decoration: none;
     display: block;
-    padding-block: 0.1rem;
+    padding-block: 0.125rem;
     padding-inline-start: 0.625rem;
     margin-inline-start: -0.625rem;
     border-inline-start: 2px solid transparent;
