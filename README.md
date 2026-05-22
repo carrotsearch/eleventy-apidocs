@@ -6,7 +6,7 @@ unmaintained [`gatsby-theme-apidocs`](https://github.com/carrotsearch/gatsby-the
 This repository is a pnpm workspace with two packages:
 
 - `apidocs/` &mdash; the theme, published as `@carrotsearch/eleventy-apidocs`
-- `sample-docs/` &mdash; a sample site that consumes the theme, used as a
+- `docs/` &mdash; a sample site that consumes the theme, used as a
   living integration test
 
 ## Using the theme in your own project
@@ -73,9 +73,9 @@ All URLs in the generated HTML are relative to the page, so you can host
 
 ```sh
 pnpm install         # install workspace deps
-pnpm dev             # serve sample-docs with hot reload
-pnpm build           # build sample-docs to sample-docs/_site/
-pnpm clean           # remove sample-docs/_site/
+pnpm dev             # serve docs with hot reload
+pnpm build           # build docs to docs/_site/
+pnpm clean           # remove docs/_site/
 pnpm format          # run Prettier
 ```
 

@@ -1,6 +1,6 @@
 packages:
   - "apidocs"
-  - "sample-docs"
+  - "docs"
 
 # pnpm 11+ ignores postinstall scripts by default. These two ship native
 # binaries (esbuild's compiler, sharp's libvips) and need their build step

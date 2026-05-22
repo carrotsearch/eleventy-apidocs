@@ -2,9 +2,9 @@
   "name": "apidocs-workspace",
   "private": true,
   "scripts": {
-    "dev": "pnpm -F sample-docs dev",
-    "build": "pnpm -F sample-docs build",
-    "clean": "pnpm -F sample-docs clean",
+    "dev": "pnpm -F docs dev",
+    "build": "pnpm -F docs build",
+    "clean": "pnpm -F docs clean",
     "test": "pnpm -F @carrotsearch/eleventy-apidocs test",
     "format": "prettier --write ."
   },
