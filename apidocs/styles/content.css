@@ -99,6 +99,11 @@ pre code {
   margin-block-end: 0.25rem;
 }
 
+/* No-heading case: drop the first child's leading top-margin so the
+   inner padding stays symmetric. overflow:hidden blocks margin collapse,
+   so we need to zero it explicitly. */
+:is(.info, .warning, .box) > *:first-child { margin-block-start: 0; }
+
 /* Icon on info/warning heading. Box stays plain — generic container. */
 .info > :is(strong, b):first-child::before,
 .warning > :is(strong, b):first-child::before {
