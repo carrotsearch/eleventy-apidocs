@@ -74,6 +74,22 @@ dialog.apidocs-lightbox > .frame > figcaption {
   max-inline-size: 50rem;
 }
 
+/* Suppress the cross-document named groups during a lightbox transition.
+   Without this, the header/nav/footer get their own VT groups that render
+   above the root snapshot (so they sit on top of the dialog) and capture
+   slightly different positions in old vs new (because `overflow:hidden`
+   on body removes the scrollbar) — visible as a header wobble during the
+   zoom. Folding them back into the root makes the whole page crossfade as
+   one layer underneath the morphing image. */
+html.apidocs-lightbox-opening .site-header,
+html.apidocs-lightbox-opening .main-nav,
+html.apidocs-lightbox-opening .site-footer,
+html.apidocs-lightbox-closing .site-header,
+html.apidocs-lightbox-closing .main-nav,
+html.apidocs-lightbox-closing .site-footer {
+  view-transition-name: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-group(apidocs-lightbox-image),
   ::view-transition-old(apidocs-lightbox-image),
