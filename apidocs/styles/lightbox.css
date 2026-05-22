@@ -106,13 +106,13 @@ html.apidocs-lightbox-closing .site-footer {
     animation-timing-function: ease-out;
   }
 
-  /* Close: backdrop lingers and fades out only at the tail of the morph,
-     so the image animates back over the dark page until the very end. */
+  /* Close: backdrop fades out alongside the image morph from t=0 so the
+     page reappears in lockstep with the image returning home, instead of
+     snapping back in at the very end. */
   html.apidocs-lightbox-closing::view-transition-old(root),
   html.apidocs-lightbox-closing::view-transition-new(root) {
-    animation-duration: 120ms;
-    animation-delay: 230ms;
-    animation-timing-function: ease-in;
+    animation-duration: 0.35s;
+    animation-timing-function: ease-in-out;
   }
 }
 
