@@ -6,6 +6,7 @@ import nunjucks from "nunjucks";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { relativizeHtml } from "./lib/relativize.js";
 import { buildCss } from "./lib/build-css.js";
+import { buildJs } from "./lib/build-js.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
 
 const themeRoot = path.dirname(fileURLToPath(import.meta.url));
@@ -54,18 +55,21 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     cachedShell = null;
   });
 
-  // Bundle the theme CSS once before each build. lightningcss collapses
-  // @imports and minifies in one pass, so the site ships a single .css file.
-  // The bundle is written directly into the Eleventy output dir to keep it
-  // out of any watched/passthrough source path — see lib/build-css.js.
+  // Bundle the theme CSS and JS once before each build. Both write directly
+  // into the Eleventy output dir to stay out of any passthrough-copy source
+  // path — see lib/build-css.js and lib/build-js.js.
   eleventyConfig.on("eleventy.before", async ({ directories, dir }) => {
     symbols = [];
     const output = directories?.output || dir?.output;
-    if (output) await buildCss(themeRoot, output);
+    if (output) {
+      await buildCss(themeRoot, output);
+      await buildJs(themeRoot, output);
+    }
   });
 
-  // Watch CSS source so dev rebuilds pick up token/layout edits.
+  // Watch source so dev rebuilds pick up token/layout/script edits.
   eleventyConfig.addWatchTarget(path.join(themeRoot, "styles"));
+  eleventyConfig.addWatchTarget(path.join(themeRoot, "assets/js"));
 
   eleventyConfig.addTransform("apidocs-shell", async function (content, outputPath) {
     if (!outputPath || !outputPath.endsWith(".html")) return content;
@@ -111,7 +115,6 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   }
 
   eleventyConfig.addPassthroughCopy({
-    [path.join(themeRoot, "assets/js")]: "assets/apidocs/js",
     [fuzzysortPath]: "assets/apidocs/js/fuzzysort.js"
   });
 
