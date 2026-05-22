@@ -11,7 +11,8 @@
       "title": "Content",
       "articles": [
         { "slug": "code-blocks", "title": "Code blocks" },
-        { "slug": "images", "title": "Images" }
+        { "slug": "images", "title": "Images" },
+        { "slug": "callouts", "title": "Callouts" }
       ]
     }
   ]

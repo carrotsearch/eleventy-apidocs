@@ -1,0 +1,94 @@
+<article>
+  <h1>Callouts</h1>
+  <p>
+    Three callout variants ship with the theme: <code>.info</code>,
+    <code>.warning</code>, and <code>.box</code>. Each is plain
+    <code>&lt;div&gt;</code> markup — no extra plugin syntax, no MDX, no
+    custom shortcodes. An optional <code>&lt;strong&gt;</code> first
+    child renders as the callout heading.
+  </p>
+
+  <section>
+    <h2 id="info">Info</h2>
+    <p>
+      <code>&lt;div class="info"&gt;</code> &mdash; informational asides,
+      reference notes, gentle reminders.
+    </p>
+    <div class="info">
+      <strong>Heads up</strong>
+      <p>
+        The HTML pipeline reads <code>&lt;strong&gt;</code> as a heading
+        only when it&rsquo;s the callout&rsquo;s first child. Anywhere
+        else, it&rsquo;s just emphasized text.
+      </p>
+    </div>
+    <p>
+      Without a heading, the callout still renders &mdash; just without
+      the icon row:
+    </p>
+    <div class="info">
+      <p>
+        Embed paths, fragment markers, and JSONPath selectors are all
+        documented in <a href="code-blocks.html">Code blocks</a>.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="warning">Warning</h2>
+    <p>
+      <code>&lt;div class="warning"&gt;</code> &mdash; sharper attention
+      cues for breaking changes, deprecations, footguns.
+    </p>
+    <div class="warning">
+      <strong>Don&rsquo;t skip the migration step</strong>
+      <p>
+        Upgrading past v0.3 requires running the symbol-id rewriter once
+        on existing content. Skipping it leaves stale anchors in the
+        published index.
+      </p>
+    </div>
+    <div class="warning">
+      <strong>Deprecated</strong>
+      <p>
+        The <code>data-toc-skip</code> attribute is gone in v0.4 &mdash;
+        use <code>data-toc="omit"</code> on the section instead. Pages
+        still carrying the old attribute build, but the value is
+        ignored.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="box">Box</h2>
+    <p>
+      <code>&lt;div class="box"&gt;</code> &mdash; a generic shaded
+      container with no semantic role. Use it for sidebars, callouts
+      that don&rsquo;t fit either of the above, or to visually group a
+      list with its preamble.
+    </p>
+    <div class="box">
+      <strong>Reading time</strong>
+      <p>
+        ~3 minutes for the whole authoring contract; ~8 minutes if you
+        also work through the embed and JSONPath examples on the
+        <a href="code-blocks.html">Code blocks</a> page.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="composition">Composition</h2>
+    <p>
+      Callouts can contain any block content &mdash; paragraphs, lists,
+      nested <code>&lt;pre&gt;</code> blocks, even images. The
+      pipeline doesn&rsquo;t treat callout interiors specially.
+    </p>
+    <div class="info">
+      <strong>Code inside a callout</strong>
+      <p>The code-box transform runs as usual:</p>
+      <pre data-language="javascript">// Callouts pass their interior through every standard transform.
+const ok = process(input);</pre>
+    </div>
+  </section>
+</article>
