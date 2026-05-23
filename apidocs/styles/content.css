@@ -140,8 +140,15 @@ figure img, figure picture, figure svg { display: block; max-inline-size: 100%; 
 
 /* Standalone media — match the rhythm of paragraphs and figures when an
    image isn't wrapped in <figure>. The image pipeline rewraps raster <img>
-   in .lqip, so cover that too; nested matches inside a figure are excluded. */
-article :is(img, picture, .lqip):not(figure :is(img, picture, .lqip)) {
+   in .lqip, so cover that too. Excludes:
+     - anything inside a <figure> (figure handles its own rhythm)
+     - the <picture>/<img> *inside* a .lqip wrapper — they'd otherwise pick
+       up a top/bottom margin, and since .lqip is overflow:hidden the margin
+       doesn't collapse, leaving a strip of LQIP background visible. */
+article :is(img, picture, .lqip):not(
+  figure :is(img, picture, .lqip),
+  .lqip :is(img, picture)
+) {
   margin-block: var(--leading);
 }
 figcaption {
