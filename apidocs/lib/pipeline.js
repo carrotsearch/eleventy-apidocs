@@ -54,7 +54,7 @@ export async function processContent(html, ctx) {
 
   await svgInliner($, ctx);
   await imageProcessor($, ctx);
-  linkRewriter($);
+  linkRewriter($, ctx);
   sectionAnchors($);
   await embedCode($, ctx);
   await codeHighlight($, ctx);
