@@ -51,7 +51,7 @@
 }
 
 .site-header .logo         { grid-area: logo; }
-.site-header .search       { grid-area: search-toggle; justify-self: stretch; max-inline-size: 24rem; }
+.site-header .search       { grid-area: search-toggle; justify-self: stretch; max-inline-size: 24rem}
 .site-header .theme-switch { grid-area: theme; }
 
 .logo a {
@@ -104,7 +104,7 @@
 .article {
   grid-area: article;
   min-inline-size: 0;
-  padding-inline: var(--gutter);
+  padding-inline: calc(var(--gutter) + 1em);
   padding-block: calc(0.75 * var(--leading)) calc(3 * var(--leading));
 }
 
@@ -175,10 +175,12 @@
     grid-template-areas: "logo search-toggle theme";
   }
 
-  /* Pull the search box left by the header column gap so its left edge
-     lines up with the article text's left edge (both sit on nav-w + gutter
-     from the viewport once the gap is cancelled). */
-  .site-header .search { margin-inline-start: -0.75rem; }
+  /* Align the search box's left edge with the article text. The search
+     sits naturally at gutter + nav-w + 0.75rem (the header column gap);
+     the article text starts at nav-w + gutter + 1em (the extra 1em
+     keeps overflowing code blocks off the toc scrollbar — see .article).
+     Net shift: 1em - 0.75rem. */
+  .site-header .search { margin-inline-start: calc(1em - 0.75rem); }
 
   .main-nav {
     border-block-end: none;
