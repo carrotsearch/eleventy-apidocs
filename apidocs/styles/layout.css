@@ -11,14 +11,28 @@
 .layout {
   display: grid;
   min-height: 100dvh;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
     "header"
+    "body"
+    "footer";
+}
+
+/* Inner grid for nav + article + toc. Wrapping these in their own grid
+   container — rather than letting them be cells of .layout directly —
+   confines the sticky .toc's containing block to this body. Without the
+   wrapper, the toc would remain stuck while the footer scrolled into view
+   below it, since the toc's containing block would extend all the way to
+   the bottom of .layout. */
+.layout-body {
+  grid-area: body;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
     "nav"
     "article"
-    "toc"
-    "footer";
+    "toc";
 }
 
 .site-header {
@@ -150,13 +164,10 @@
 
 /* Tablet — nav becomes a left rail. */
 @media (min-width: 48rem) {
-  .layout {
+  .layout-body {
     grid-template-columns: var(--nav-w) minmax(0, 1fr);
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas:
-      "header header"
-      "nav    article"
-      "footer footer";
+    grid-template-rows: auto;
+    grid-template-areas: "nav article";
   }
 
   .site-header {
@@ -183,12 +194,9 @@
 
 /* Desktop — add the ToC rail. */
 @media (min-width: 64rem) {
-  .layout {
+  .layout-body {
     grid-template-columns: var(--nav-w) minmax(0, 1fr) var(--toc-w);
-    grid-template-areas:
-      "header header  header"
-      "nav    article toc"
-      "footer footer  footer";
+    grid-template-areas: "nav article toc";
   }
 
   .article { max-inline-size: 48rem; }
@@ -205,14 +213,11 @@
 
   /* Pages without a ToC: drop the right rail and let the article use the
      freed width. */
-  .layout:not(:has(.toc-inner)) {
+  .layout-body:not(:has(.toc-inner)) {
     grid-template-columns: var(--nav-w) minmax(0, 1fr);
-    grid-template-areas:
-      "header header"
-      "nav    article"
-      "footer footer";
+    grid-template-areas: "nav article";
   }
-  .layout:not(:has(.toc-inner)) .article { max-inline-size: 60rem; }
+  .layout-body:not(:has(.toc-inner)) .article { max-inline-size: 60rem; }
 }
 
 /* Modern thin scrollbars in scrollable rails. */

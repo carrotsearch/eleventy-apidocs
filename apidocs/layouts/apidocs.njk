@@ -34,12 +34,14 @@
         <div class="search">{% include "search.njk" ignore missing %}</div>
         <div class="theme-switch">{% include "theme-switch.njk" ignore missing %}</div>
       </header>
-      <nav class="main-nav">{% include "navigation.njk" ignore missing %}</nav>
-      <main class="article" data-pagefind-body>
-        {{ content | safe }}
-        {% include "prev-next.njk" ignore missing %}
-      </main>
-      <nav class="toc">{% include "toc.njk" ignore missing %}</nav>
+      <div class="layout-body">
+        <nav class="main-nav">{% include "navigation.njk" ignore missing %}</nav>
+        <main class="article" data-pagefind-body>
+          {{ content | safe }}
+          {% include "prev-next.njk" ignore missing %}
+        </main>
+        <nav class="toc">{% include "toc.njk" ignore missing %}</nav>
+      </div>
       <footer class="site-footer">{{ apidocs.footer | safe }}</footer>
     </div>
     <script type="module" src="/assets/apidocs/js/apidocs.js"></script>
