@@ -3,6 +3,8 @@ import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import nunjucks from "nunjucks";
 import { loadSourceFile } from "./lib/load-source-file.js";
+import { loadNavigation } from "./lib/load-navigation.js";
+import { extractH1 } from "./lib/extract-h1.js";
 import { relativizeHtml } from "./lib/relativize.js";
 import { buildCss } from "./lib/build-css.js";
 import { buildJs } from "./lib/build-js.js";
@@ -39,7 +41,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   async function getShellData() {
     if (cachedShell) return cachedShell;
     cachedShell = {
-      navigation: await loadSourceFile(opts.navigation, "json"),
+      navigation: await loadNavigation(opts.navigation, opts.contentDir),
       logo: await loadSourceFile(opts.logo, "html"),
       footer: await loadSourceFile(opts.footer, "html"),
       variables: opts.variables,
@@ -92,7 +94,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     };
 
     const processed = await processContent(content, ctx);
-    const title = extractTitle(processed) || "apidocs";
+    const title = extractH1(processed) || "apidocs";
     const { prev, next } = neighborsFor(apidocs.navigation, this.page?.url);
     const wrapped = env.render("apidocs.njk", {
       content: processed,
@@ -148,11 +150,6 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   };
 }
 
-function extractTitle(html) {
-  const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-  if (!m) return null;
-  return m[1].replace(/<[^>]+>/g, "").trim();
-}
 
 // Flatten the navigation manifest (chaptered or flat) into an ordered list
 // and return the {prev, next} entries surrounding the current page.

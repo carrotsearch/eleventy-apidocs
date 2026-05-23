@@ -1,10 +1,11 @@
-{# Main navigation. Accepts two shapes for apidocs.navigation:
+{# Main navigation. Article entries are normalized to {slug, title} by
+   lib/load-navigation.js before reaching this partial, so it only ever
+   sees objects. The manifest itself accepts these shapes:
 
-   Flat (single chapter):
-     [ {slug, title}, ... ]
+   Flat:      [ "slug" | {slug, title}, ... ]
+   Chaptered: { chapters: [ {title, articles: [ "slug" | {slug, title}, ... ]}, ... ] }
 
-   Chaptered (multiple groups):
-     { chapters: [ {title, articles: [{slug, title}, ...]}, ... ] }
+   Bare strings have their title pulled from the target page's <h1>.
 
    The current page is marked .active by comparing page.url against the
    entry's "/slug/" path. #}

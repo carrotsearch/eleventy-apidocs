@@ -47,6 +47,38 @@
       flattens the chapters in declared order and treats the whole thing as
       one sequence.
     </p>
+
+    <section>
+      <h3 id="manifest:slug-only">Slug-only entries</h3>
+      <p>
+        Inside an <code>articles</code> array each entry can also be a bare
+        slug string. The nav loader resolves the title from the target
+        page&rsquo;s <code>&lt;h1&gt;</code>, so the manifest doesn&rsquo;t
+        repeat what the page already states:
+      </p>
+      <pre data-language="json">{
+  "chapters": [
+    {
+      "title": "Introduction",
+      "articles": [ "", "getting-started" ]
+    },
+    {
+      "title": "Authoring",
+      "articles": [ "page-structure", "code-blocks" ]
+    }
+  ]
+}</pre>
+      <p>
+        Bare strings and <code>{slug, title}</code> objects can be mixed in
+        the same array &mdash; reach for an explicit <code>title</code> only
+        when the nav label needs to differ from the page heading.
+      </p>
+      <p>
+        If a slug points at a file that doesn&rsquo;t exist, or the file has
+        no <code>&lt;h1&gt;</code>, the slug is used as the title and a
+        warning is logged so the gap is visible in the build output.
+      </p>
+    </section>
   </section>
 
   <section>
@@ -70,10 +102,11 @@
       <dt class="api" id="entry-title">title</dt>
       <dd>
         <p>
-          The label shown in the nav. Independent of the page&rsquo;s
-          <code>&lt;h1&gt;</code>, so the nav can read &ldquo;Install&rdquo; even
-          though the page itself is titled
-          &ldquo;Installing @carrotsearch/eleventy-apidocs&rdquo;.
+          The label shown in the nav. Optional &mdash; when omitted, the
+          loader uses the target page&rsquo;s <code>&lt;h1&gt;</code>. Set it
+          explicitly when the nav label needs to differ from the page heading,
+          e.g. nav reads &ldquo;Install&rdquo; even though the page itself is
+          titled &ldquo;Installing @carrotsearch/eleventy-apidocs&rdquo;.
         </p>
       </dd>
     </dl>
