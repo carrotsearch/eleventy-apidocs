@@ -69,3 +69,16 @@ test("places the anchor as the first child of the heading", () => {
   const first = $("h2").contents().first()[0];
   assert.equal(first.tagName, "a");
 });
+
+test("lifts section id onto its first heading when the heading has none", () => {
+  const $ = anchor(`<article><section id="npm"><h2>NPM</h2><p>p</p></section></article>`);
+  assert.equal($("section[id]").length, 0, "section id is removed");
+  assert.equal($("h2").attr("id"), "npm", "heading inherits the section id");
+  assert.equal($("a.anchor").attr("href"), "#npm", "anchor uses lifted id");
+});
+
+test("does not overwrite an existing heading id when section also has one", () => {
+  const $ = anchor(`<article><section id="from-section"><h2 id="from-heading">H</h2></section></article>`);
+  assert.equal($("h2").attr("id"), "from-heading");
+  assert.equal($("section").attr("id"), "from-section");
+});
