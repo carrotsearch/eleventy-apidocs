@@ -21,6 +21,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     variables: {},
     transformers: [],
     finalizers: [],
+    styles: [],
     ...userOptions
   };
 
@@ -61,7 +62,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     symbols = [];
     const output = directories?.output || dir?.output;
     if (output) {
-      await buildCss(themeRoot, output);
+      await buildCss(themeRoot, output, opts.styles);
       await buildJs(themeRoot, output);
     }
   });
@@ -69,6 +70,9 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // Watch source so dev rebuilds pick up token/layout/script edits.
   eleventyConfig.addWatchTarget(path.join(themeRoot, "styles"));
   eleventyConfig.addWatchTarget(path.join(themeRoot, "assets/js"));
+  for (const f of [].concat(opts.styles || [])) {
+    if (f) eleventyConfig.addWatchTarget(f);
+  }
 
   eleventyConfig.addTransform("apidocs-shell", async function (content, outputPath) {
     if (!outputPath || !outputPath.endsWith(".html")) return content;
