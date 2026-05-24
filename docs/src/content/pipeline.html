@@ -9,8 +9,8 @@
     deciding which to use is mostly a question of ordering.
   </p>
 
-  <section>
-    <h2 id="when">When passes run</h2>
+  <section id="when">
+    <h2>When passes run</h2>
     <p>The order from the plugin&rsquo;s perspective:</p>
     <ol>
       <li>
@@ -53,8 +53,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="signature">Pass signature</h2>
+  <section id="signature">
+    <h2>Pass signature</h2>
     <p>
       A pass is an async function that receives the cheerio root and a
       context object:
@@ -111,8 +111,8 @@
     </dl>
   </section>
 
-  <section>
-    <h2 id="transformers">Transformers</h2>
+  <section id="transformers">
+    <h2>Transformers</h2>
     <p>
       Transformers run after Nunjucks but before any built-in pass. Wire
       them via <code>options.transformers</code>:
@@ -147,8 +147,8 @@ export default async function (eleventyConfig) {
     </p>
   </section>
 
-  <section>
-    <h2 id="finalizers">Finalizers</h2>
+  <section id="finalizers">
+    <h2>Finalizers</h2>
     <p>
       Finalizers run last, with full access to the processed document.
       They&rsquo;re the place for cross-cutting concerns that depend on the
@@ -181,8 +181,8 @@ export default async function (eleventyConfig) {
     </p>
   </section>
 
-  <section>
-    <h2 id="staying-fast">Staying fast</h2>
+  <section id="staying-fast">
+    <h2>Staying fast</h2>
     <p>
       Passes run on every page on every build, so the time you spend in a
       pass is multiplied by the size of the site. The built-ins keep their

@@ -8,8 +8,8 @@
     backend to host.
   </p>
 
-  <section>
-    <h2 id="prose">Prose search</h2>
+  <section id="prose">
+    <h2>Prose search</h2>
     <p>
       <a href="https://pagefind.app/" data-external>Pagefind</a> runs as the
       last step of every build. It walks the emitted HTML, extracts text
@@ -18,8 +18,8 @@
       shards it needs on demand &mdash; opening search costs a few kilobytes,
       not a full index download.
     </p>
-    <section>
-      <h3 id="prose:scope">What gets indexed</h3>
+    <section id="prose:scope">
+      <h3>What gets indexed</h3>
       <p>
         Pagefind indexes the element marked
         <code>data-pagefind-body</code>. The layout puts that attribute on
@@ -33,8 +33,8 @@
         opens the page scrolled to that heading.
       </p>
     </section>
-    <section>
-      <h3 id="prose:ignore">Excluding content</h3>
+    <section id="prose:ignore">
+      <h3>Excluding content</h3>
       <p>
         Mark anything you want Pagefind to skip with
         <code>data-pagefind-ignore</code>. The theme uses it on the
@@ -49,8 +49,8 @@
     </section>
   </section>
 
-  <section>
-    <h2 id="symbols">API symbols</h2>
+  <section id="symbols">
+    <h2>API symbols</h2>
     <p>
       For API documentation, the prose index is the wrong shape &mdash;
       you want to type a method or option name and jump straight to its
@@ -72,8 +72,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="ui">The search UI</h2>
+  <section id="ui">
+    <h2>The search UI</h2>
     <p>
       The search box in the header opens a modal with two panels: prose
       results from Pagefind on the left, symbol matches from fuzzysort on
@@ -104,8 +104,8 @@
     </table>
   </section>
 
-  <section>
-    <h2 id="rebuilding">Rebuilding the index</h2>
+  <section id="rebuilding">
+    <h2>Rebuilding the index</h2>
     <p>
       Both indexes are produced by <code>pnpm build</code>:
     </p>

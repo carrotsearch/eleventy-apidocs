@@ -8,8 +8,8 @@
     symbol search index.
   </p>
 
-  <section>
-    <h2 id="sections">API sections</h2>
+  <section id="sections">
+    <h2>API sections</h2>
     <p>
       Adding <code>class="api"</code> to a <code>&lt;section&gt;</code> draws
       a rule above it and renders its heading in the monospace family at a
@@ -21,8 +21,8 @@
   &lt;p&gt;Validates and enqueues an order for fulfillment.&lt;/p&gt;
 &lt;/section&gt;</pre>
     <p>The same markup, rendered:</p>
-    <section class="api">
-      <h3 id="processOrder">processOrder(order, options)</h3>
+    <section class="api" id="processOrder">
+      <h3>processOrder(order, options)</h3>
       <p>
         Validates the order, computes totals, and enqueues it for
         fulfillment. Returns a promise that resolves to the persisted order
@@ -30,8 +30,8 @@
         validation before enqueue.
       </p>
     </section>
-    <section class="api">
-      <h3 id="cancelOrder">cancelOrder(orderId)</h3>
+    <section class="api" id="cancelOrder">
+      <h3>cancelOrder(orderId)</h3>
       <p>
         Marks an order as cancelled and emits a <code>order.cancelled</code>
         event. Idempotent &mdash; calling it again on an already-cancelled
@@ -40,15 +40,15 @@
     </section>
   </section>
 
-  <section>
-    <h2 id="options">Option lists</h2>
+  <section id="options">
+    <h2>Option lists</h2>
     <p>
       Inside an API section, a definition list with <code>dt.api</code>
       terms documents the options. Each term renders in monospace, matching
       the heading style.
     </p>
-    <section class="api">
-      <h3 id="processOrder:options">Options</h3>
+    <section class="api" id="processOrder:options">
+      <h3>Options</h3>
       <dl>
         <dt class="api" id="processOrder:options:notify">notify</dt>
         <dd>
@@ -75,8 +75,8 @@
     </section>
   </section>
 
-  <section>
-    <h2 id="symbol-index">The symbol index</h2>
+  <section id="symbol-index">
+    <h2>The symbol index</h2>
     <p>
       Every <code>.api</code> element is harvested at build time into
       <code>symbols.json</code> at the site root. The Web Component that
@@ -93,8 +93,8 @@
   "anchor": "processOrder"
 }</pre>
 
-    <section>
-      <h3 id="symbol-index:name">name</h3>
+    <section id="symbol-index:name">
+      <h3>name</h3>
       <p>
         The display string. By default the extractor reads the
         <code>&lt;h*&gt;</code> text for sections and the <code>&lt;dt&gt;</code>
@@ -109,8 +109,8 @@
 &lt;/section&gt;</pre>
     </section>
 
-    <section>
-      <h3 id="symbol-index:kind">kind</h3>
+    <section id="symbol-index:kind">
+      <h3>kind</h3>
       <p>
         A short label rendered next to the entry in the search results.
         Inferred by default: <code>section</code> for
@@ -125,8 +125,8 @@
         <code>event</code>, <code>option</code>, <code>flag</code>.</p>
     </section>
 
-    <section>
-      <h3 id="symbol-index:anchor">anchor</h3>
+    <section id="symbol-index:anchor">
+      <h3>anchor</h3>
       <p>
         The fragment used in the deep link. Comes from the element&rsquo;s own
         <code>id</code>, falling back to the section&rsquo;s first heading id,
@@ -137,15 +137,15 @@
     </section>
   </section>
 
-  <section>
-    <h2 id="combined">Putting it together</h2>
+  <section id="combined">
+    <h2>Putting it together</h2>
     <p>
       A complete API page typically alternates section headings with their
       option lists. Here&rsquo;s a compact endpoint reference for two
       operations:
     </p>
-    <section class="api" data-api-kind="endpoint">
-      <h3 id="getUsers">GET /users</h3>
+    <section class="api" data-api-kind="endpoint" id="getUsers">
+      <h3>GET /users</h3>
       <p>
         Returns a paginated list of users. Results are sorted by creation
         time, newest first.
@@ -172,8 +172,8 @@
       </dl>
     </section>
 
-    <section class="api" data-api-kind="endpoint">
-      <h3 id="getUser">GET /users/:id</h3>
+    <section class="api" data-api-kind="endpoint" id="getUser">
+      <h3>GET /users/:id</h3>
       <p>Returns a single user by id, including inline organization details.</p>
       <dl class="compact">
         <dt class="api" id="getUser:id">id</dt>

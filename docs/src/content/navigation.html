@@ -7,8 +7,8 @@
     and inter-page links fall out automatically.
   </p>
 
-  <section>
-    <h2 id="manifest">The manifest</h2>
+  <section id="manifest">
+    <h2>The manifest</h2>
     <p>
       <code>navigation.json</code> (path configurable via
       <code>options.navigation</code>) takes one of two shapes. Most sites
@@ -48,8 +48,8 @@
       one sequence.
     </p>
 
-    <section>
-      <h3 id="manifest:slug-only">Slug-only entries</h3>
+    <section id="manifest:slug-only">
+      <h3>Slug-only entries</h3>
       <p>
         Inside an <code>articles</code> array each entry can also be a bare
         slug string. The nav loader resolves the title from the target
@@ -81,8 +81,8 @@
     </section>
   </section>
 
-  <section>
-    <h2 id="entries">Article entries</h2>
+  <section id="entries">
+    <h2>Article entries</h2>
     <dl>
       <dt class="api" id="entry-slug">slug</dt>
       <dd>
@@ -112,8 +112,8 @@
     </dl>
   </section>
 
-  <section>
-    <h2 id="rendering">How it renders</h2>
+  <section id="rendering">
+    <h2>How it renders</h2>
     <p>
       The left-hand <code>&lt;nav&gt;</code> walks the chapters in declared
       order, prints each <code>title</code> as a small uppercase heading,
@@ -128,8 +128,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="prev-next">Prev/next links</h2>
+  <section id="prev-next">
+    <h2>Prev/next links</h2>
     <p>
       The footer of every article carries a two-column block: the previous
       article on the left, the next on the right. The sequence is the
@@ -155,8 +155,8 @@
     </div>
   </section>
 
-  <section>
-    <h2 id="watching">Live reloads</h2>
+  <section id="watching">
+    <h2>Live reloads</h2>
     <p>
       The plugin watches the navigation file with
       <code>addWatchTarget</code>, so editing

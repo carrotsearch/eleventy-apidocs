@@ -8,8 +8,8 @@
     logo and footer.
   </p>
 
-  <section>
-    <h2 id="syntax">Syntax</h2>
+  <section id="syntax">
+    <h2>Syntax</h2>
     <p>
       A variable reference is a name in <code>SCREAMING_SNAKE_CASE</code>
       bracketed by dollar signs:
@@ -39,8 +39,8 @@ $API_BASE_URL$</pre>
     </p>
   </section>
 
-  <section>
-    <h2 id="configuration">Configuration</h2>
+  <section id="configuration">
+    <h2>Configuration</h2>
     <p>Declare the map in <code>eleventy.config.js</code>:</p>
     <pre data-language="javascript">import apidocs from "@carrotsearch/eleventy-apidocs";
 
@@ -63,8 +63,8 @@ export default async function (eleventyConfig) {
     </p>
   </section>
 
-  <section>
-    <h2 id="where">Where substitution applies</h2>
+  <section id="where">
+    <h2>Where substitution applies</h2>
     <p>
       The variable pass is the last step in the document pipeline. By that
       point Nunjucks has already rendered the layout shell around the
@@ -97,8 +97,8 @@ export default async function (eleventyConfig) {
     </dl>
   </section>
 
-  <section>
-    <h2 id="in-embeds">Variables in embedded files</h2>
+  <section id="in-embeds">
+    <h2>Variables in embedded files</h2>
     <p>
       Substitution runs over embed contents as they&rsquo;re loaded, before
       they&rsquo;re inserted into the page. That lets a single config
@@ -113,8 +113,8 @@ export default async function (eleventyConfig) {
     </p>
   </section>
 
-  <section>
-    <h2 id="not-a-template">This isn&rsquo;t a template language</h2>
+  <section id="not-a-template">
+    <h2>This isn&rsquo;t a template language</h2>
     <p>
       Variable substitution is intentionally tiny: token replacement, no
       conditionals, no loops, no function calls. If you need branching or

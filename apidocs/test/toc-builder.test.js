@@ -10,8 +10,8 @@ function toc(html) {
 test("builds a flat list from top-level sections", () => {
   const t = toc(`
     <article>
-      <section><h2 id="a">A</h2></section>
-      <section><h2 id="b">B</h2></section>
+      <section id="a"><h2>A</h2></section>
+      <section id="b"><h2>B</h2></section>
     </article>
   `);
   assert.deepEqual(t, [
@@ -23,10 +23,10 @@ test("builds a flat list from top-level sections", () => {
 test("nests child sections under their parent", () => {
   const t = toc(`
     <article>
-      <section>
-        <h2 id="a">A</h2>
-        <section><h3 id="a1">A.1</h3></section>
-        <section><h3 id="a2">A.2</h3></section>
+      <section id="a">
+        <h2>A</h2>
+        <section id="a1"><h3>A.1</h3></section>
+        <section id="a2"><h3>A.2</h3></section>
       </section>
     </article>
   `);
@@ -45,8 +45,8 @@ test("nests child sections under their parent", () => {
 test("data-toc=omit drops the section entirely", () => {
   const t = toc(`
     <article>
-      <section><h2 id="a">A</h2></section>
-      <section data-toc="omit"><h2 id="b">B</h2></section>
+      <section id="a"><h2>A</h2></section>
+      <section id="b" data-toc="omit"><h2>B</h2></section>
     </article>
   `);
   assert.deepEqual(t, [{ heading: "A", anchor: "a" }]);
@@ -55,20 +55,20 @@ test("data-toc=omit drops the section entirely", () => {
 test("data-toc=omit-children keeps the section but drops descendants", () => {
   const t = toc(`
     <article>
-      <section data-toc="omit-children">
-        <h2 id="a">A</h2>
-        <section><h3 id="a1">A.1</h3></section>
+      <section id="a" data-toc="omit-children">
+        <h2>A</h2>
+        <section id="a1"><h3>A.1</h3></section>
       </section>
     </article>
   `);
   assert.deepEqual(t, [{ heading: "A", anchor: "a" }]);
 });
 
-test("skips sections whose heading lacks an id", () => {
+test("skips sections without an id", () => {
   const t = toc(`
     <article>
       <section><h2>No id</h2></section>
-      <section><h2 id="ok">OK</h2></section>
+      <section id="ok"><h2>OK</h2></section>
     </article>
   `);
   assert.deepEqual(t, [{ heading: "OK", anchor: "ok" }]);
@@ -77,8 +77,8 @@ test("skips sections whose heading lacks an id", () => {
 test("strips the prepended anchor icon from heading text", () => {
   const t = toc(`
     <article>
-      <section>
-        <h2 id="x"><a class="anchor" href="#x">#</a>Title</h2>
+      <section id="x">
+        <h2><a class="anchor" href="#x">#</a>Title</h2>
       </section>
     </article>
   `);

@@ -7,8 +7,8 @@
     drive anchors, deep links, and the right-hand table of contents.
   </p>
 
-  <section>
-    <h2 id="article-shape">Article shape</h2>
+  <section id="article-shape">
+    <h2>Article shape</h2>
     <p>
       The pipeline expects an <code>&lt;article&gt;</code> with an
       <code>&lt;h1&gt;</code> title and one or more nested
@@ -34,8 +34,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="ids-and-anchors">IDs and anchors</h2>
+  <section id="ids-and-anchors">
+    <h2>IDs and anchors</h2>
     <p>
       Every <code>&lt;h2&gt;</code>&ndash;<code>&lt;h5&gt;</code> with an
       <code>id</code> gets a small link icon prepended that pulls into the
@@ -65,8 +65,8 @@
     </div>
   </section>
 
-  <section>
-    <h2 id="toc">Table of contents</h2>
+  <section id="toc">
+    <h2>Table of contents</h2>
     <p>
       The right-hand ToC is built from <code>&lt;article&gt; &gt; &lt;section&gt;</code>
       top-level entries and any nested <code>&lt;section&gt;</code> children.
@@ -74,8 +74,8 @@
       whose first heading lacks an id are skipped &mdash; they&rsquo;re
       structural, not navigable.
     </p>
-    <section>
-      <h3 id="toc:omit">Omitting from the ToC</h3>
+    <section id="toc:omit">
+      <h3>Omitting from the ToC</h3>
       <p>
         Two opt-outs control how a section participates:
       </p>
@@ -100,8 +100,8 @@
     </section>
   </section>
 
-  <section>
-    <h2 id="lead">Lead paragraph</h2>
+  <section id="lead">
+    <h2>Lead paragraph</h2>
     <p>
       The first <code>&lt;p&gt;</code> directly inside <code>&lt;article&gt;</code>
       &mdash; the one before any <code>&lt;section&gt;</code> &mdash; is
@@ -111,8 +111,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="links">Internal links</h2>
+  <section id="links">
+    <h2>Internal links</h2>
     <p>
       Write internal links the way you author the files &mdash; with
       <code>.html</code> suffixes:
@@ -134,8 +134,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="page-title">Page title</h2>
+  <section id="page-title">
+    <h2>Page title</h2>
     <p>
       The <code>&lt;title&gt;</code> tag for each page is taken from its
       <code>&lt;h1&gt;</code>. No frontmatter, no

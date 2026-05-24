@@ -7,8 +7,8 @@
     page-relative, so <code>_site/</code> works under any URL prefix.
   </p>
 
-  <section>
-    <h2 id="build">Build</h2>
+  <section id="build">
+    <h2>Build</h2>
     <p>
       <code>pnpm build</code> runs Eleventy, which writes the site under
       <code>_site/</code> (or whatever <code>--output</code> you pass).
@@ -36,8 +36,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="portable">Portable URLs</h2>
+  <section id="portable">
+    <h2>Portable URLs</h2>
     <p>
       The relativize pass walks every emitted HTML page after the layout
       and content pipeline are done. For each absolute URL it finds, it
@@ -74,8 +74,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="verify">Verifying the build</h2>
+  <section id="verify">
+    <h2>Verifying the build</h2>
     <p>
       Two checks confirm the site is portable:
     </p>
@@ -106,8 +106,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="hosts">Common hosts</h2>
+  <section id="hosts">
+    <h2>Common hosts</h2>
     <dl>
       <dt>Static file servers</dt>
       <dd>
@@ -144,8 +144,8 @@
     </dl>
   </section>
 
-  <section>
-    <h2 id="prefetch">Speculation rules prefetch</h2>
+  <section id="prefetch">
+    <h2>Speculation rules prefetch</h2>
     <p>
       The layout includes a <code>&lt;script type="speculationrules"&gt;</code>
       block that asks the browser to prefetch every same-origin link on

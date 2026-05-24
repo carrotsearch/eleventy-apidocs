@@ -7,8 +7,8 @@
     page never flashes the wrong palette during load.
   </p>
 
-  <section>
-    <h2 id="switch">The switch</h2>
+  <section id="switch">
+    <h2>The switch</h2>
     <p>
       A small button in the header toggles between three states:
       <em>light</em>, <em>dark</em>, and <em>auto</em> (follow the
@@ -23,8 +23,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="fouc">FOUC prevention</h2>
+  <section id="fouc">
+    <h2>FOUC prevention</h2>
     <p>
       The layout includes a tiny inline script in <code>&lt;head&gt;</code>
       that reads the saved preference and applies it to
@@ -49,8 +49,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="tokens">Color tokens</h2>
+  <section id="tokens">
+    <h2>Color tokens</h2>
     <p>
       All theme-aware colors are CSS custom properties resolved with
       <code>light-dark()</code> in <code>tokens.css</code>:
@@ -69,8 +69,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="images">Theme-aware images</h2>
+  <section id="images">
+    <h2>Theme-aware images</h2>
     <p>
       For screenshots, diagrams, or any image whose light/dark variant is
       meaningfully different, ship both and let CSS pick:
@@ -89,8 +89,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="syntax">Code syntax themes</h2>
+  <section id="syntax">
+    <h2>Code syntax themes</h2>
     <p>
       Shiki highlights every code block with a paired theme &mdash; one for
       light, one for dark. The pipeline emits both color sets up front;
@@ -105,8 +105,8 @@
     </p>
   </section>
 
-  <section>
-    <h2 id="custom">Customizing</h2>
+  <section id="custom">
+    <h2>Customizing</h2>
     <p>
       Color tokens live in <code>apidocs/styles/tokens.css</code>. To override
       them in a consumer project, ship a stylesheet that comes after the

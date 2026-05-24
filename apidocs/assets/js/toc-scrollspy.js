@@ -1,10 +1,10 @@
-// ToC scrollspy — highlight the entry for the section whose header has
+// ToC scrollspy — highlight the entry for the section whose heading has
 // most recently crossed the upper "fold" of the viewport.
 //
-// Picks the LAST <section[id]> (in document order) whose top is at or
-// above the fold line. That works for siblings (upper wins until you
-// scroll past) and for nesting (inner wins once its header crosses,
-// even though the outer section's body still extends down off-screen).
+// Picks the LAST heading (in document order) whose top is at or above
+// the fold line. The pipeline lifts section ids onto their headings, so
+// getElementById(anchor) returns the heading itself — which is exactly
+// what we want: "the heading just crossed the fold."
 //
 // Click handling overrides the scroll-driven pick: clicking a ToC link
 // pins the active state to that link and suspends scrollspy until the
