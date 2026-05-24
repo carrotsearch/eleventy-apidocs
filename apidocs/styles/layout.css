@@ -188,7 +188,16 @@
     position: sticky;
     inset-block-start: var(--header-h);
     max-block-size: calc(100dvh - var(--header-h));
+    /* Scroll the inner <ul>, not .main-nav itself, so the scrollbar starts
+       at the first chapter title instead of running up through the padding. */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .main-nav > ul {
+    min-block-size: 0;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .toc:empty + .article { /* nothing */ }
@@ -205,12 +214,26 @@
 
   .toc {
     border: 0;
+    /* Move the inline gutter onto .toc-inner so the active-link bar
+       (which sits in a negative-margin overhang) stays inside the
+       scroll element's padding box and isn't clipped. */
+    padding-inline: 0;
     padding-block-start: calc(0.75 * var(--leading));
     align-self: start;
     position: sticky;
     inset-block-start: var(--header-h);
     max-block-size: calc(100dvh - var(--header-h));
+    /* Scroll the inner wrapper, not .toc itself, so the scrollbar starts
+       at the title's top edge instead of running up through the padding. */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .toc > .toc-inner {
+    padding-inline: var(--gutter);
+    min-block-size: 0;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   /* Pages without a ToC: drop the right rail and let the article use the
@@ -224,7 +247,7 @@
 
 /* Modern thin scrollbars in scrollable rails. */
 @supports (scrollbar-width: thin) {
-  .main-nav, .toc {
+  .main-nav > ul, .toc > .toc-inner {
     scrollbar-width: thin;
     scrollbar-color: var(--rule) transparent;
   }
