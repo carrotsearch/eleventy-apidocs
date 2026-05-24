@@ -236,13 +236,13 @@
     overflow-x: hidden;
   }
 
-  /* Pages without a ToC: drop the right rail and let the article use the
-     freed width. */
+  /* Pages without a ToC: drop the right rail. Article keeps its max-width
+     so the reading measure stays consistent page-to-page; the freed space
+     becomes right-margin. */
   .layout-body:not(:has(.toc-inner)) {
     grid-template-columns: var(--nav-w) minmax(0, 1fr);
     grid-template-areas: "nav article";
   }
-  .layout-body:not(:has(.toc-inner)) .article { max-inline-size: 60rem; }
 }
 
 /* Modern thin scrollbars in scrollable rails. */
