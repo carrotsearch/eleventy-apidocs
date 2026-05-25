@@ -163,6 +163,12 @@
   gap: 0.6rem;
 }
 
+/* Section hits — a single bold title, no kind tag, no excerpt. The group
+   header ("SECTIONS") supplies the categorization. */
+.search-hit-section > a {
+  grid-template-columns: 1fr;
+}
+
 .search-hit-name {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.95rem;

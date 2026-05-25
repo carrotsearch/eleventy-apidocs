@@ -10,6 +10,7 @@ import { queryWords, regionCount, regionsStartAtBoundary } from "./search-filter
 
 const PAGE_DEBOUNCE_MS = 80;
 const API_LIMIT = 8;
+const SECTION_LIMIT = 8;
 const PAGE_LIMIT = 8;
 const SUB_LIMIT = 2; // sub-results per page
 
@@ -22,10 +23,12 @@ function init() {
   const closeBtn = dialog.querySelector("[data-search-close]");
   const groups = {
     api: dialog.querySelector('[data-search-group="api"]'),
+    sections: dialog.querySelector('[data-search-group="sections"]'),
     pages: dialog.querySelector('[data-search-group="pages"]')
   };
   const lists = {
     api: groups.api.querySelector("[data-search-list]"),
+    sections: groups.sections.querySelector("[data-search-list]"),
     pages: groups.pages.querySelector("[data-search-list]")
   };
   const emptyEl = dialog.querySelector("[data-search-empty]");
@@ -104,8 +107,10 @@ function init() {
 
   function clearResults() {
     lists.api.replaceChildren();
+    lists.sections.replaceChildren();
     lists.pages.replaceChildren();
     groups.api.hidden = true;
+    groups.sections.hidden = true;
     groups.pages.hidden = true;
     rows = [];
     activeIndex = -1;
@@ -120,7 +125,7 @@ function init() {
       return;
     }
     emptyEl.hidden = true;
-    const hasHits = !groups.api.hidden || !groups.pages.hidden;
+    const hasHits = !groups.api.hidden || !groups.sections.hidden || !groups.pages.hidden;
     // Only declare "no results" once both sides have reported back.
     noHitsEl.hidden = !(apiRendered && pagesRendered && !hasHits);
   }
@@ -139,7 +144,9 @@ function init() {
     pagesRendered = false;
     updateEmptyState();
 
-    // API path — synchronous, paints on every keystroke.
+    // API + Sections path — synchronous, paints on every keystroke. One
+    // fuzzysort pass over the symbols index, split into the two groups by
+    // sym.group ("api" vs "section") at render time.
     (async () => {
       await apiReady;
       if (q !== lastQuery) return;
@@ -150,14 +157,23 @@ function init() {
       // prefix-at-boundary matches ("lbc"→"labelBoxColor", "lab"→"labelBox")
       // even when their region count exceeds the cap.
       const maxRegions = Math.max(2, queryWords(q) + 1);
-      const apiHits = fuzzysort
+      const hits = fuzzysort
         ? fuzzysort
-            .go(q, symbols || [], { key: "name", limit: API_LIMIT * 2, threshold: 0.3 })
+            .go(q, symbols || [], { key: "name", limit: (API_LIMIT + SECTION_LIMIT) * 2, threshold: 0.3 })
             .filter(h => regionCount(h._indexes) <= maxRegions || regionsStartAtBoundary(h._indexes, h.target))
-            .slice(0, API_LIMIT)
         : [];
       if (q !== lastQuery) return;
+      const apiHits = [];
+      const sectionHits = [];
+      for (const h of hits) {
+        if (h.obj.group === "section") {
+          if (sectionHits.length < SECTION_LIMIT) sectionHits.push(h);
+        } else {
+          if (apiHits.length < API_LIMIT) apiHits.push(h);
+        }
+      }
       renderApi(apiHits);
+      renderSections(sectionHits);
     })();
 
     // Pages path — pagefind handles its own debouncing.
@@ -169,7 +185,7 @@ function init() {
       if (r === null || q !== lastQuery) return;
       const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
       if (q !== lastQuery) return;
-      renderPages(pageHits, q);
+      renderPages(pageHits);
     })();
   }
 
@@ -186,11 +202,23 @@ function init() {
     updateEmptyState();
   }
 
-  function renderPages(pageHits, query) {
+  function renderSections(sectionHits) {
+    lists.sections.replaceChildren();
+    if (sectionHits.length) {
+      groups.sections.hidden = false;
+      for (const hit of sectionHits) lists.sections.appendChild(renderSectionHit(hit));
+    } else {
+      groups.sections.hidden = true;
+    }
+    rebuildRows();
+    updateEmptyState();
+  }
+
+  function renderPages(pageHits) {
     lists.pages.replaceChildren();
     if (pageHits.length) {
       groups.pages.hidden = false;
-      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page, query));
+      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page));
     } else {
       groups.pages.hidden = true;
     }
@@ -203,6 +231,7 @@ function init() {
     const prevHref = activeIndex >= 0 ? rows[activeIndex]?.href : null;
     rows = [
       ...lists.api.querySelectorAll(":scope > .search-hit > a"),
+      ...lists.sections.querySelectorAll(":scope > .search-hit > a"),
       ...lists.pages.querySelectorAll(":scope > .search-hit > a, .search-subhit > a")
     ];
     if (!rows.length) { activeIndex = -1; return; }
@@ -223,13 +252,23 @@ function init() {
     return li;
   }
 
-  function renderPageHit(page, query) {
+  function renderSectionHit(hit) {
+    const li = document.createElement("li");
+    li.className = "search-hit search-hit-section";
+    const a = document.createElement("a");
+    a.href = symbolHref(hit.obj);
+    a.innerHTML = `<span class="search-hit-title">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>`;
+    li.appendChild(a);
+    return li;
+  }
+
+  function renderPageHit(page) {
     const li = document.createElement("li");
     li.className = "search-hit search-hit-page";
     const a = document.createElement("a");
     a.href = page.url;
     a.innerHTML = `
-      <span class="search-hit-title">${highlightTitle(page.meta?.title || page.url, query)}</span>
+      <span class="search-hit-title">${escapeHtml(page.meta?.title || page.url)}</span>
       <span class="search-hit-excerpt">${page.excerpt || ""}</span>
     `;
     li.appendChild(a);
@@ -244,7 +283,7 @@ function init() {
         const subA = document.createElement("a");
         subA.href = sub.url;
         subA.innerHTML = `
-          <span class="search-subhit-title">${highlightTitle(sub.title || "", query)}</span>
+          <span class="search-subhit-title">${escapeHtml(sub.title || "")}</span>
           <span class="search-subhit-excerpt">${sub.excerpt || ""}</span>
         `;
         subLi.appendChild(subA);
@@ -253,23 +292,6 @@ function init() {
       li.appendChild(subList);
     }
     return li;
-  }
-
-  // Highlight matched query tokens in a plain title. Pagefind only marks
-  // up excerpt body content, so heading text comes back unhighlighted —
-  // we mirror its word-prefix matcher client-side so the highlight lands
-  // where the user typed.
-  function highlightTitle(text, query) {
-    const escaped = escapeHtml(text || "");
-    if (!escaped || !query) return escaped;
-    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean).map(escapeRegex);
-    if (!tokens.length) return escaped;
-    const re = new RegExp(`\\b(${tokens.join("|")})`, "gi");
-    return escaped.replace(re, "<mark>$1</mark>");
-  }
-
-  function escapeRegex(s) {
-    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   function symbolHref(sym) {

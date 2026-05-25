@@ -1,16 +1,25 @@
-// Symbol extractor — collects API elements for the client-side fuzzysort
-// index. Any element with class "api" is a symbol. Output is appended to
-// ctx.symbols (a build-scoped array threaded in from index.js).
+// Symbol extractor — collects entries for the client-side fuzzysort index:
+//   * every .api element (explicit API symbols)                → group: "api"
+//   * the article's top-level <h1> (the page itself)            → group: "section"
+//   * every <article> <section> with an id (ToC-style sections) → group: "section"
+// Output is appended to ctx.symbols (a build-scoped array threaded in from
+// index.js).
 //
 // Per element:
 //   name   = data-api-name | <dt> text | first <h*> text inside <section> | own text
-//   kind   = data-api-kind | inferred from tag (dt→option, section→section)
-//   anchor = own id | nearest ancestor with id
+//   kind   = data-api-kind | inferred from tag (dt→option, section→section, h1→page)
+//   group  = "api" | "section" — which search dialog category the entry belongs to
+//   anchor = own id | nearest ancestor with id (omitted for page-level entries)
 //   url    = ctx.page.url
+//
+// Section pass mirrors toc-builder's inclusion rules: data-toc="omit" drops
+// the section, data-toc="omit-children" drops descendants. A section already
+// extracted via the .api pass is skipped to avoid duplicates.
 
 export function extractSymbols($, ctx) {
   if (!ctx?.symbols) return;
   const url = ctx.page?.url || "/";
+  const seenAnchors = new Set();
 
   $(".api").each((_, el) => {
     const $el = $(el);
@@ -22,7 +31,26 @@ export function extractSymbols($, ctx) {
       return;
     }
     const kind = $el.attr("data-api-kind") || inferKind($el);
-    ctx.symbols.push({ name, kind, url, anchor });
+    ctx.symbols.push({ name, kind, group: "api", url, anchor });
+    if ($el.is("section")) seenAnchors.add(anchor);
+  });
+
+  const pageName = readHeadingText($("article > h1").first());
+  if (pageName) {
+    ctx.symbols.push({ name: pageName, kind: "page", group: "section", url });
+  }
+
+  $("article section[id]").each((_, el) => {
+    const $el = $(el);
+    if ($el.hasClass("api")) return;
+    if ($el.attr("data-toc") === "omit") return;
+    if (hasOmitChildrenAncestor($, $el)) return;
+    const anchor = $el.attr("id");
+    if (seenAnchors.has(anchor)) return;
+    const name = readSectionName($el);
+    if (!name) return;
+    seenAnchors.add(anchor);
+    ctx.symbols.push({ name, kind: "section", group: "section", url, anchor });
   });
 }
 
@@ -30,15 +58,19 @@ function readName($el) {
   const explicit = $el.attr("data-api-name");
   if (explicit) return explicit.trim();
   if ($el.is("dt")) return $el.text().trim();
-  if ($el.is("section")) {
-    const $h = $el.children("h1, h2, h3, h4, h5, h6").first();
-    if ($h.length) {
-      const $clone = $h.clone();
-      $clone.find("a.anchor").remove();
-      return $clone.text().trim();
-    }
-  }
+  if ($el.is("section")) return readSectionName($el);
   return $el.text().trim();
+}
+
+function readSectionName($el) {
+  return readHeadingText($el.children("h1, h2, h3, h4, h5, h6").first());
+}
+
+function readHeadingText($h) {
+  if (!$h?.length) return "";
+  const $clone = $h.clone();
+  $clone.find("a.anchor").remove();
+  return $clone.text().trim();
 }
 
 function readAnchor($el) {
@@ -52,4 +84,12 @@ function inferKind($el) {
   if ($el.is("dt")) return "option";
   if ($el.is("section")) return "section";
   return null;
+}
+
+function hasOmitChildrenAncestor($, $el) {
+  let omits = false;
+  $el.parents("section").each((_, p) => {
+    if ($(p).attr("data-toc") === "omit-children") omits = true;
+  });
+  return omits;
 }
