@@ -1,0 +1,41 @@
+/* Navigation progress bar — appears at the top of the viewport when a
+   cross-document navigation is taking long enough that the user might
+   wonder whether the click registered. See assets/js/progress.js. */
+
+.apidocs-progress {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 4px;
+  /* The bar's solid fill is always-on so its visibility doesn't depend on
+     animation frames — when the browser freezes the old page during a
+     cross-document navigation commit, the bar stays put. */
+  background: light-dark(hsl(140 75% 38%), hsl(140 65% 55%));
+  overflow: hidden;
+  pointer-events: none;
+  /* Above .site-header (z-index: 10). */
+  z-index: 100;
+}
+
+.apidocs-progress::before {
+  content: "";
+  display: block;
+  block-size: 100%;
+  inline-size: 40%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    light-dark(hsl(140 95% 80% / 0.95), hsl(140 80% 92% / 0.85)),
+    transparent
+  );
+  animation: apidocs-progress 1.4s ease-in-out infinite;
+}
+
+@keyframes apidocs-progress {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apidocs-progress::before { animation: none; display: none; }
+}
