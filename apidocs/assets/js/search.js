@@ -6,6 +6,8 @@
 // its own debouncedSearch and lags by PAGE_DEBOUNCE_MS, so API hits paint
 // instantly and prose hits stream in beside them.
 
+import { queryWords, regionCount, regionsStartAtBoundary } from "./search-filters.js";
+
 const PAGE_DEBOUNCE_MS = 80;
 const API_LIMIT = 8;
 const PAGE_LIMIT = 8;
@@ -141,8 +143,18 @@ function init() {
     (async () => {
       await apiReady;
       if (q !== lastQuery) return;
+      // fuzzysort v3 compresses scores to 0..1, so a single threshold no
+      // longer separates good fuzzy hits from scattered ones. Pair the
+      // threshold with a region-count cap to drop "doc"→"labelShadowColor"
+      // noise, then let the boundary escape hatch readmit initialism and
+      // prefix-at-boundary matches ("lbc"→"labelBoxColor", "lab"→"labelBox")
+      // even when their region count exceeds the cap.
+      const maxRegions = Math.max(2, queryWords(q) + 1);
       const apiHits = fuzzysort
-        ? fuzzysort.go(q, symbols || [], { key: "name", limit: API_LIMIT, threshold: -10000 })
+        ? fuzzysort
+            .go(q, symbols || [], { key: "name", limit: API_LIMIT * 2, threshold: 0.3 })
+            .filter(h => regionCount(h._indexes) <= maxRegions || regionsStartAtBoundary(h._indexes, h.target))
+            .slice(0, API_LIMIT)
         : [];
       if (q !== lastQuery) return;
       renderApi(apiHits);
