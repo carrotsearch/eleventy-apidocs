@@ -10,9 +10,10 @@
 //   7. code highlighter                  [Phase 3]
 //   8. fragment-ID assignment
 //   9. toc + symbol extraction           (consume section ids)
-//   10. lift section ids to headings     (final HTML shape — for Pagefind)
-//   11. user finalizers
-//   12. variable substitution            (runs on the wrapped document — see processDocument)
+//   10. pagefind-ignore tagging          (hide page h1 from Pagefind body)
+//   11. lift section ids to headings     (final HTML shape — for Pagefind)
+//   12. user finalizers
+//   13. variable substitution            (runs on the wrapped document — see processDocument)
 //
 // processContent() runs the inner-content passes (1-9). processDocument()
 // runs whole-document passes (current-year + $VAR$) after the layout wraps
@@ -29,6 +30,7 @@ import { codeHighlight } from "./passes/code-highlight.js";
 import { fragmentIds } from "./passes/fragment-ids.js";
 import { buildToc } from "./passes/toc-builder.js";
 import { extractSymbols } from "./passes/symbol-extractor.js";
+import { tagPagefindIgnore } from "./passes/pagefind-ignore.js";
 import { liftSectionIds } from "./passes/lift-section-ids.js";
 import { currentYear } from "./passes/current-year.js";
 import { substituteVariables } from "./passes/variables.js";
@@ -68,6 +70,11 @@ export async function processContent(html, ctx) {
   // Symbol harvest runs after fragmentIds so anchor resolution can fall
   // back to the nearest ancestor id (the enclosing section).
   extractSymbols($, ctx);
+  // Strip the page h1 from Pagefind's content stream — fuzzysort owns
+  // page-title matches, and otherwise every prose excerpt would start
+  // with the title prefix. Section headings stay indexed: Pagefind
+  // builds sub-result anchors from heading text + id together.
+  tagPagefindIgnore($);
   // Move section ids onto their headings — final HTML carries heading
   // ids so Pagefind's sub-result anchors work. Runs after the section-id
   // consumers above.
