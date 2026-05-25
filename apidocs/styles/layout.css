@@ -63,21 +63,35 @@
 .main-nav {
   grid-area: nav;
   /* Top padding matches .article so the first chapter title aligns with the
-     article's h1 baseline-top across the nav and content columns. */
-  padding: calc(0.75 * var(--leading)) 0 var(--gutter) var(--gutter);
+     article's h1 baseline-top across the nav and content columns. The
+     inline-start gutter is split: var(--bar-inset) lives on the inner <ul>
+     (see below) so the active-link bar's negative-margin overhang stays
+     inside the scroll element's padding box and isn't clipped on tablet+. */
+  --bar-inset: 0.625rem;
+  padding: calc(0.75 * var(--leading)) 0 var(--gutter) calc(var(--gutter) - var(--bar-inset));
   border-block-end: 1px solid var(--rule-faint);
   font-size: 0.95rem;
   line-height: 1.3;
 
   & ul { list-style: none; margin: 0; padding: 0; }
-  & li { margin-block: 0.35rem; }
+  /* The outer ul holds back the inset we shaved off .main-nav so text
+     alignment stays put; the inner article ul keeps the universal reset. */
+  & > ul { padding-inline-start: var(--bar-inset); }
+  & li { margin-block: 0.15rem; }
   & .chapter:first-child { margin-block-start: 0; }
+  /* Active-link bar mirrors the on-page outline (.toc) — same 2px rule on
+     the leading edge, same padding/negative-margin trick so text doesn't
+     shift between inactive and active states. */
   & a {
     color: var(--fg-faint);
     text-decoration: none;
-    display: inline-block;
+    display: block;
     padding-block: 0.125rem;
-    &:hover { color: var(--fg); text-decoration: underline; }
+    padding-inline-start: var(--bar-inset);
+    margin-inline-start: calc(-1 * var(--bar-inset));
+    border-inline-start: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    &:hover { color: var(--fg); }
   }
 
   & .chapter { margin-block-end: 1.5rem; }
@@ -97,6 +111,7 @@
   & .chapter:first-child .chapter-title { padding-block-start: 0.55rem; }
   & li.active > a {
     color: var(--link);
+    border-inline-start-color: var(--link);
     font-weight: 500;
   }
 }
