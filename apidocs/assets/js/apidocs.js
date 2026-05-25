@@ -5,3 +5,4 @@ import "./code-box.js";
 import "./lightbox.js";
 import "./toc-scrollspy.js";
 import "./search.js";
+import "./pagefind-highlight.js";

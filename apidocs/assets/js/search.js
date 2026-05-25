@@ -172,8 +172,8 @@ function init() {
           if (apiHits.length < API_LIMIT) apiHits.push(h);
         }
       }
-      renderApi(apiHits);
-      renderSections(sectionHits);
+      renderApi(apiHits, q);
+      renderSections(sectionHits, q);
     })();
 
     // Pages path — pagefind handles its own debouncing.
@@ -185,15 +185,15 @@ function init() {
       if (r === null || q !== lastQuery) return;
       const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
       if (q !== lastQuery) return;
-      renderPages(pageHits);
+      renderPages(pageHits, q);
     })();
   }
 
-  function renderApi(apiHits) {
+  function renderApi(apiHits, q) {
     lists.api.replaceChildren();
     if (apiHits.length) {
       groups.api.hidden = false;
-      for (const hit of apiHits) lists.api.appendChild(renderApiHit(hit));
+      for (const hit of apiHits) lists.api.appendChild(renderApiHit(hit, q));
     } else {
       groups.api.hidden = true;
     }
@@ -202,11 +202,11 @@ function init() {
     updateEmptyState();
   }
 
-  function renderSections(sectionHits) {
+  function renderSections(sectionHits, q) {
     lists.sections.replaceChildren();
     if (sectionHits.length) {
       groups.sections.hidden = false;
-      for (const hit of sectionHits) lists.sections.appendChild(renderSectionHit(hit));
+      for (const hit of sectionHits) lists.sections.appendChild(renderSectionHit(hit, q));
     } else {
       groups.sections.hidden = true;
     }
@@ -214,11 +214,11 @@ function init() {
     updateEmptyState();
   }
 
-  function renderPages(pageHits) {
+  function renderPages(pageHits, q) {
     lists.pages.replaceChildren();
     if (pageHits.length) {
       groups.pages.hidden = false;
-      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page));
+      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page, q));
     } else {
       groups.pages.hidden = true;
     }
@@ -239,11 +239,11 @@ function init() {
     setActive(restored >= 0 ? restored : 0);
   }
 
-  function renderApiHit(hit) {
+  function renderApiHit(hit, q) {
     const li = document.createElement("li");
     li.className = "search-hit search-hit-api";
     const a = document.createElement("a");
-    a.href = symbolHref(hit.obj);
+    a.href = withHighlight(symbolHref(hit.obj), q);
     a.innerHTML = `
       <span class="search-hit-name">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>
       ${hit.obj.kind ? `<span class="search-hit-kind">${escapeHtml(hit.obj.kind)}</span>` : ""}
@@ -252,21 +252,21 @@ function init() {
     return li;
   }
 
-  function renderSectionHit(hit) {
+  function renderSectionHit(hit, q) {
     const li = document.createElement("li");
     li.className = "search-hit search-hit-section";
     const a = document.createElement("a");
-    a.href = symbolHref(hit.obj);
+    a.href = withHighlight(symbolHref(hit.obj), q);
     a.innerHTML = `<span class="search-hit-title">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>`;
     li.appendChild(a);
     return li;
   }
 
-  function renderPageHit(page) {
+  function renderPageHit(page, q) {
     const li = document.createElement("li");
     li.className = "search-hit search-hit-page";
     const a = document.createElement("a");
-    a.href = page.url;
+    a.href = withHighlight(page.url, q);
     a.innerHTML = `
       <span class="search-hit-title">${escapeHtml(page.meta?.title || page.url)}</span>
       <span class="search-hit-excerpt">${page.excerpt || ""}</span>
@@ -281,7 +281,7 @@ function init() {
         const subLi = document.createElement("li");
         subLi.className = "search-subhit";
         const subA = document.createElement("a");
-        subA.href = sub.url;
+        subA.href = withHighlight(sub.url, q);
         subA.innerHTML = `
           <span class="search-subhit-title">${escapeHtml(sub.title || "")}</span>
           <span class="search-subhit-excerpt">${sub.excerpt || ""}</span>
@@ -296,6 +296,19 @@ function init() {
 
   function symbolHref(sym) {
     return sym.anchor ? `${sym.url}#${sym.anchor}` : sym.url;
+  }
+
+  // Append ?pagefind-highlight=<q> to a hit href so the destination page
+  // can highlight matches. Param goes before any #fragment so the
+  // fragment still drives scroll. assets/js/pagefind-highlight.js
+  // strips the param after applying highlights.
+  function withHighlight(href, q) {
+    if (!q) return href;
+    const hashIdx = href.indexOf("#");
+    const base = hashIdx >= 0 ? href.slice(0, hashIdx) : href;
+    const hash = hashIdx >= 0 ? href.slice(hashIdx) : "";
+    const sep = base.includes("?") ? "&" : "?";
+    return `${base}${sep}pagefind-highlight=${encodeURIComponent(q)}${hash}`;
   }
 
   function setActive(i) {
