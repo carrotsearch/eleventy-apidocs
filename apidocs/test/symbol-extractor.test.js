@@ -17,11 +17,18 @@ test("extracts .api dt as option, group=api", () => {
   assert.deepEqual(s, [{ name: "size", kind: "option", group: "api", url: "/page/", anchor: "size" }]);
 });
 
-test(".api section uses first heading text and section kind, group=api", () => {
+test(".api section without call-signature parens infers property kind", () => {
   const s = extract(`
     <article><section id="cfg" class="api"><h2>Config</h2></section></article>
   `);
-  assert.deepEqual(s, [{ name: "Config", kind: "section", group: "api", url: "/page/", anchor: "cfg" }]);
+  assert.deepEqual(s, [{ name: "Config", kind: "property", group: "api", url: "/page/", anchor: "cfg" }]);
+});
+
+test(".api section whose name ends with (…) infers method kind", () => {
+  const s = extract(`
+    <article><section id="proc" class="api"><h2>processOrder(order, options)</h2></section></article>
+  `);
+  assert.deepEqual(s, [{ name: "processOrder(order, options)", kind: "method", group: "api", url: "/page/", anchor: "proc" }]);
 });
 
 test(".api falls back to ancestor id when element has none", () => {

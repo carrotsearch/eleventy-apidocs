@@ -7,7 +7,9 @@
 //
 // Per element:
 //   name   = data-api-name | <dt> text | first <h*> text inside <section> | own text
-//   kind   = data-api-kind | inferred from tag (dt→option, section→section, h1→page)
+//   kind   = data-api-kind | inferred from tag and name shape
+//            (dt → option; .api section → method when the name ends in `(…)`
+//             else property; plain section → section; h1 → page)
 //   group  = "api" | "section" — which search dialog category the entry belongs to
 //   anchor = own id | nearest ancestor with id (omitted for page-level entries)
 //   url    = ctx.page.url
@@ -35,7 +37,7 @@ export function extractSymbols($, ctx) {
       console.warn(`[apidocs] .api element without anchor: "${name}" on ${url}`);
       return;
     }
-    const kind = $el.attr("data-api-kind") || inferKind($el);
+    const kind = $el.attr("data-api-kind") || inferKind($el, name);
     ctx.symbols.push(withCrumbs(
       { name, kind, group: "api", url, anchor },
       readCrumbs($, $el, pageName)
@@ -109,9 +111,9 @@ function readAnchor($el) {
   return $ancestor.attr("id") || null;
 }
 
-function inferKind($el) {
+function inferKind($el, name) {
   if ($el.is("dt")) return "option";
-  if ($el.is("section")) return "section";
+  if ($el.is("section")) return /\(.*\)$/.test(name) ? "method" : "property";
   return null;
 }
 
