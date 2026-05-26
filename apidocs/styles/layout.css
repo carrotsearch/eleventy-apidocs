@@ -38,8 +38,8 @@
 .site-header {
   grid-area: header;
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  grid-template-areas: "logo theme search-toggle";
+  grid-template-columns: auto 1fr auto auto;
+  grid-template-areas: "nav-toggle logo theme search-toggle";
   align-items: center;
   gap: 0.75rem;
   block-size: var(--header-h);
@@ -47,12 +47,41 @@
   background: var(--bg-dim);
   position: sticky;
   inset-block-start: 0;
-  z-index: 10;
+  z-index: 20;
 }
 
+.site-header .nav-toggle   { grid-area: nav-toggle; }
 .site-header .logo         { grid-area: logo; }
 .site-header .search       { grid-area: search-toggle; justify-self: stretch; max-inline-size: 24rem}
 .site-header .theme-switch { grid-area: theme; }
+
+/* Hamburger button. Mirrors the theme-switch button: same size, same hover
+   and focus rings. Hidden on tablet+ once the nav rail is always visible. */
+.nav-toggle {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  margin-inline-start: -0.5rem;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover  { background: var(--bg); color: var(--fg); border-color: var(--rule-faint); }
+  &:focus-visible {
+    outline: none;
+    border-color: var(--link);
+    box-shadow: 0 0 0 3px var(--focus-ring);
+  }
+
+  & svg { grid-area: 1 / 1; inline-size: 1.25rem; block-size: 1.25rem; }
+  & .nav-toggle-close { display: none; }
+  &[aria-expanded="true"] .nav-toggle-open  { display: none; }
+  &[aria-expanded="true"] .nav-toggle-close { display: block; }
+}
 
 .logo a {
   color: var(--fg);
@@ -177,8 +206,48 @@
   font-size: var(--small);
 }
 
+/* Mobile — nav becomes a slide-in drawer driven by the header hamburger.
+   The nav lives in normal flow at tablet+, so all drawer-specific rules
+   are scoped here. */
+@media (max-width: 47.99rem) {
+  .main-nav {
+    position: fixed;
+    inset-block-start: var(--header-h);
+    inset-inline-start: 0;
+    inline-size: min(20rem, 85vw);
+    max-block-size: calc(100dvh - var(--header-h));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg);
+    border-block-end: none;
+    border-inline-end: 1px solid var(--rule-faint);
+    box-shadow: 0 0 24px rgb(0 0 0 / 0.15);
+    z-index: 15;
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+    will-change: transform;
+  }
+  .layout[data-nav-open] .main-nav { transform: translateX(0); }
+
+  /* Backdrop. Sits above the article but below the drawer and header.
+     Pointer events flip on with [data-nav-open] so a tap dismisses. */
+  .layout::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 0.4);
+    z-index: 14;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .layout[data-nav-open]::before { opacity: 1; pointer-events: auto; }
+}
+
 /* Tablet — nav becomes a left rail. */
 @media (min-width: 48rem) {
+  .nav-toggle { display: none; }
+
   .layout-body {
     grid-template-columns: var(--nav-w) minmax(0, 1fr);
     grid-template-rows: auto;

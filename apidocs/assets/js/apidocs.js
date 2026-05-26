@@ -7,3 +7,4 @@ import "./toc-scrollspy.js";
 import "./search.js";
 import "./pagefind-highlight.js";
 import "./progress.js";
+import "./nav-toggle.js";

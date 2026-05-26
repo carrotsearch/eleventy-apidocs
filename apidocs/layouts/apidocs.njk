@@ -37,12 +37,29 @@
   <body>
     <div class="layout">
       <header class="site-header">
+        <button type="button" class="nav-toggle" data-nav-toggle
+                aria-expanded="false" aria-controls="main-nav"
+                aria-label="Open navigation">
+          <svg class="nav-toggle-open" viewBox="0 0 24 24" width="20" height="20"
+               aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6"  x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg class="nav-toggle-close" viewBox="0 0 24 24" width="20" height="20"
+               aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5"  y1="5"  x2="19" y2="19"></line>
+            <line x1="19" y1="5"  x2="5"  y2="19"></line>
+          </svg>
+        </button>
         <div class="logo">{{ apidocs.logo | safe }}</div>
         <div class="search">{% include "search.njk" ignore missing %}</div>
         <div class="theme-switch">{% include "theme-switch.njk" ignore missing %}</div>
       </header>
       <div class="layout-body">
-        <nav class="main-nav">{% include "navigation.njk" ignore missing %}</nav>
+        <nav class="main-nav" id="main-nav">{% include "navigation.njk" ignore missing %}</nav>
         <main class="article" data-pagefind-body>
           {{ content | safe }}
           {% include "prev-next.njk" ignore missing %}
