@@ -77,6 +77,16 @@ export default async function (eleventyConfig) {
             Default: <code>src/footer.html</code>.
           </p>
         </dd>
+        <dt class="api" id="opt-head">head</dt>
+        <dd>
+          <p>
+            Path to an HTML fragment appended to the document
+            <code>&lt;head&gt;</code> on every page — use it for site-wide
+            <code>&lt;meta&gt;</code> tags (description, Open Graph, Twitter
+            cards), favicons, or analytics snippets. Default:
+            <code>src/head.html</code>. Missing file renders as nothing.
+          </p>
+        </dd>
         <dt class="api" id="opt-contentDir">contentDir</dt>
         <dd>
           <p>

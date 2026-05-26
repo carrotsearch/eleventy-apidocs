@@ -23,6 +23,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     navigation: "src/navigation.json",
     logo: "src/logo.html",
     footer: "src/footer.html",
+    head: "src/head.html",
     contentDir: "src/content",
     variables: {},
     transformers: [],
@@ -69,6 +70,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       }),
       logo: await loadSourceFile(opts.logo, "html"),
       footer: await loadSourceFile(opts.footer, "html"),
+      head: await loadSourceFile(opts.head, "html"),
       variables: opts.variables,
       buildTime: new Date().toISOString(),
       assets
@@ -150,7 +152,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     return relativizeHtml(finalized, this.page?.url || "/");
   });
 
-  for (const f of [opts.navigation, opts.logo, opts.footer]) {
+  for (const f of [opts.navigation, opts.logo, opts.footer, opts.head]) {
     if (f) eleventyConfig.addWatchTarget(f);
   }
 
