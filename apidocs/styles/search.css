@@ -94,6 +94,7 @@
     font: inherit;
     font-size: 0.75rem;
     &:hover { color: var(--fg); }
+    & .search-close-icon { display: none; }
   }
 }
 
@@ -238,12 +239,30 @@
   font-size: 0.85rem;
 }
 
-@media (max-width: 32rem) {
+/* Mobile — full-screen overlay matching the nav breakpoint. Swap the
+   "Esc" kbd hint for an X icon: no physical Esc key on phones, so the
+   tappable target needs to read as one. */
+@media (max-width: 47.99rem) {
   .search-dialog {
+    /* The UA <dialog> sheet applies `margin: auto`, which leaves a
+       scrollbar-width gutter on each side even with `inline-size: 100vw`
+       when the page reserves space for a scrollbar. Pin the dialog to
+       the viewport corners and zero out the margins instead. */
+    inset: 0;
+    margin: 0;
     inline-size: 100vw;
     block-size: 100dvh;
+    max-inline-size: none;
     max-block-size: 100dvh;
     border-radius: 0;
     border: 0;
+  }
+
+  .search-form .search-close {
+    padding: 0.35rem;
+    background: transparent;
+    border-color: transparent;
+    & .search-close-kbd  { display: none; }
+    & .search-close-icon { display: block; }
   }
 }

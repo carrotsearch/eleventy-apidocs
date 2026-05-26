@@ -206,42 +206,29 @@
   font-size: var(--small);
 }
 
-/* Mobile — nav becomes a slide-in drawer driven by the header hamburger.
-   The nav lives in normal flow at tablet+, so all drawer-specific rules
-   are scoped here. */
+/* Mobile — nav becomes a full-screen overlay driven by the header
+   hamburger. The sticky header (z=20) stays above the panel so the
+   hamburger X remains tappable as the close affordance. */
 @media (max-width: 47.99rem) {
   .main-nav {
     position: fixed;
     inset-block-start: var(--header-h);
-    inset-inline-start: 0;
-    inline-size: min(20rem, 85vw);
-    max-block-size: calc(100dvh - var(--header-h));
+    inset-inline: 0;
+    block-size: calc(100dvh - var(--header-h));
     overflow-y: auto;
     overscroll-behavior: contain;
     background: var(--bg);
     border-block-end: none;
-    border-inline-end: 1px solid var(--rule-faint);
-    box-shadow: 0 0 24px rgb(0 0 0 / 0.15);
     z-index: 15;
-    transform: translateX(-105%);
+    /* Slide in from the left, same as the previous drawer. */
+    transform: translateX(-100%);
     transition: transform 0.2s ease;
     will-change: transform;
+    /* Trailing inline padding so the rightmost text doesn't kiss the
+       viewport edge (base rule sets it to 0 for the desktop rail). */
+    padding-inline-end: var(--gutter);
   }
   .layout[data-nav-open] .main-nav { transform: translateX(0); }
-
-  /* Backdrop. Sits above the article but below the drawer and header.
-     Pointer events flip on with [data-nav-open] so a tap dismisses. */
-  .layout::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgb(0 0 0 / 0.4);
-    z-index: 14;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-  }
-  .layout[data-nav-open]::before { opacity: 1; pointer-events: auto; }
 }
 
 /* Tablet — nav becomes a left rail. */

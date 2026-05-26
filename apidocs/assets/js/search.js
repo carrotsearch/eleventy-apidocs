@@ -95,6 +95,13 @@ function init() {
     });
   }
 
+  // History entry pushed on open so the device back button closes the
+  // dialog instead of leaving the page. We listen on the dialog's
+  // native `close` event so every dismissal path (button, Esc, link
+  // click) cleans up the entry uniformly.
+  let historyPushed = false;
+  let closingFromPopstate = false;
+
   function open() {
     if (dialog.open) return;
     ensureLoaded();
@@ -104,11 +111,28 @@ function init() {
     clearResults();
     updateEmptyState();
     requestAnimationFrame(() => input.focus());
+    if (!historyPushed) {
+      history.pushState({ apidocsOverlay: "search" }, "");
+      historyPushed = true;
+    }
   }
 
   function close() {
     if (dialog.open) dialog.close();
   }
+
+  dialog.addEventListener("close", () => {
+    const wasPushed = historyPushed;
+    historyPushed = false;
+    if (wasPushed && !closingFromPopstate) history.back();
+  });
+
+  window.addEventListener("popstate", () => {
+    if (!dialog.open) return;
+    closingFromPopstate = true;
+    dialog.close();
+    closingFromPopstate = false;
+  });
 
   function clearResults() {
     lists.api.replaceChildren();

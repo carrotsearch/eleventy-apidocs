@@ -1,7 +1,8 @@
-// Mobile nav drawer. The hamburger button in the header toggles
-// [data-nav-open] on .layout; CSS handles the slide-in and backdrop. We
-// also flip `inert` on the nav so keyboard focus and screen readers
-// ignore it while it's off-screen.
+// Mobile nav overlay. The hamburger button in the header toggles
+// [data-nav-open] on .layout; CSS handles the slide-in. The sticky
+// header stays above the panel, so the hamburger flips to an X and
+// serves as the close affordance. We also flip `inert` on the nav so
+// keyboard focus and screen readers ignore it while it's off-screen.
 
 const layout = document.querySelector(".layout");
 const toggle = document.querySelector("[data-nav-toggle]");
@@ -10,7 +11,12 @@ const nav = document.getElementById("main-nav");
 if (layout && toggle && nav) {
   const mql = window.matchMedia("(max-width: 47.99rem)");
 
-  const setOpen = (open) => {
+  // History entry pushed on open so the device back button closes the
+  // overlay instead of leaving the page. The flag tracks whether our
+  // entry is still on top of the stack so close() knows whether to pop.
+  let historyPushed = false;
+
+  const setOpen = (open, { fromPopstate = false } = {}) => {
     if (open) layout.setAttribute("data-nav-open", "");
     else layout.removeAttribute("data-nav-open");
     toggle.setAttribute("aria-expanded", String(open));
@@ -18,15 +24,27 @@ if (layout && toggle && nav) {
     nav.inert = !open && mql.matches;
     // Lock body scroll while the drawer is open so swipes scroll the nav.
     document.documentElement.style.overflow = open ? "hidden" : "";
+
+    if (open) {
+      if (!historyPushed) {
+        history.pushState({ apidocsOverlay: "nav" }, "");
+        historyPushed = true;
+      }
+    } else {
+      const wasPushed = historyPushed;
+      historyPushed = false;
+      // Pop our marker entry — unless this close was itself triggered by
+      // a popstate, in which case the entry is already gone.
+      if (wasPushed && !fromPopstate) history.back();
+    }
   };
 
   const syncToViewport = () => {
     if (!mql.matches) {
-      // Desktop / tablet — drawer state is meaningless; clear it.
-      layout.removeAttribute("data-nav-open");
-      toggle.setAttribute("aria-expanded", "false");
+      // Desktop / tablet — drawer state is meaningless. Route through
+      // setOpen so any pushed history entry gets cleaned up.
+      if (layout.hasAttribute("data-nav-open")) setOpen(false);
       nav.inert = false;
-      document.documentElement.style.overflow = "";
     } else {
       // Mobile — start closed; nav is inert until opened.
       nav.inert = !layout.hasAttribute("data-nav-open");
@@ -35,14 +53,6 @@ if (layout && toggle && nav) {
 
   toggle.addEventListener("click", () => {
     setOpen(!layout.hasAttribute("data-nav-open"));
-  });
-
-  // Backdrop dismiss. The ::before backdrop isn't clickable as a real
-  // element, so we listen on .layout and dismiss when the target is the
-  // layout itself (clicks on nav/header bubble through their own targets).
-  layout.addEventListener("click", (e) => {
-    if (!layout.hasAttribute("data-nav-open")) return;
-    if (e.target === layout) setOpen(false);
   });
 
   // ESC dismisses.
@@ -58,6 +68,14 @@ if (layout && toggle && nav) {
   nav.addEventListener("click", (e) => {
     const link = e.target.closest("a");
     if (link) setOpen(false);
+  });
+
+  // Device back button: if our marker is on top of the stack, the user
+  // expects "back" to close the overlay before leaving the page.
+  window.addEventListener("popstate", () => {
+    if (layout.hasAttribute("data-nav-open")) {
+      setOpen(false, { fromPopstate: true });
+    }
   });
 
   mql.addEventListener("change", syncToViewport);
