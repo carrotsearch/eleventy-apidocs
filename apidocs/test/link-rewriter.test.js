@@ -1,5 +1,5 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
 import { linkRewriter } from "../lib/passes/link-rewriter.js";
 import { loadFragment } from "./helpers.js";
 
@@ -19,16 +19,19 @@ test("rewrites .htm with the same recipe", () => {
 });
 
 test("preserves query and fragment", () => {
-  assert.equal(
-    rewrite(`<a href="foo.html?a=1#sec">x</a>`),
-    `<a href="/foo/?a=1#sec">x</a>`
-  );
+  assert.equal(rewrite(`<a href="foo.html?a=1#sec">x</a>`), `<a href="/foo/?a=1#sec">x</a>`);
   assert.equal(rewrite(`<a href="foo.html#sec">x</a>`), `<a href="/foo/#sec">x</a>`);
 });
 
 test("skips http(s), protocol-relative, and mailto", () => {
-  assert.equal(rewrite(`<a href="https://x.com/a.html">x</a>`), `<a href="https://x.com/a.html">x</a>`);
-  assert.equal(rewrite(`<a href="//cdn.example/a.html">x</a>`), `<a href="//cdn.example/a.html">x</a>`);
+  assert.equal(
+    rewrite(`<a href="https://x.com/a.html">x</a>`),
+    `<a href="https://x.com/a.html">x</a>`
+  );
+  assert.equal(
+    rewrite(`<a href="//cdn.example/a.html">x</a>`),
+    `<a href="//cdn.example/a.html">x</a>`
+  );
   assert.equal(rewrite(`<a href="mailto:a@b">x</a>`), `<a href="mailto:a@b">x</a>`);
 });
 

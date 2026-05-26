@@ -18,9 +18,7 @@ export function linkRewriter($, ctx) {
   const pageUrl = ctx?.page?.url || "/";
   // Source URL: where this page would live before Eleventy's pretty-URL
   // rewrite. /callouts/ → /callouts.html, / → /index.html.
-  const sourceUrl = pageUrl === "/"
-    ? "/index.html"
-    : pageUrl.replace(/\/$/, ".html");
+  const sourceUrl = pageUrl === "/" ? "/index.html" : pageUrl.replace(/\/$/, ".html");
   const sourceDir = sourceUrl.slice(0, sourceUrl.lastIndexOf("/") + 1);
 
   $("a[href]").each((_, el) => {

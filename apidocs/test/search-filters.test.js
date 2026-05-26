@@ -1,10 +1,6 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  queryWords,
-  regionCount,
-  regionsStartAtBoundary
-} from "../assets/js/search-filters.js";
+import { test } from "node:test";
+import { queryWords, regionCount, regionsStartAtBoundary } from "../assets/js/search-filters.js";
 
 // ---------- queryWords ----------
 
@@ -76,20 +72,14 @@ test("regionsStartAtBoundary rejects mid-word region starts", () => {
 test("regionsStartAtBoundary rejects when first region starts mid-word", () => {
   // "table" → "DotAtlas.LabelsLayer.defaults": first region [2,3] starts
   // at 't' in "DotAtlas" (preceded by 'o' lowercase — not a boundary).
-  assert.equal(
-    regionsStartAtBoundary([2, 3, 11, 13, 18], "DotAtlas.LabelsLayer.defaults"),
-    false
-  );
+  assert.equal(regionsStartAtBoundary([2, 3, 11, 13, 18], "DotAtlas.LabelsLayer.defaults"), false);
 });
 
 test("regionsStartAtBoundary treats separators as boundaries", () => {
   // "doc" → "lingo4g:result:stageName:documentClusters": one region
   // starting at 'd' (pos 25), preceded by ':'.
   assert.equal(
-    regionsStartAtBoundary(
-      [25, 26, 27],
-      "lingo4g:result:stageName:documentClusters"
-    ),
+    regionsStartAtBoundary([25, 26, 27], "lingo4g:result:stageName:documentClusters"),
     true
   );
 });
@@ -98,10 +88,7 @@ test("regionsStartAtBoundary rejects lowercase-after-lowercase region starts", (
   // "doc" → "labelShadowColor": region [8,9] starts at 'd' in mid-word
   // "Shadow" (preceded by 'a' lowercase). The [11] region starts at 'C'
   // (camelCase boundary) — but the first region disqualifies it.
-  assert.equal(
-    regionsStartAtBoundary([8, 9, 11], "labelShadowColor"),
-    false
-  );
+  assert.equal(regionsStartAtBoundary([8, 9, 11], "labelShadowColor"), false);
 });
 
 test("regionsStartAtBoundary honors .len over .length", () => {

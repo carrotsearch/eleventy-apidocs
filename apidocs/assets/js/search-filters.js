@@ -49,9 +49,7 @@ function isWordBoundary(pos, target) {
   const cur = target.charCodeAt(pos);
   const prev = target.charCodeAt(pos - 1);
   const prevAlnum =
-    (prev >= 48 && prev <= 57) ||
-    (prev >= 65 && prev <= 90) ||
-    (prev >= 97 && prev <= 122);
+    (prev >= 48 && prev <= 57) || (prev >= 65 && prev <= 90) || (prev >= 97 && prev <= 122);
   if (!prevAlnum) return true;
   const curUpper = cur >= 65 && cur <= 90;
   const prevLower = prev >= 97 && prev <= 122;

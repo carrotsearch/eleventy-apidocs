@@ -16,11 +16,21 @@
   font-size: 0.9rem;
   text-align: start;
 
-  &:hover { color: var(--fg); border-color: var(--rule); }
-  &:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+  &:hover {
+    color: var(--fg);
+    border-color: var(--rule);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+  }
 
-  & svg { flex: 0 0 auto; }
-  & .search-trigger-label { flex: 1 1 auto; }
+  & svg {
+    flex: 0 0 auto;
+  }
+  & .search-trigger-label {
+    flex: 1 1 auto;
+  }
   & .search-trigger-kbd {
     font-family: inherit;
     font-size: 0.75em;
@@ -34,8 +44,13 @@
 
 @media (max-width: 32rem) {
   .search-trigger .search-trigger-label,
-  .search-trigger .search-trigger-kbd { display: none; }
-  .search-trigger { inline-size: auto; padding: 0.4rem; }
+  .search-trigger .search-trigger-kbd {
+    display: none;
+  }
+  .search-trigger {
+    inline-size: auto;
+    padding: 0.4rem;
+  }
 }
 
 .search-dialog {
@@ -82,7 +97,9 @@
     font: inherit;
     font-size: 1rem;
   }
-  & .search-input::placeholder { color: var(--fg-faint); }
+  & .search-input::placeholder {
+    color: var(--fg-faint);
+  }
   & .search-close {
     flex: 0 0 auto;
     padding: 0.15rem 0.45rem;
@@ -93,8 +110,12 @@
     cursor: pointer;
     font: inherit;
     font-size: 0.75rem;
-    &:hover { color: var(--fg); }
-    & .search-close-icon { display: none; }
+    &:hover {
+      color: var(--fg);
+    }
+    & .search-close-icon {
+      display: none;
+    }
   }
 }
 
@@ -103,7 +124,9 @@
   padding: 0.5rem 0;
 }
 
-.search-group { margin-block: 0.5rem 0.75rem; }
+.search-group {
+  margin-block: 0.5rem 0.75rem;
+}
 .search-group-title {
   margin: 0;
   padding: 0.25rem 0.875rem;
@@ -129,7 +152,9 @@
   color: var(--fg);
   border-inline-start: 2px solid transparent;
 
-  &:hover { background: var(--bg-dim); }
+  &:hover {
+    background: var(--bg-dim);
+  }
   &.is-active {
     background: var(--bg-dim);
     border-inline-start-color: var(--link);
@@ -139,7 +164,9 @@
      content.css: soft-yellow band, orange under the baseline. */
   & :is(.search-hit-title, .search-subhit-title, .search-hit-name) mark {
     background: var(--accent-soft);
-    box-shadow: 0 -0.125em 0 var(--accent-soft), 0 0.125em 0 var(--accent);
+    box-shadow:
+      0 -0.125em 0 var(--accent-soft),
+      0 0.125em 0 var(--accent);
     color: inherit;
     font-weight: 600;
     border-radius: 2px;
@@ -149,8 +176,9 @@
      prefix matches and stem expansions, so dial the same recipe down. */
   & :is(.search-hit-excerpt, .search-subhit-excerpt) mark {
     background: color-mix(in srgb, var(--accent-soft) 40%, transparent);
-    box-shadow: 0 -0.125em 0 color-mix(in srgb, var(--accent-soft) 40%, transparent),
-                0 0.125em 0 color-mix(in srgb, var(--accent) 40%, transparent);
+    box-shadow:
+      0 -0.125em 0 color-mix(in srgb, var(--accent-soft) 40%, transparent),
+      0 0.125em 0 color-mix(in srgb, var(--accent) 40%, transparent);
     color: inherit;
     font-weight: normal;
     border-radius: 2px;
@@ -262,7 +290,11 @@
     padding: 0.35rem;
     background: transparent;
     border-color: transparent;
-    & .search-close-kbd  { display: none; }
-    & .search-close-icon { display: block; }
+    & .search-close-kbd {
+      display: none;
+    }
+    & .search-close-icon {
+      display: block;
+    }
   }
 }

@@ -33,7 +33,9 @@ class ApidocsThemeSwitch extends HTMLElement {
     const isDark = this.#isDark();
     const next = isDark ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem(STORAGE_KEY, next); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {}
     this.#sync();
   }
 

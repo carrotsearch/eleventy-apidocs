@@ -16,7 +16,7 @@ let showTimer = null;
 let hideTimer = null;
 let bar = null;
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", event => {
   if (event.defaultPrevented) return;
   if (event.button !== 0) return;
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -28,8 +28,11 @@ document.addEventListener("click", (event) => {
   if (link.getAttribute("rel")?.includes("external")) return;
 
   let url;
-  try { url = new URL(link.href, document.baseURI); }
-  catch { return; }
+  try {
+    url = new URL(link.href, document.baseURI);
+  } catch {
+    return;
+  }
 
   if (url.origin !== location.origin) return;
   // Same-page anchor / hash — no document fetch.
@@ -48,8 +51,14 @@ function arm() {
 }
 
 function cancel() {
-  if (showTimer !== null) { clearTimeout(showTimer); showTimer = null; }
-  if (hideTimer !== null) { clearTimeout(hideTimer); hideTimer = null; }
+  if (showTimer !== null) {
+    clearTimeout(showTimer);
+    showTimer = null;
+  }
+  if (hideTimer !== null) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
   hide();
 }
 
@@ -61,5 +70,8 @@ function show() {
 }
 
 function hide() {
-  if (bar) { bar.remove(); bar = null; }
+  if (bar) {
+    bar.remove();
+    bar = null;
+  }
 }

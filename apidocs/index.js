@@ -1,15 +1,15 @@
-import path from "node:path";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import nunjucks from "nunjucks";
-import { loadSourceFile } from "./lib/load-source-file.js";
-import { loadNavigation } from "./lib/load-navigation.js";
-import { extractH1 } from "./lib/extract-h1.js";
-import { relativizeHtml, relativizeUrl } from "./lib/relativize.js";
 import { buildCss } from "./lib/build-css.js";
 import { buildJs } from "./lib/build-js.js";
+import { extractH1 } from "./lib/extract-h1.js";
 import { writeHashedAsset } from "./lib/hashed-asset.js";
+import { loadNavigation } from "./lib/load-navigation.js";
+import { loadSourceFile } from "./lib/load-source-file.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
+import { relativizeHtml, relativizeUrl } from "./lib/relativize.js";
 
 // Distinct from the window.__APIDOCS_SYMBOLS_URL__ identifier on purpose:
 // a plain replace() across each generated HTML would clobber the identifier
@@ -101,9 +101,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       assets.css = await buildCss(themeRoot, output, opts.styles, { hashed });
       assets.js = await buildJs(themeRoot, output, { hashed });
     }
-    assets.symbolsUrl = hashed
-      ? SYMBOLS_URL_PLACEHOLDER
-      : "/assets/apidocs/symbols.json";
+    assets.symbolsUrl = hashed ? SYMBOLS_URL_PLACEHOLDER : "/assets/apidocs/symbols.json";
   });
 
   // Watch source so dev rebuilds pick up token/layout/script edits.
@@ -226,7 +224,6 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   };
 }
 
-
 // Flatten the navigation manifest (chaptered or flat) into an ordered list
 // and return the {prev, next} entries surrounding the current page.
 function neighborsFor(navigation, currentUrl) {
@@ -259,13 +256,15 @@ function articleHref(article) {
 // the site still works from any URL prefix.
 async function substituteSymbolsUrl(siteDir, absUrl) {
   const files = await collectHtml(siteDir);
-  await Promise.all(files.map(async file => {
-    const html = await fs.readFile(file, "utf8");
-    if (!html.includes(SYMBOLS_URL_PLACEHOLDER)) return;
-    const pageUrl = pageUrlFromFile(siteDir, file);
-    const url = relativizeUrl(absUrl, pageUrl);
-    await fs.writeFile(file, html.split(SYMBOLS_URL_PLACEHOLDER).join(url));
-  }));
+  await Promise.all(
+    files.map(async file => {
+      const html = await fs.readFile(file, "utf8");
+      if (!html.includes(SYMBOLS_URL_PLACEHOLDER)) return;
+      const pageUrl = pageUrlFromFile(siteDir, file);
+      const url = relativizeUrl(absUrl, pageUrl);
+      await fs.writeFile(file, html.split(SYMBOLS_URL_PLACEHOLDER).join(url));
+    })
+  );
 }
 
 function pruneUniqueCrumbs(symbols) {

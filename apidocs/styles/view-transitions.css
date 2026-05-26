@@ -6,9 +6,15 @@
 
 /* Persistent shell — named elements get their own snapshot pair so they
    visually stay put while the article and ToC crossfade as part of root. */
-.site-header { view-transition-name: apidocs-header; }
-.main-nav    { view-transition-name: apidocs-nav; }
-.site-footer { view-transition-name: apidocs-footer; }
+.site-header {
+  view-transition-name: apidocs-header;
+}
+.main-nav {
+  view-transition-name: apidocs-nav;
+}
+.site-footer {
+  view-transition-name: apidocs-footer;
+}
 
 /* Swap pages instantly — the named shell groups below keep the header,
    nav, and footer rooted across the swap, so there's nothing to crossfade. */

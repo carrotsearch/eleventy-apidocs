@@ -16,7 +16,7 @@ export async function withVariables(eleventyConfig) {
     contentDir: "src/content",
     variables: {
       VERSION: "$VERSION$",
-      OWNER:   "$SITE_OWNER$"
+      OWNER: "$SITE_OWNER$"
     }
   });
 }

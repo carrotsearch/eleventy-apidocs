@@ -3,31 +3,35 @@
    but rebuilt with rem-relative custom properties + text-wrap. */
 :root {
   --font-body:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 
-  --base-size:    16px;
-  --leading:      1.55rem;
-  --scale:        1.0625;
+  --base-size: 16px;
+  --leading: 1.55rem;
+  --scale: 1.0625;
 
   --h1: calc(2.75 * var(--scale) * 1rem);
-  --h2: calc(2     * var(--scale) * 1rem);
-  --h3: calc(1.5   * var(--scale) * 1rem);
-  --h4: calc(1.25  * var(--scale) * 1rem);
-  --h5: calc(1     * var(--scale) * 1rem);
+  --h2: calc(2 * var(--scale) * 1rem);
+  --h3: calc(1.5 * var(--scale) * 1rem);
+  --h4: calc(1.25 * var(--scale) * 1rem);
+  --h5: calc(1 * var(--scale) * 1rem);
   --small: calc(0.85rem);
 }
 
 @media (min-width: 48rem) {
-  :root { --h1: calc(3 * var(--scale) * 1rem); }
+  :root {
+    --h1: calc(3 * var(--scale) * 1rem);
+  }
 }
 
 @media (min-width: 64rem) {
-  :root { --base-size: 17px; --scale: 1.125; }
+  :root {
+    --base-size: 17px;
+    --scale: 1.125;
+  }
 }
 
 html {
@@ -44,37 +48,68 @@ body {
   margin: 0;
 }
 
-p { margin-block: var(--leading) 0; text-wrap: pretty; }
+p {
+  margin-block: var(--leading) 0;
+  text-wrap: pretty;
+}
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin-block: var(--leading) 0;
   line-height: 1.15;
   text-wrap: balance;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
-h1 { font-size: var(--h1); margin-block-start: 0;                  line-height: 1.05; }
-h2 { font-size: var(--h2); margin-block-start: calc(2   * var(--leading)); }
-h3 { font-size: var(--h3); margin-block-start: calc(1.5 * var(--leading)); }
-h4 { font-size: var(--h4); }
-h5, h6 { font-size: var(--h5); }
+h1 {
+  font-size: var(--h1);
+  margin-block-start: 0;
+  line-height: 1.05;
+}
+h2 {
+  font-size: var(--h2);
+  margin-block-start: calc(2 * var(--leading));
+}
+h3 {
+  font-size: var(--h3);
+  margin-block-start: calc(1.5 * var(--leading));
+}
+h4 {
+  font-size: var(--h4);
+}
+h5,
+h6 {
+  font-size: var(--h5);
+}
 
 a {
   color: var(--link);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  &:hover { color: var(--link-hover); }
+  &:hover {
+    color: var(--link-hover);
+  }
 }
 
-ul, ol {
+ul,
+ol {
   margin-block: var(--leading);
   padding-inline-start: var(--leading);
 }
-ul ul, ul ol, ol ul, ol ol {
+ul ul,
+ul ol,
+ol ul,
+ol ol {
   margin-block: 0;
 }
 
-small { font-size: var(--small); }
+small {
+  font-size: var(--small);
+}
 
 hr {
   border: 0;

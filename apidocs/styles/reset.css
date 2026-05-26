@@ -1,14 +1,29 @@
 /* Minimal reset — only what we actually rely on. */
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-html, body { margin: 0; padding: 0; }
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
 
-img, picture, svg, video, canvas {
+img,
+picture,
+svg,
+video,
+canvas {
   display: block;
   max-inline-size: 100%;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -19,4 +34,7 @@ button, input, select, textarea {
 }
 
 /* Anchors without href are buttons in disguise — treat as interactive only when href exists. */
-a:not([href]) { color: inherit; cursor: default; }
+a:not([href]) {
+  color: inherit;
+  cursor: default;
+}

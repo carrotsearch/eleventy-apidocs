@@ -1,5 +1,5 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
 import { liftSectionIds } from "../lib/passes/lift-section-ids.js";
 import { loadFragment } from "./helpers.js";
 
@@ -42,7 +42,9 @@ test("leaves sections without a child heading untouched", () => {
 });
 
 test("does not overwrite an existing heading id", () => {
-  const $ = lift(`<article><section id="from-section"><h2 id="from-heading">H</h2></section></article>`);
+  const $ = lift(
+    `<article><section id="from-section"><h2 id="from-heading">H</h2></section></article>`
+  );
   assert.equal($("h2").attr("id"), "from-heading");
   assert.equal($("section").attr("id"), "from-section");
 });

@@ -4,8 +4,8 @@
 // Key selectors filter retained properties; trim-brackets strips outer
 // braces from each rendered object; remove-comments parses JSONC strictly.
 
-import { JSONPath } from "jsonpath-plus";
 import * as jsonc from "jsonc-parser";
+import { JSONPath } from "jsonpath-plus";
 
 export function extractJsonpath(content, expr) {
   if (!content) throw new Error("Cannot apply jsonpath to empty content.");
@@ -18,7 +18,9 @@ export function extractJsonpath(content, expr) {
   const errors = [];
   const parsed = jsonc.parse(text, errors, { allowTrailingComma: true });
   if (errors.length) {
-    throw new Error(`JSON parse failed: ${errors.map(e => jsonc.printParseErrorCode(e.error)).join(", ")}`);
+    throw new Error(
+      `JSON parse failed: ${errors.map(e => jsonc.printParseErrorCode(e.error)).join(", ")}`
+    );
   }
 
   let results;
@@ -54,7 +56,10 @@ function parseSuffix(raw) {
 
   if (path.endsWith("}")) {
     const lastBrace = path.lastIndexOf("{");
-    const tokens = path.slice(lastBrace + 1, -1).trim().split(/\s*,\s*/);
+    const tokens = path
+      .slice(lastBrace + 1, -1)
+      .trim()
+      .split(/\s*,\s*/);
     path = path.slice(0, lastBrace).trim();
 
     const matchers = [];

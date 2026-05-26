@@ -1,5 +1,5 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
 import { sectionAnchors } from "../lib/passes/section-anchors.js";
 import { loadFragment } from "./helpers.js";
 
@@ -45,7 +45,9 @@ test("skips sections without an id", () => {
 });
 
 test("ignores sections outside <article>", () => {
-  const $ = anchor(`<section id="loose"><h2>Loose</h2></section><article><section id="ok"><h2>OK</h2></section></article>`);
+  const $ = anchor(
+    `<section id="loose"><h2>Loose</h2></section><article><section id="ok"><h2>OK</h2></section></article>`
+  );
   assert.equal($("a.anchor").length, 1);
   assert.equal($("a.anchor").attr("href"), "#ok");
 });
@@ -78,7 +80,9 @@ test("lifts heading id to its parent section when the section has none", () => {
 });
 
 test("does not lift heading id when the section already has one", () => {
-  const $ = anchor(`<article><section id="from-section"><h2 id="from-heading">H</h2></section></article>`);
+  const $ = anchor(
+    `<article><section id="from-section"><h2 id="from-heading">H</h2></section></article>`
+  );
   assert.equal($("section").attr("id"), "from-section");
   assert.equal($("h2").attr("id"), "from-heading");
   assert.equal($("a.anchor").attr("href"), "#from-section", "anchor uses section id");

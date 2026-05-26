@@ -2,10 +2,10 @@
    Components inside (nav, toc, callouts) use container queries — see content.css. */
 
 :root {
-  --header-h:     4rem;
-  --gutter:       clamp(1rem, 3vw, 1.5rem);
-  --nav-w:        14rem;
-  --toc-w:        16rem;
+  --header-h: 4rem;
+  --gutter: clamp(1rem, 3vw, 1.5rem);
+  --nav-w: 14rem;
+  --toc-w: 16rem;
 }
 
 .layout {
@@ -50,10 +50,20 @@
   z-index: 20;
 }
 
-.site-header .nav-toggle   { grid-area: nav-toggle; }
-.site-header .logo         { grid-area: logo; }
-.site-header .search       { grid-area: search-toggle; justify-self: stretch; max-inline-size: 24rem}
-.site-header .theme-switch { grid-area: theme; }
+.site-header .nav-toggle {
+  grid-area: nav-toggle;
+}
+.site-header .logo {
+  grid-area: logo;
+}
+.site-header .search {
+  grid-area: search-toggle;
+  justify-self: stretch;
+  max-inline-size: 24rem;
+}
+.site-header .theme-switch {
+  grid-area: theme;
+}
 
 /* Hamburger button. Mirrors the theme-switch button: same size, same hover
    and focus rings. Hidden on tablet+ once the nav rail is always visible. */
@@ -68,19 +78,36 @@
   color: var(--fg-muted);
   cursor: pointer;
   margin-inline-start: -0.5rem;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 
-  &:hover  { background: var(--bg); color: var(--fg); border-color: var(--rule-faint); }
+  &:hover {
+    background: var(--bg);
+    color: var(--fg);
+    border-color: var(--rule-faint);
+  }
   &:focus-visible {
     outline: none;
     border-color: var(--link);
     box-shadow: 0 0 0 3px var(--focus-ring);
   }
 
-  & svg { grid-area: 1 / 1; inline-size: 1.25rem; block-size: 1.25rem; }
-  & .nav-toggle-close { display: none; }
-  &[aria-expanded="true"] .nav-toggle-open  { display: none; }
-  &[aria-expanded="true"] .nav-toggle-close { display: block; }
+  & svg {
+    grid-area: 1 / 1;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+  }
+  & .nav-toggle-close {
+    display: none;
+  }
+  &[aria-expanded="true"] .nav-toggle-open {
+    display: none;
+  }
+  &[aria-expanded="true"] .nav-toggle-close {
+    display: block;
+  }
 }
 
 .logo a {
@@ -102,12 +129,22 @@
   font-size: 0.95rem;
   line-height: 1.3;
 
-  & ul { list-style: none; margin: 0; padding: 0; }
+  & ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
   /* The outer ul holds back the inset we shaved off .main-nav so text
      alignment stays put; the inner article ul keeps the universal reset. */
-  & > ul { padding-inline-start: var(--bar-inset); }
-  & li { margin-block: 0.15rem; }
-  & .chapter:first-child { margin-block-start: 0; }
+  & > ul {
+    padding-inline-start: var(--bar-inset);
+  }
+  & li {
+    margin-block: 0.15rem;
+  }
+  & .chapter:first-child {
+    margin-block-start: 0;
+  }
   /* Active-link bar mirrors the on-page outline (.toc) — same 2px rule on
      the leading edge, same padding/negative-margin trick so text doesn't
      shift between inactive and active states. */
@@ -119,12 +156,20 @@
     padding-inline-start: var(--bar-inset);
     margin-inline-start: calc(-1 * var(--bar-inset));
     border-inline-start: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-    &:hover { color: var(--fg); }
+    transition:
+      color 0.15s,
+      border-color 0.15s;
+    &:hover {
+      color: var(--fg);
+    }
   }
 
-  & .chapter { margin-block-end: 1.5rem; }
-  & .chapter:last-child { margin-block-end: 0; }
+  & .chapter {
+    margin-block-end: 1.5rem;
+  }
+  & .chapter:last-child {
+    margin-block-end: 0;
+  }
   & .chapter-title {
     font-size: 0.8rem;
     font-weight: 600;
@@ -137,7 +182,9 @@
      the chapter title has much less, so without a nudge it would sit
      visibly higher. Push the first chapter title down to land on h1's
      visible top. */
-  & .chapter:first-child .chapter-title { padding-block-start: 0.55rem; }
+  & .chapter:first-child .chapter-title {
+    padding-block-start: 0.55rem;
+  }
   & li.active > a {
     color: var(--link);
     border-inline-start-color: var(--link);
@@ -170,8 +217,14 @@
     /* Same nudge as the first chapter title — land on h1's visible top. */
     padding-block-start: 0.55rem;
   }
-  & ul { list-style: none; margin: 0; padding: 0; }
-  & li { margin-block: 0.15rem; }
+  & ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  & li {
+    margin-block: 0.15rem;
+  }
   & ul ul {
     padding-inline-start: 0.75rem;
     font-size: 0.95em;
@@ -185,8 +238,12 @@
     padding-inline-start: 0.625rem;
     margin-inline-start: -0.625rem;
     border-inline-start: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-    &:hover { color: var(--fg); }
+    transition:
+      color 0.15s,
+      border-color 0.15s;
+    &:hover {
+      color: var(--fg);
+    }
   }
   & a.active {
     color: var(--link);
@@ -196,7 +253,9 @@
 /* Hide the ToC rail when there's nothing to show — and let the article
    reclaim the column on desktop. :has lands the cascade based on whether
    the partial emitted any content. */
-.toc:not(:has(.toc-inner)) { display: none; }
+.toc:not(:has(.toc-inner)) {
+  display: none;
+}
 
 .site-footer {
   grid-area: footer;
@@ -228,12 +287,16 @@
        viewport edge (base rule sets it to 0 for the desktop rail). */
     padding-inline-end: var(--gutter);
   }
-  .layout[data-nav-open] .main-nav { transform: translateX(0); }
+  .layout[data-nav-open] .main-nav {
+    transform: translateX(0);
+  }
 }
 
 /* Tablet — nav becomes a left rail. */
 @media (min-width: 48rem) {
-  .nav-toggle { display: none; }
+  .nav-toggle {
+    display: none;
+  }
 
   .layout-body {
     grid-template-columns: var(--nav-w) minmax(0, 1fr);
@@ -251,7 +314,9 @@
      the article text starts at nav-w + gutter + 1em (the extra 1em
      keeps overflowing code blocks off the toc scrollbar — see .article).
      Net shift: 1em - 0.75rem. */
-  .site-header .search { margin-inline-start: calc(1em - 0.75rem); }
+  .site-header .search {
+    margin-inline-start: calc(1em - 0.75rem);
+  }
 
   .main-nav {
     border-block-end: none;
@@ -271,7 +336,9 @@
     overflow-x: hidden;
   }
 
-  .toc:empty + .article { /* nothing */ }
+  .toc:empty + .article {
+    /* nothing */
+  }
 }
 
 /* Desktop — add the ToC rail. */
@@ -281,7 +348,9 @@
     grid-template-areas: "nav article toc";
   }
 
-  .article { max-inline-size: 48rem; }
+  .article {
+    max-inline-size: 48rem;
+  }
 
   .toc {
     border: 0;
@@ -318,7 +387,8 @@
 
 /* Modern thin scrollbars in scrollable rails. */
 @supports (scrollbar-width: thin) {
-  .main-nav > ul, .toc > .toc-inner {
+  .main-nav > ul,
+  .toc > .toc-inner {
     scrollbar-width: thin;
     scrollbar-color: var(--rule) transparent;
   }

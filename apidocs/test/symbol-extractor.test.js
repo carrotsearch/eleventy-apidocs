@@ -1,5 +1,5 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
 import { extractSymbols } from "../lib/passes/symbol-extractor.js";
 import { loadFragment } from "./helpers.js";
 
@@ -14,21 +14,33 @@ function extract(html, url = "/page/") {
 
 test("extracts .api dt as option, group=api", () => {
   const s = extract(`<article><dl><dt id="size" class="api">size</dt></dl></article>`);
-  assert.deepEqual(s, [{ name: "size", kind: "option", group: "api", url: "/page/", anchor: "size" }]);
+  assert.deepEqual(s, [
+    { name: "size", kind: "option", group: "api", url: "/page/", anchor: "size" }
+  ]);
 });
 
 test(".api section without call-signature parens infers property kind", () => {
   const s = extract(`
     <article><section id="cfg" class="api"><h2>Config</h2></section></article>
   `);
-  assert.deepEqual(s, [{ name: "Config", kind: "property", group: "api", url: "/page/", anchor: "cfg" }]);
+  assert.deepEqual(s, [
+    { name: "Config", kind: "property", group: "api", url: "/page/", anchor: "cfg" }
+  ]);
 });
 
 test(".api section whose name ends with (…) infers method kind", () => {
   const s = extract(`
     <article><section id="proc" class="api"><h2>processOrder(order, options)</h2></section></article>
   `);
-  assert.deepEqual(s, [{ name: "processOrder(order, options)", kind: "method", group: "api", url: "/page/", anchor: "proc" }]);
+  assert.deepEqual(s, [
+    {
+      name: "processOrder(order, options)",
+      kind: "method",
+      group: "api",
+      url: "/page/",
+      anchor: "proc"
+    }
+  ]);
 });
 
 test(".api falls back to ancestor id when element has none", () => {
@@ -47,16 +59,16 @@ test("data-api-name and data-api-kind override defaults", () => {
       </section>
     </article>
   `);
-  assert.deepEqual(s, [{ name: "onClick", kind: "event", group: "api", url: "/page/", anchor: "ev" }]);
+  assert.deepEqual(s, [
+    { name: "onClick", kind: "event", group: "api", url: "/page/", anchor: "ev" }
+  ]);
 });
 
 // ---------- page (article > h1) pass ----------
 
 test("article h1 becomes a kind=page entry with no anchor", () => {
   const s = extract(`<article><h1>Quick start</h1></article>`);
-  assert.deepEqual(s, [
-    { name: "Quick start", kind: "page", group: "section", url: "/page/" }
-  ]);
+  assert.deepEqual(s, [{ name: "Quick start", kind: "page", group: "section", url: "/page/" }]);
 });
 
 test("article without an h1 produces no page entry", () => {
@@ -94,7 +106,10 @@ test("nested sections are included", () => {
       </section>
     </article>
   `);
-  assert.deepEqual(s.map(x => x.anchor), ["a", "a1"]);
+  assert.deepEqual(
+    s.map(x => x.anchor),
+    ["a", "a1"]
+  );
 });
 
 test("section heading strips the prepended anchor link", () => {
@@ -123,7 +138,10 @@ test("data-toc=omit drops the section", () => {
       <section id="b" data-toc="omit"><h2>B</h2></section>
     </article>
   `);
-  assert.deepEqual(s.map(x => x.name), ["A"]);
+  assert.deepEqual(
+    s.map(x => x.name),
+    ["A"]
+  );
 });
 
 test("data-toc=omit-children keeps the section but drops descendants", () => {
@@ -135,7 +153,10 @@ test("data-toc=omit-children keeps the section but drops descendants", () => {
       </section>
     </article>
   `);
-  assert.deepEqual(s.map(x => x.anchor), ["a"]);
+  assert.deepEqual(
+    s.map(x => x.anchor),
+    ["a"]
+  );
 });
 
 // ---------- interaction between passes ----------

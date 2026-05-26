@@ -38,10 +38,9 @@ export function extractSymbols($, ctx) {
       return;
     }
     const kind = $el.attr("data-api-kind") || inferKind($el, name);
-    ctx.symbols.push(withCrumbs(
-      { name, kind, group: "api", url, anchor },
-      readCrumbs($, $el, pageName)
-    ));
+    ctx.symbols.push(
+      withCrumbs({ name, kind, group: "api", url, anchor }, readCrumbs($, $el, pageName))
+    );
     if ($el.is("section")) seenAnchors.add(anchor);
   });
 
@@ -59,10 +58,12 @@ export function extractSymbols($, ctx) {
     const name = readSectionName($el);
     if (!name) return;
     seenAnchors.add(anchor);
-    ctx.symbols.push(withCrumbs(
-      { name, kind: "section", group: "section", url, anchor },
-      readCrumbs($, $el, pageName)
-    ));
+    ctx.symbols.push(
+      withCrumbs(
+        { name, kind: "section", group: "section", url, anchor },
+        readCrumbs($, $el, pageName)
+      )
+    );
   });
 }
 

@@ -17,13 +17,13 @@ function getDialog() {
   dialog.appendChild(frame);
   document.body.appendChild(dialog);
 
-  dialog.addEventListener("click", (e) => {
+  dialog.addEventListener("click", e => {
     // Click on the dialog itself (the backdrop/padding area) closes.
     // Clicks on the inner image bubble here too, so the whole modal closes
     // on any click — matching the original carrotsearch lightbox.
     closeLightbox();
   });
-  dialog.addEventListener("cancel", (e) => {
+  dialog.addEventListener("cancel", e => {
     // ESC fires the cancel event first. Run our close path so the view
     // transition can play instead of an instant close.
     e.preventDefault();
@@ -147,7 +147,10 @@ function aspectRatioOf(el) {
   if (el.tagName === "svg" || el.tagName === "SVG") {
     const vb = el.getAttribute("viewBox");
     if (vb) {
-      const parts = vb.trim().split(/[\s,]+/).map(Number);
+      const parts = vb
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number);
       if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
         return `${parts[2]} / ${parts[3]}`;
       }

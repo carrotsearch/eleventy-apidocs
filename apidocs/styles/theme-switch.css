@@ -14,9 +14,16 @@ apidocs-theme-switch button {
   border-radius: 999px;
   color: var(--fg-muted);
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 
-  &:hover  { background: var(--bg); color: var(--fg); border-color: var(--rule-faint); }
+  &:hover {
+    background: var(--bg);
+    color: var(--fg);
+    border-color: var(--rule-faint);
+  }
   &:focus-visible {
     outline: none;
     border-color: var(--link);
@@ -28,16 +35,36 @@ apidocs-theme-switch svg {
   inline-size: 1.1rem;
   block-size: 1.1rem;
   grid-area: 1 / 1;
-  transition: opacity 0.2s, transform 0.3s;
+  transition:
+    opacity 0.2s,
+    transform 0.3s;
 }
 
 /* Show the sun in light mode, the moon in dark. */
-apidocs-theme-switch .sun  { opacity: 1; transform: rotate(0deg); }
-apidocs-theme-switch .moon { opacity: 0; transform: rotate(-90deg); }
+apidocs-theme-switch .sun {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+apidocs-theme-switch .moon {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) apidocs-theme-switch .sun  { opacity: 0; transform: rotate(90deg); }
-  :root:not([data-theme]) apidocs-theme-switch .moon { opacity: 1; transform: rotate(0deg); }
+  :root:not([data-theme]) apidocs-theme-switch .sun {
+    opacity: 0;
+    transform: rotate(90deg);
+  }
+  :root:not([data-theme]) apidocs-theme-switch .moon {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
 }
-:root[data-theme="dark"] apidocs-theme-switch .sun   { opacity: 0; transform: rotate(90deg); }
-:root[data-theme="dark"] apidocs-theme-switch .moon  { opacity: 1; transform: rotate(0deg); }
+:root[data-theme="dark"] apidocs-theme-switch .sun {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+:root[data-theme="dark"] apidocs-theme-switch .moon {
+  opacity: 1;
+  transform: rotate(0deg);
+}

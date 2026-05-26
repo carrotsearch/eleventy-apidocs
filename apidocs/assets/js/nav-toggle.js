@@ -67,7 +67,7 @@ if (layout && toggle && nav) {
   });
 
   // ESC dismisses.
-  document.addEventListener("keydown", (e) => {
+  document.addEventListener("keydown", e => {
     if (e.key === "Escape" && layout.hasAttribute("data-nav-open")) {
       setOpen(false);
       toggle.focus();
@@ -76,7 +76,7 @@ if (layout && toggle && nav) {
 
   // Tapping a nav link navigates the page; close so it doesn't linger
   // when the new page renders the same drawer state.
-  nav.addEventListener("click", (e) => {
+  nav.addEventListener("click", e => {
     const link = e.target.closest("a");
     if (link) setOpen(false, { fromLink: true });
   });

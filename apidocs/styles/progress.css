@@ -32,10 +32,17 @@
 }
 
 @keyframes apidocs-progress {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(250%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .apidocs-progress::before { animation: none; display: none; }
+  .apidocs-progress::before {
+    animation: none;
+    display: none;
+  }
 }

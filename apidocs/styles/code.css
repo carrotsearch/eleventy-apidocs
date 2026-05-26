@@ -77,7 +77,11 @@ apidocs-code-box > button.copy {
   color: hsl(0 0% 100% / 0.7);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.3s, background-color 0.2s, border-color 0.2s, color 0.2s;
+  transition:
+    opacity 0.3s,
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
 }
 
 apidocs-code-box > button.copy::before {
@@ -88,11 +92,13 @@ apidocs-code-box > button.copy::before {
   margin: auto;
   background: currentColor;
   -webkit-mask: var(--icon-copy) center / contain no-repeat;
-          mask: var(--icon-copy) center / contain no-repeat;
+  mask: var(--icon-copy) center / contain no-repeat;
 }
 
 apidocs-code-box:hover > button.copy,
-apidocs-code-box > button.copy:focus-visible { opacity: 1; }
+apidocs-code-box > button.copy:focus-visible {
+  opacity: 1;
+}
 
 apidocs-code-box > button.copy:hover {
   background: hsl(0 0% 100% / 0.1);
@@ -107,7 +113,7 @@ apidocs-code-box > button.copy.ok {
 }
 apidocs-code-box > button.copy.ok::before {
   -webkit-mask: var(--icon-check) center / contain no-repeat;
-          mask: var(--icon-check) center / contain no-repeat;
+  mask: var(--icon-check) center / contain no-repeat;
 }
 
 apidocs-code-box > button.copy.failed {
@@ -117,7 +123,7 @@ apidocs-code-box > button.copy.failed {
 }
 apidocs-code-box > button.copy.failed::before {
   -webkit-mask: var(--icon-x) center / contain no-repeat;
-          mask: var(--icon-x) center / contain no-repeat;
+  mask: var(--icon-x) center / contain no-repeat;
 }
 
 /* Inline icons as data URLs — no extra HTTP requests. */

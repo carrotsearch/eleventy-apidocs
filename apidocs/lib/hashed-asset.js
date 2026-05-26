@@ -1,6 +1,6 @@
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import crypto from "node:crypto";
 
 // Write `bundle` as <basename>.<hash>.<ext> inside `dir`, returning that
 // filename. Removes any siblings matching the same hashed-name pattern so

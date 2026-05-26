@@ -21,18 +21,18 @@
 // layout-injected markup, matching the Gatsby behavior.
 
 import * as cheerio from "cheerio";
-import { svgInliner } from "./passes/svg-inliner.js";
-import { imageProcessor } from "./passes/image-processor.js";
-import { linkRewriter } from "./passes/link-rewriter.js";
-import { sectionAnchors } from "./passes/section-anchors.js";
-import { embedCode } from "./passes/embed-code.js";
 import { codeHighlight } from "./passes/code-highlight.js";
-import { fragmentIds } from "./passes/fragment-ids.js";
-import { buildToc } from "./passes/toc-builder.js";
-import { extractSymbols } from "./passes/symbol-extractor.js";
-import { tagPagefindIgnore } from "./passes/pagefind-ignore.js";
-import { liftSectionIds } from "./passes/lift-section-ids.js";
 import { currentYear } from "./passes/current-year.js";
+import { embedCode } from "./passes/embed-code.js";
+import { fragmentIds } from "./passes/fragment-ids.js";
+import { imageProcessor } from "./passes/image-processor.js";
+import { liftSectionIds } from "./passes/lift-section-ids.js";
+import { linkRewriter } from "./passes/link-rewriter.js";
+import { tagPagefindIgnore } from "./passes/pagefind-ignore.js";
+import { sectionAnchors } from "./passes/section-anchors.js";
+import { svgInliner } from "./passes/svg-inliner.js";
+import { extractSymbols } from "./passes/symbol-extractor.js";
+import { buildToc } from "./passes/toc-builder.js";
 import { substituteVariables } from "./passes/variables.js";
 
 // Load HTML as a fragment — cheerio's default mode wraps content in

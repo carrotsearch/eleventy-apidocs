@@ -21,12 +21,27 @@ const DIR_LINE_PATTERNS = [
 ];
 const DIR_INLINE = new RegExp(DIR_LINE_PATTERNS.map(r => `\\s*(${r.source})`).join("|"));
 
-const PRESERVED_DATA = new Set(["preserve-common-indent", "preserve-leading-and-trailing-newlines", "language"]);
+const PRESERVED_DATA = new Set([
+  "preserve-common-indent",
+  "preserve-leading-and-trailing-newlines",
+  "language"
+]);
 
 const THEMES = { light: "github-light", dark: "github-dark" };
 const LANGS = [
-  "javascript", "typescript", "json", "html", "css", "scss",
-  "bash", "shell", "yaml", "xml", "markdown", "java", "python"
+  "javascript",
+  "typescript",
+  "json",
+  "html",
+  "css",
+  "scss",
+  "bash",
+  "shell",
+  "yaml",
+  "xml",
+  "markdown",
+  "java",
+  "python"
 ];
 
 let highlighterPromise;
@@ -61,11 +76,13 @@ export async function codeHighlight($, ctx) {
       lang: safeLang,
       themes: THEMES,
       defaultColor: false,
-      transformers: [{
-        line(node, line) {
-          if (highlighted.has(line)) this.addClassToHast(node, "highlighted");
+      transformers: [
+        {
+          line(node, line) {
+            if (highlighted.has(line)) this.addClassToHast(node, "highlighted");
+          }
         }
-      }]
+      ]
     });
 
     const carryAttrs = collectAttrs($el);
@@ -126,7 +143,10 @@ function collectHighlight(content) {
     if (dir && dir.action === "highlight") {
       const base = dir.type === "line" ? i - offset : i - 1 - offset;
       for (let k = dir.start; k < dir.end; k++) highlighted.add(base + k + 1); // Shiki lines are 1-based
-      if (dir.type !== "line") { offset++; continue; }
+      if (dir.type !== "line") {
+        offset++;
+        continue;
+      }
       out.push(input[i].replace(DIR_INLINE, ""));
       continue;
     }

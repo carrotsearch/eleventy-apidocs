@@ -37,7 +37,7 @@ function init() {
   let symbols = null;
   let pagefind = null;
   let fuzzysort = null;
-  let apiReady = null;   // resolves when symbols.json + fuzzysort are loaded
+  let apiReady = null; // resolves when symbols.json + fuzzysort are loaded
   let pagesReady = null; // resolves when pagefind.js is loaded
   let lastQuery = "";
   let activeIndex = -1;
@@ -203,8 +203,16 @@ function init() {
       const maxRegions = Math.max(2, queryWords(q) + 1);
       const hits = fuzzysort
         ? fuzzysort
-            .go(q, symbols || [], { key: "name", limit: (API_LIMIT + SECTION_LIMIT) * 2, threshold: 0.3 })
-            .filter(h => regionCount(h._indexes) <= maxRegions || regionsStartAtBoundary(h._indexes, h.target))
+            .go(q, symbols || [], {
+              key: "name",
+              limit: (API_LIMIT + SECTION_LIMIT) * 2,
+              threshold: 0.3
+            })
+            .filter(
+              h =>
+                regionCount(h._indexes) <= maxRegions ||
+                regionsStartAtBoundary(h._indexes, h.target)
+            )
         : [];
       if (q !== lastQuery) return;
       const apiHits = [];
@@ -224,7 +232,10 @@ function init() {
     (async () => {
       await pagesReady;
       if (q !== lastQuery) return;
-      if (!pagefind) { renderPages([], q); return; }
+      if (!pagefind) {
+        renderPages([], q);
+        return;
+      }
       const r = await pagefind.debouncedSearch(q, PAGE_DEBOUNCE_MS);
       if (r === null || q !== lastQuery) return;
       const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
@@ -278,7 +289,10 @@ function init() {
       ...lists.sections.querySelectorAll(":scope > .search-hit > a"),
       ...lists.pages.querySelectorAll(":scope > .search-hit > a, .search-subhit > a")
     ];
-    if (!rows.length) { activeIndex = -1; return; }
+    if (!rows.length) {
+      activeIndex = -1;
+      return;
+    }
     const restored = prevHref ? rows.findIndex(a => a.href === prevHref) : -1;
     setActive(restored >= 0 ? restored : 0);
   }
@@ -378,9 +392,17 @@ function init() {
   }
 
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[c]));
+    return String(s).replace(
+      /[&<>"']/g,
+      c =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        })[c]
+    );
   }
 
   // --- Event wiring ---

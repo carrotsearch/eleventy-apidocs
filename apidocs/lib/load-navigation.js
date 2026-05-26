@@ -41,7 +41,7 @@ export async function loadNavigation(navigationPath, contentDir, { cache = false
 async function enrichNavigation(nav, contentDir, cache) {
   const seen = new Map();
 
-  const normalize = async (articles) => {
+  const normalize = async articles => {
     for (let i = 0; i < articles.length; i++) {
       if (typeof articles[i] === "string") {
         articles[i] = { slug: articles[i] };
@@ -68,9 +68,8 @@ async function enrichNavigation(nav, contentDir, cache) {
 
 async function readTitleForSlug(contentDir, slug, cache) {
   if (!contentDir) return null;
-  const file = slug === ""
-    ? path.join(contentDir, "index.html")
-    : path.join(contentDir, slug + ".html");
+  const file =
+    slug === "" ? path.join(contentDir, "index.html") : path.join(contentDir, slug + ".html");
   const abs = path.resolve(process.cwd(), file);
 
   let mtimeMs = null;
@@ -81,7 +80,9 @@ async function readTitleForSlug(contentDir, slug, cache) {
       if (hit && hit.mtimeMs === mtimeMs) return hit.title;
     } catch (err) {
       if (err.code === "ENOENT") {
-        console.warn(`[apidocs] navigation: no source file for slug "${slug}" (looked for ${file})`);
+        console.warn(
+          `[apidocs] navigation: no source file for slug "${slug}" (looked for ${file})`
+        );
         return null;
       }
       throw err;

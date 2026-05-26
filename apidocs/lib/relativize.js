@@ -29,12 +29,7 @@ export function relativizeHtml(html, fromUrl) {
 }
 
 export function relativizeUrl(url, fromUrl) {
-  if (
-    !url ||
-    !url.startsWith("/") ||
-    url.startsWith("/.11ty/") ||
-    url.startsWith("//")
-  ) {
+  if (!url || !url.startsWith("/") || url.startsWith("/.11ty/") || url.startsWith("//")) {
     return url;
   }
 

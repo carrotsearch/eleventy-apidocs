@@ -8,9 +8,7 @@
     "/users": {
       "get": {
         "summary": "List users",
-        "parameters": [
-          { "name": "limit", "in": "query", "schema": { "type": "integer" } }
-        ]
+        "parameters": [{ "name": "limit", "in": "query", "schema": { "type": "integer" } }]
       }
     },
     "/users/{id}": {

@@ -19,11 +19,19 @@ export function extractFragment(content, id) {
 
   for (const line of lines) {
     if (!inside) {
-      if (startRe.test(line)) { inside = true; found = true; continue; }
-      if (endRe.test(line)) throw new Error(`Expected fragment-start{${id}}, saw fragment-end first.`);
+      if (startRe.test(line)) {
+        inside = true;
+        found = true;
+        continue;
+      }
+      if (endRe.test(line))
+        throw new Error(`Expected fragment-start{${id}}, saw fragment-end first.`);
       continue;
     }
-    if (endRe.test(line)) { inside = false; continue; }
+    if (endRe.test(line)) {
+      inside = false;
+      continue;
+    }
     if (MARKER.test(line)) continue;
     output.push(line);
   }

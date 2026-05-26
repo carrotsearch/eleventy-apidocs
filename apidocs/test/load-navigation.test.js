@@ -1,8 +1,8 @@
-import { test, before, after, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile, mkdir, rm } from "node:fs/promises";
-import path from "node:path";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
+import path from "node:path";
+import { after, before, beforeEach, test } from "node:test";
 import { loadNavigation } from "../lib/load-navigation.js";
 
 let tmpRoot;
@@ -14,22 +14,13 @@ before(async () => {
   await mkdir(path.join(tmpRoot, "src", "content"), { recursive: true });
   process.chdir(tmpRoot);
 
-  await writeFile(
-    "src/content/index.html",
-    "<article><h1>Home</h1></article>"
-  );
-  await writeFile(
-    "src/content/install.html",
-    "<article><h1>How to install</h1></article>"
-  );
+  await writeFile("src/content/index.html", "<article><h1>Home</h1></article>");
+  await writeFile("src/content/install.html", "<article><h1>How to install</h1></article>");
   await writeFile(
     "src/content/usage.html",
     "<article><h1>Using <code>apidocs</code></h1></article>"
   );
-  await writeFile(
-    "src/content/no-title.html",
-    "<article><p>no h1 here</p></article>"
-  );
+  await writeFile("src/content/no-title.html", "<article><p>no h1 here</p></article>");
 });
 
 after(async () => {
@@ -57,10 +48,7 @@ test("returns null when path is falsy", async () => {
 });
 
 test("returns null when manifest file is missing", async () => {
-  assert.equal(
-    await loadNavigation("does-not-exist.json", "src/content"),
-    null
-  );
+  assert.equal(await loadNavigation("does-not-exist.json", "src/content"), null);
 });
 
 test("flat form: bare strings get titles from <h1>", async () => {
@@ -79,10 +67,7 @@ test("flat form: explicit titles are preserved", async () => {
 });
 
 test("flat form: mixed strings and objects coexist", async () => {
-  const file = await writeNav([
-    "install",
-    { slug: "usage", title: "Custom usage title" }
-  ]);
+  const file = await writeNav(["install", { slug: "usage", title: "Custom usage title" }]);
   const nav = await loadNavigation(file, "src/content");
   assert.deepEqual(nav, [
     { slug: "install", title: "How to install" },
@@ -98,9 +83,7 @@ test("empty-string slug resolves to index.html", async () => {
 
 test("chaptered form: bare strings get titles from <h1>", async () => {
   const file = await writeNav({
-    chapters: [
-      { title: "Start", articles: ["install", "usage"] }
-    ]
+    chapters: [{ title: "Start", articles: ["install", "usage"] }]
   });
   const nav = await loadNavigation(file, "src/content");
   assert.deepEqual(nav, {

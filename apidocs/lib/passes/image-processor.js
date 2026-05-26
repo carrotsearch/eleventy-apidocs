@@ -17,10 +17,12 @@ const DEFAULT_FORMATS = ["avif", "webp", "auto"]; // auto = original format
 const LQIP_WIDTH = 24;
 
 export async function imageProcessor($, ctx) {
-  const targets = $("img").toArray().filter(el => {
-    const src = $(el).attr("src");
-    return src && RASTER.test(src) && !$(el).parents("pre").length;
-  });
+  const targets = $("img")
+    .toArray()
+    .filter(el => {
+      const src = $(el).attr("src");
+      return src && RASTER.test(src) && !$(el).parents("pre").length;
+    });
   if (!targets.length) return;
 
   const outputDir = ctx.outputDir || "_site";

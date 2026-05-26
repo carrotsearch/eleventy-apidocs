@@ -10,7 +10,10 @@ export function removeCommonIndent(content) {
 
   let indentChar;
   for (const l of lines) {
-    if (l.length > 0) { indentChar = l[0]; break; }
+    if (l.length > 0) {
+      indentChar = l[0];
+      break;
+    }
   }
   if (indentChar !== " " && indentChar !== "\t") return content;
 

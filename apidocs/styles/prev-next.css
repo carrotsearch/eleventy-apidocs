@@ -20,16 +20,27 @@
   border-radius: 0.5rem;
   color: var(--fg);
   text-decoration: none;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 
-  &:hover, &:focus-visible {
+  &:hover,
+  &:focus-visible {
     border-color: var(--rule);
     background: var(--bg-dim);
   }
 }
 
-.prev-next-prev { grid-column: 1; align-items: flex-start; text-align: start; }
-.prev-next-next { grid-column: 2; align-items: flex-end;   text-align: end; }
+.prev-next-prev {
+  grid-column: 1;
+  align-items: flex-start;
+  text-align: start;
+}
+.prev-next-next {
+  grid-column: 2;
+  align-items: flex-end;
+  text-align: end;
+}
 
 .prev-next-direction {
   font-size: var(--small);
@@ -43,4 +54,6 @@
   font-weight: 500;
 }
 
-.prev-next-link:hover .prev-next-title { color: var(--link-hover); }
+.prev-next-link:hover .prev-next-title {
+  color: var(--link-hover);
+}
