@@ -12,10 +12,45 @@ import path from "node:path";
 import Image from "@11ty/eleventy-img";
 import * as progress from "../progress.js";
 
-const RASTER = /\.(png|jpe?g|gif|webp|avif)$/i;
+export const RASTER = /\.(png|jpe?g|gif|webp|avif)$/i;
 const DEFAULT_WIDTHS = [320, 640, 960, 1280, 1920];
 const DEFAULT_FORMATS = ["avif", "webp", "auto"]; // auto = original format
 const LQIP_WIDTH = 24;
+
+// Run an image through eleventy-img with the framework's standard widths
+// and formats. Both the HTML pipeline (this file's imageProcessor) and the
+// Markdown pipeline (process-markdown.js) call this — eleventy-img's
+// in-memory cache makes the second call a no-op as long as the options
+// match, so keeping a single entry point matters.
+export async function loadImage(src, ctx) {
+  const outputDir = ctx.outputDir || "_site";
+  const imgDir = path.join(outputDir, "assets/apidocs/img");
+  const urlPath = "/assets/apidocs/img/";
+  const filePath = path.resolve(ctx.sourceDir || ".", src);
+  try {
+    return await Image(filePath, {
+      widths: [LQIP_WIDTH, ...DEFAULT_WIDTHS],
+      formats: DEFAULT_FORMATS,
+      outputDir: imgDir,
+      urlPath,
+      sharpOptions: { animated: true }
+    });
+  } catch (e) {
+    console.warn(`[apidocs] Failed to process image ${src}: ${e.message}`);
+    return null;
+  }
+}
+
+// Pick the original-format variant list from an eleventy-img metadata bag.
+// "Original" meaning the fallback browsers reach for when neither AVIF nor
+// WebP is acceptable. Exported so the Markdown branch can resolve the same
+// fallback URL we use for the HTML <picture>'s <img src>.
+export function pickFallbackFormat(metadata) {
+  for (const fmt of ["jpeg", "png", "gif", "webp"]) {
+    if (metadata[fmt]?.length) return fmt;
+  }
+  return Object.keys(metadata)[0];
+}
 
 export async function imageProcessor($, ctx) {
   const targets = $("img")
@@ -26,31 +61,15 @@ export async function imageProcessor($, ctx) {
     });
   if (!targets.length) return;
 
-  const outputDir = ctx.outputDir || "_site";
-  const imgDir = path.join(outputDir, "assets/apidocs/img");
-  const urlPath = "/assets/apidocs/img/";
-
-  await Promise.all(targets.map(el => processOne($, el, ctx, imgDir, urlPath)));
+  await Promise.all(targets.map(el => processOne($, el, ctx)));
 }
 
-async function processOne($, el, ctx, imgDir, urlPath) {
+async function processOne($, el, ctx) {
   const $img = $(el);
   const src = $img.attr("src");
-  const filePath = path.resolve(ctx.sourceDir || ".", src);
 
-  let metadata;
-  try {
-    metadata = await Image(filePath, {
-      widths: [LQIP_WIDTH, ...DEFAULT_WIDTHS],
-      formats: DEFAULT_FORMATS,
-      outputDir: imgDir,
-      urlPath,
-      sharpOptions: { animated: true }
-    });
-  } catch (e) {
-    console.warn(`[apidocs] Failed to process image ${src}: ${e.message}`);
-    return;
-  }
+  const metadata = await loadImage(src, ctx);
+  if (!metadata) return;
 
   progress.image(src);
 
@@ -93,14 +112,6 @@ async function processOne($, el, ctx, imgDir, urlPath) {
   const lqipClass = ["lqip", className].filter(Boolean).join(" ");
 
   $img.replaceWith(`<span class="${lqipClass}"${lqipStyle}>${picture}</span>`);
-}
-
-function pickFallbackFormat(metadata) {
-  for (const fmt of ["jpeg", "png", "gif", "webp"]) {
-    if (metadata[fmt]?.length) return fmt;
-  }
-  // fall back to whatever's first
-  return Object.keys(metadata)[0];
 }
 
 async function readLqip(metadata) {

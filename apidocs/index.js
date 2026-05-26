@@ -9,6 +9,7 @@ import { writeHashedAsset } from "./lib/hashed-asset.js";
 import { loadNavigation } from "./lib/load-navigation.js";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
+import { processMarkdown } from "./lib/process-markdown.js";
 import * as progress from "./lib/progress.js";
 import { relativizeHtml, relativizeUrl } from "./lib/relativize.js";
 
@@ -45,6 +46,11 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // apidocs-shell transform pushes harvested .api elements into it via
   // ctx.symbols; eleventy.after writes the manifest to symbols.json.
   let symbols = [];
+
+  // Build-scoped per-page Markdown accumulator. The apidocs-shell transform
+  // converts each page's processed HTML to Markdown and pushes it here;
+  // eleventy.after writes one .md file per URL alongside its .html.
+  let markdownPages = [];
 
   // Latched once we've emitted Pagefind + symbols.json in the dev server's
   // lifetime. Subsequent dev rebuilds skip both — search reflects the
@@ -98,6 +104,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     progress.startBuild(currentRunMode);
     const hashed = currentRunMode !== "serve";
     symbols = [];
+    markdownPages = [];
     const output = directories?.output || dir?.output;
     if (output) {
       assets.css = await progress.stage("css", () =>
@@ -140,6 +147,16 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 
     const processed = await processContent(content, ctx);
     const title = extractH1(processed) || "apidocs";
+
+    // Stash a Markdown rendering of the article alongside the HTML. Runs
+    // its own slim pipeline on the raw source HTML — see
+    // lib/process-markdown.js — rather than turning processContent's
+    // browser-shaped output back into Markdown.
+    markdownPages.push({
+      url: this.page?.url || "/",
+      markdown: await processMarkdown(content, ctx)
+    });
+
     const { prev, next } = neighborsFor(apidocs.navigation, this.page?.url);
     const wrapped = env.render("apidocs.njk", {
       content: processed,
@@ -170,6 +187,23 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     const siteDir = path.resolve(output);
 
     const isDev = (runMode || currentRunMode) === "serve";
+
+    // Per-page Markdown siblings (e.g. /foo/ → _site/foo.md). Runs on every
+    // build — in dev with --incremental, markdownPages only carries the
+    // pages that actually re-rendered, so the .md files stay in sync with
+    // their .html counterparts without re-writing the whole tree.
+    if (markdownPages.length) {
+      await progress.stage("markdown", async () => {
+        await Promise.all(
+          markdownPages.map(async ({ url, markdown }) => {
+            const file = mdPathFor(siteDir, url);
+            await fs.mkdir(path.dirname(file), { recursive: true });
+            await fs.writeFile(file, markdown);
+          })
+        );
+      });
+    }
+
     if (isDev && devIndexedOnce) {
       progress.endBuild();
       return;
@@ -312,6 +346,16 @@ async function collectHtml(root) {
   }
   await recurse(root);
   return out;
+}
+
+// Map a page URL to its .md sibling path under siteDir:
+//   /       → <siteDir>/index.md
+//   /foo/   → <siteDir>/foo.md
+//   /a/b/   → <siteDir>/a/b.md
+function mdPathFor(siteDir, url) {
+  if (!url || url === "/") return path.join(siteDir, "index.md");
+  const clean = url.replace(/^\//, "").replace(/\/$/, "");
+  return path.join(siteDir, `${clean}.md`);
 }
 
 function pageUrlFromFile(siteDir, file) {
