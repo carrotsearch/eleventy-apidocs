@@ -112,7 +112,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   }
 
   eleventyConfig.addTransform("apidocs-shell", async function (content, outputPath) {
-    if (!outputPath || !outputPath.endsWith(".html")) return content;
+    if (!outputPath?.endsWith(".html")) return content;
     const apidocs = await getShellData();
 
     const sourceDir = this.page?.inputPath
@@ -248,7 +248,7 @@ function flattenArticles(navigation) {
 
 function articleHref(article) {
   const slug = article.slug || "";
-  return "/" + slug + (slug ? "/" : "");
+  return `/${slug}${slug ? "/" : ""}`;
 }
 
 // Walk every generated HTML file and replace the symbols-URL placeholder
@@ -306,9 +306,9 @@ function pageUrlFromFile(siteDir, file) {
   const rel = path.relative(siteDir, file).split(path.sep).join("/");
   if (rel === "index.html") return "/";
   if (rel.endsWith("/index.html")) {
-    return "/" + rel.slice(0, -"index.html".length);
+    return `/${rel.slice(0, -"index.html".length)}`;
   }
-  return "/" + rel;
+  return `/${rel}`;
 }
 
 // Given Eleventy's resolved output path (e.g. "_site/code-blocks/index.html")
@@ -317,7 +317,7 @@ function pageUrlFromFile(siteDir, file) {
 function deriveOutputDir(outputPath, pageUrl) {
   if (!outputPath) return "_site";
   const url = pageUrl || "/";
-  const suffix = url.replace(/^\//, "") + "index.html";
+  const suffix = `${url.replace(/^\//, "")}index.html`;
   if (outputPath.endsWith(suffix)) {
     const dir = outputPath.slice(0, outputPath.length - suffix.length);
     return dir.replace(/\/$/, "") || ".";

@@ -328,7 +328,7 @@ function init() {
   // section titles). Only present on entries whose name collides with another
   // somewhere in the index — index.js prunes the rest.
   function renderCrumbs(crumbs) {
-    if (!crumbs || !crumbs.length) return "";
+    if (!crumbs?.length) return "";
     return `<span class="search-hit-crumbs">${crumbs.map(escapeHtml).join(" › ")}</span>`;
   }
 

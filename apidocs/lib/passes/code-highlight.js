@@ -52,7 +52,7 @@ function getHighlighter() {
   return highlighterPromise;
 }
 
-export async function codeHighlight($, ctx) {
+export async function codeHighlight($, _ctx) {
   const targets = $("pre[data-language]").toArray();
   if (!targets.length) return;
   const highlighter = await getHighlighter();
@@ -165,7 +165,7 @@ function collectAttrs($el) {
     if (PRESERVED_DATA.has(key)) continue;
     attrs.push(`${name}="${encodeAttr(value)}"`);
   }
-  return attrs.length ? " " + attrs.join(" ") : "";
+  return attrs.length ? ` ${attrs.join(" ")}` : "";
 }
 
 function has($el, name) {

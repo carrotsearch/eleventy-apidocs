@@ -17,7 +17,7 @@ function getDialog() {
   dialog.appendChild(frame);
   document.body.appendChild(dialog);
 
-  dialog.addEventListener("click", e => {
+  dialog.addEventListener("click", () => {
     // Click on the dialog itself (the backdrop/padding area) closes.
     // Clicks on the inner image bubble here too, so the whole modal closes
     // on any click — matching the original carrotsearch lightbox.
@@ -33,7 +33,7 @@ function getDialog() {
 }
 
 function findVisual(target) {
-  const figure = target.closest && target.closest("figure");
+  const figure = target.closest?.("figure");
   if (!figure) return null;
   // Prefer the element actually clicked when it's the visual itself
   // (svg or img), but fall back to the figure's primary visual.
@@ -98,7 +98,7 @@ function openLightbox(figure, source) {
 }
 
 function closeLightbox() {
-  if (!dialog || !dialog.open) return;
+  if (!dialog?.open) return;
   const frame = dialog.querySelector(".frame");
   const clone = frame.querySelector("picture, img, svg");
 
@@ -168,7 +168,7 @@ function arFromWH(w, h) {
 }
 
 function onClick(e) {
-  if (dialog && dialog.open) return;
+  if (dialog?.open) return;
   const hit = findVisual(e.target);
   if (!hit) return;
   if (hit.figure.dataset.lightbox === "off") return;

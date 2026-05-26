@@ -24,7 +24,7 @@ export function removeCommonIndent(content) {
     while (c < l.length && l[c] === indentChar) c++;
     if (c < min) min = c;
   }
-  if (!isFinite(min)) return content;
+  if (!Number.isFinite(min)) return content;
 
   return lines.map(l => l.slice(min)).join("\n");
 }

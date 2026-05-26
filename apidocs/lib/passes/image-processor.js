@@ -65,7 +65,7 @@ async function processOne($, el, ctx, imgDir, urlPath) {
 
   const sources = Object.entries(metadata)
     .filter(([fmt]) => fmt !== fallbackFormat)
-    .map(([fmt, entries]) => {
+    .map(([_fmt, entries]) => {
       const visible = entries.filter(e => e.width !== LQIP_WIDTH);
       const srcset = visible.map(e => `${e.url} ${e.width}w`).join(", ");
       return `<source type="${visible[0].sourceType}" srcset="${srcset}" sizes="100vw">`;

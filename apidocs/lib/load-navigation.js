@@ -69,7 +69,7 @@ async function enrichNavigation(nav, contentDir, cache) {
 async function readTitleForSlug(contentDir, slug, cache) {
   if (!contentDir) return null;
   const file =
-    slug === "" ? path.join(contentDir, "index.html") : path.join(contentDir, slug + ".html");
+    slug === "" ? path.join(contentDir, "index.html") : path.join(contentDir, `${slug}.html`);
   const abs = path.resolve(process.cwd(), file);
 
   let mtimeMs = null;

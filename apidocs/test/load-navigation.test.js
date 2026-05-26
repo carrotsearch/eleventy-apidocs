@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { after, before, beforeEach, test } from "node:test";
+import { after, afterEach, before, beforeEach, test } from "node:test";
 import { loadNavigation } from "../lib/load-navigation.js";
 
 let tmpRoot;
@@ -34,6 +34,9 @@ beforeEach(() => {
   warnings = [];
   originalWarn = console.warn;
   console.warn = (...args) => warnings.push(args.join(" "));
+});
+afterEach(() => {
+  console.warn = originalWarn;
 });
 
 async function writeNav(json) {
