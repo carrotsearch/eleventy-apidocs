@@ -99,8 +99,17 @@ function init() {
   // dialog instead of leaving the page. We listen on the dialog's
   // native `close` event so every dismissal path (button, Esc, link
   // click) cleans up the entry uniformly.
+  //
+  // Link-click dismissals are a special case: the link's own
+  // navigation runs synchronously alongside our close, and queuing a
+  // history.back() at the same time races the forward navigation —
+  // under cross-document View Transitions the browser cancels the
+  // forward nav and the progress bar gets stuck. Instead we
+  // replaceState() to drop the overlay marker from the current entry,
+  // so the link's navigation pushes the target URL cleanly on top.
   let historyPushed = false;
   let closingFromPopstate = false;
+  let closingFromLink = false;
 
   function open() {
     if (dialog.open) return;
@@ -124,7 +133,13 @@ function init() {
   dialog.addEventListener("close", () => {
     const wasPushed = historyPushed;
     historyPushed = false;
-    if (wasPushed && !closingFromPopstate) history.back();
+    if (!wasPushed || closingFromPopstate) return;
+    if (closingFromLink) {
+      closingFromLink = false;
+      history.replaceState(null, "");
+    } else {
+      history.back();
+    }
   });
 
   window.addEventListener("popstate", () => {
@@ -396,7 +411,10 @@ function init() {
 
   dialog.addEventListener("click", e => {
     const link = e.target.closest("a");
-    if (link && dialog.contains(link)) close();
+    if (link && dialog.contains(link)) {
+      closingFromLink = true;
+      close();
+    }
   });
 
   // Show ⌘K on macOS, Ctrl K elsewhere. Both, plus "/", open the dialog.

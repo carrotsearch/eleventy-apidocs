@@ -14,9 +14,16 @@ if (layout && toggle && nav) {
   // History entry pushed on open so the device back button closes the
   // overlay instead of leaving the page. The flag tracks whether our
   // entry is still on top of the stack so close() knows whether to pop.
+  //
+  // Link-click closes use replaceState rather than history.back(): the
+  // link's own navigation runs alongside our close, and a queued back
+  // races the forward navigation — under cross-document View
+  // Transitions the browser cancels the forward nav and leaves the
+  // progress bar stuck. Dropping the overlay marker via replaceState
+  // lets the link's navigation push the target URL cleanly on top.
   let historyPushed = false;
 
-  const setOpen = (open, { fromPopstate = false } = {}) => {
+  const setOpen = (open, { fromPopstate = false, fromLink = false } = {}) => {
     if (open) layout.setAttribute("data-nav-open", "");
     else layout.removeAttribute("data-nav-open");
     toggle.setAttribute("aria-expanded", String(open));
@@ -33,9 +40,13 @@ if (layout && toggle && nav) {
     } else {
       const wasPushed = historyPushed;
       historyPushed = false;
-      // Pop our marker entry — unless this close was itself triggered by
-      // a popstate, in which case the entry is already gone.
-      if (wasPushed && !fromPopstate) history.back();
+      if (wasPushed && !fromPopstate) {
+        // Pop the marker entry — unless a link's default navigation is
+        // about to fire, in which case we replace the marker so the
+        // forward nav has nothing to race with.
+        if (fromLink) history.replaceState(null, "");
+        else history.back();
+      }
     }
   };
 
@@ -67,7 +78,7 @@ if (layout && toggle && nav) {
   // when the new page renders the same drawer state.
   nav.addEventListener("click", (e) => {
     const link = e.target.closest("a");
-    if (link) setOpen(false);
+    if (link) setOpen(false, { fromLink: true });
   });
 
   // Device back button: if our marker is on top of the stack, the user
