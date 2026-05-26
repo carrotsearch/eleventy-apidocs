@@ -19,7 +19,8 @@ async function run() {
   const url = new URL(window.location.href);
   if (!url.searchParams.has(PARAM)) return;
   try {
-    const mod = await import("/pagefind/pagefind-highlight.js");
+    const url = new URL("../pagefind/pagefind-highlight.js", import.meta.url);
+    const mod = await import(url.href);
     new mod.default({ highlightParam: PARAM, addStyles: false });
   } catch (err) {
     console.warn("[apidocs] pagefind-highlight load failed:", err?.message || err);

@@ -69,9 +69,12 @@ function init() {
   }
 
   async function loadPagefind() {
-    const url = new URL("../../../pagefind/pagefind.js", import.meta.url);
+    const url = new URL("../pagefind/pagefind.js", import.meta.url);
     pagefind = await import(url.href);
-    await pagefind.options?.({ excerptLength: 24 });
+    // baseUrl pinned to "/" because pagefind auto-detects it from
+    // pagefind.js's own location — now /assets/apidocs/pagefind/ — and
+    // would otherwise prefix every result URL with /assets/apidocs/.
+    await pagefind.options?.({ excerptLength: 24, baseUrl: "/" });
   }
 
   function loadFuzzysort() {

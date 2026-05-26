@@ -206,7 +206,9 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
         console.warn("[apidocs] pagefind init:", errors);
       } else if (index) {
         await index.addDirectory({ path: siteDir });
-        await index.writeFiles({ outputPath: path.join(siteDir, "pagefind") });
+        await index.writeFiles({
+          outputPath: path.join(siteDir, "assets/apidocs/pagefind")
+        });
       }
     } catch (err) {
       console.warn("[apidocs] pagefind failed:", err?.message || err);

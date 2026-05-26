@@ -4,7 +4,8 @@
 // real image loads.
 //
 // Skipped inside <pre>. SVG handled separately by svg-inliner. The src
-// is resolved against ctx.sourceDir. Output goes to ctx.outputDir/img.
+// is resolved against ctx.sourceDir. Output is namespaced under
+// assets/apidocs/img so it can't collide with an authored page slug.
 
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -23,8 +24,8 @@ export async function imageProcessor($, ctx) {
   if (!targets.length) return;
 
   const outputDir = ctx.outputDir || "_site";
-  const imgDir = path.join(outputDir, "img");
-  const urlPath = "/img/";
+  const imgDir = path.join(outputDir, "assets/apidocs/img");
+  const urlPath = "/assets/apidocs/img/";
 
   await Promise.all(targets.map(el => processOne($, el, ctx, imgDir, urlPath)));
 }
