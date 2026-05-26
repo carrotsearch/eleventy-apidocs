@@ -143,6 +143,72 @@ test("an .api section is not duplicated by the plain-section pass", () => {
   assert.equal(s[0].group, "api");
 });
 
+// ---------- crumbs ----------
+
+test(".api dt inside a section on a titled page gets [page, section] crumbs", () => {
+  const s = extract(`
+    <article>
+      <h1>Reference</h1>
+      <section id="cfg"><h2>Config</h2>
+        <dl><dt id="size" class="api">size</dt></dl>
+      </section>
+    </article>
+  `);
+  const size = s.find(x => x.name === "size");
+  assert.deepEqual(size.crumbs, ["Reference", "Config"]);
+});
+
+test("nested plain section gets crumbs from page title and ancestor section", () => {
+  const s = extract(`
+    <article>
+      <h1>Reference</h1>
+      <section id="a"><h2>A</h2>
+        <section id="a1"><h3>A.1</h3></section>
+      </section>
+    </article>
+  `);
+  const a = s.find(x => x.anchor === "a");
+  const a1 = s.find(x => x.anchor === "a1");
+  assert.deepEqual(a.crumbs, ["Reference"]);
+  assert.deepEqual(a1.crumbs, ["Reference", "A"]);
+});
+
+test("matched section is excluded from its own crumbs", () => {
+  const s = extract(`
+    <article>
+      <h1>Reference</h1>
+      <section id="x" class="api"><h2>X</h2></section>
+    </article>
+  `);
+  const x = s.find(e => e.anchor === "x");
+  assert.deepEqual(x.crumbs, ["Reference"]);
+});
+
+test("crumbs omitted when there is no page title and no ancestor section", () => {
+  const s = extract(`<article><dl><dt id="size" class="api">size</dt></dl></article>`);
+  assert.equal(s[0].crumbs, undefined);
+});
+
+test("page entry never carries crumbs", () => {
+  const s = extract(`<article><h1>Quick start</h1></article>`);
+  assert.equal(s[0].crumbs, undefined);
+});
+
+test("ancestor sections without a readable heading are skipped in crumbs", () => {
+  const s = extract(`
+    <article>
+      <h1>Reference</h1>
+      <section id="outer">
+        <section id="inner"><h3>Inner</h3>
+          <dl><dt id="x" class="api">x</dt></dl>
+        </section>
+      </section>
+    </article>
+  `);
+  const x = s.find(e => e.name === "x");
+  assert.deepEqual(x.crumbs, ["Reference", "Inner"]);
+});
+
 test("plain section that contains .api items keeps both: section + items", () => {
   const s = extract(`
     <article>

@@ -141,6 +141,10 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     // bake the URL in directly — it injects a placeholder string instead,
     // which we rewrite per page below with the relativized hashed URL.
     try {
+      // Crumbs (page → ancestor section path) only disambiguate; drop them
+      // from any entry whose name is unique across the whole index so the
+      // manifest doesn't carry payload no one will read.
+      pruneUniqueCrumbs(symbols);
       // Sort before hashing so the manifest (and its hash) stay stable when
       // the only thing that changed between builds is page render order.
       const sorted = [...symbols].sort(compareSymbols);
@@ -220,6 +224,14 @@ async function substituteSymbolsUrl(siteDir, absUrl) {
     const url = relativizeUrl(absUrl, pageUrl);
     await fs.writeFile(file, html.split(SYMBOLS_URL_PLACEHOLDER).join(url));
   }));
+}
+
+function pruneUniqueCrumbs(symbols) {
+  const counts = new Map();
+  for (const s of symbols) counts.set(s.name, (counts.get(s.name) || 0) + 1);
+  for (const s of symbols) {
+    if (s.crumbs && counts.get(s.name) === 1) delete s.crumbs;
+  }
 }
 
 function compareSymbols(a, b) {

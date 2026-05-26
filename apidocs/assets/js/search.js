@@ -248,6 +248,7 @@ function init() {
     a.href = withHighlight(symbolHref(hit.obj), q);
     a.innerHTML = `
       <span class="search-hit-name">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>
+      ${renderCrumbs(hit.obj.crumbs)}
       ${hit.obj.kind ? `<span class="search-hit-kind">${escapeHtml(hit.obj.kind)}</span>` : ""}
     `;
     li.appendChild(a);
@@ -259,9 +260,20 @@ function init() {
     li.className = "search-hit search-hit-section";
     const a = document.createElement("a");
     a.href = withHighlight(symbolHref(hit.obj), q);
-    a.innerHTML = `<span class="search-hit-title">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>`;
+    a.innerHTML = `
+      <span class="search-hit-title">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>
+      ${renderCrumbs(hit.obj.crumbs)}
+    `;
     li.appendChild(a);
     return li;
+  }
+
+  // crumbs is the root → immediate-parent chain (page title, then ancestor
+  // section titles). Only present on entries whose name collides with another
+  // somewhere in the index — index.js prunes the rest.
+  function renderCrumbs(crumbs) {
+    if (!crumbs || !crumbs.length) return "";
+    return `<span class="search-hit-crumbs">${crumbs.map(escapeHtml).join(" › ")}</span>`;
   }
 
   function renderPageHit(page, q) {

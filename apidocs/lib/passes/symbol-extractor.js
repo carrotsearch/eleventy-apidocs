@@ -11,6 +11,10 @@
 //   group  = "api" | "section" — which search dialog category the entry belongs to
 //   anchor = own id | nearest ancestor with id (omitted for page-level entries)
 //   url    = ctx.page.url
+//   crumbs = [pageTitle?, ...ancestorSectionTitles] — root → immediate parent.
+//            Omitted when the chain is empty and on the page-level entry itself.
+//            Index-assembly in index.js drops crumbs from any entry whose name
+//            is unique across the build.
 //
 // Section pass mirrors toc-builder's inclusion rules: data-toc="omit" drops
 // the section, data-toc="omit-children" drops descendants. A section already
@@ -19,6 +23,7 @@
 export function extractSymbols($, ctx) {
   if (!ctx?.symbols) return;
   const url = ctx.page?.url || "/";
+  const pageName = readHeadingText($("article > h1").first());
   const seenAnchors = new Set();
 
   $(".api").each((_, el) => {
@@ -31,11 +36,13 @@ export function extractSymbols($, ctx) {
       return;
     }
     const kind = $el.attr("data-api-kind") || inferKind($el);
-    ctx.symbols.push({ name, kind, group: "api", url, anchor });
+    ctx.symbols.push(withCrumbs(
+      { name, kind, group: "api", url, anchor },
+      readCrumbs($, $el, pageName)
+    ));
     if ($el.is("section")) seenAnchors.add(anchor);
   });
 
-  const pageName = readHeadingText($("article > h1").first());
   if (pageName) {
     ctx.symbols.push({ name: pageName, kind: "page", group: "section", url });
   }
@@ -50,8 +57,30 @@ export function extractSymbols($, ctx) {
     const name = readSectionName($el);
     if (!name) return;
     seenAnchors.add(anchor);
-    ctx.symbols.push({ name, kind: "section", group: "section", url, anchor });
+    ctx.symbols.push(withCrumbs(
+      { name, kind: "section", group: "section", url, anchor },
+      readCrumbs($, $el, pageName)
+    ));
   });
+}
+
+// Walks the ancestor <section> chain (innermost-first from cheerio) and
+// returns [pageTitle?, ...ancestorSectionTitles] in root → parent order.
+// The matched element itself is naturally excluded since `.parents()` does
+// not include the start node.
+function readCrumbs($, $el, pageName) {
+  const ancestors = [];
+  $el.parents("article section").each((_, p) => {
+    const name = readSectionName($(p));
+    if (name) ancestors.push(name);
+  });
+  ancestors.reverse();
+  return pageName ? [pageName, ...ancestors] : ancestors;
+}
+
+function withCrumbs(sym, crumbs) {
+  if (crumbs.length) sym.crumbs = crumbs;
+  return sym;
 }
 
 function readName($el) {

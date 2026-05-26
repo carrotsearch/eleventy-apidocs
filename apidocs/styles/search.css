@@ -157,15 +157,18 @@
 }
 
 .search-hit-api > a {
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: baseline;
   gap: 0.6rem;
 }
 
-/* Section hits — a single bold title, no kind tag, no excerpt. The group
-   header ("SECTIONS") supplies the categorization. */
+/* Section hits — a bold title plus an optional crumbs cell when the name
+   collides elsewhere in the index. The group header ("SECTIONS") supplies
+   the categorization, no kind tag. */
 .search-hit-section > a {
-  grid-template-columns: 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.6rem;
 }
 
 .search-hit-name {
@@ -174,6 +177,7 @@
   font-weight: 500;
 }
 .search-hit-kind {
+  grid-column: 3;
   justify-self: end;
   font-size: 0.7rem;
   font-weight: 500;
@@ -183,6 +187,19 @@
   padding: 0.05rem 0.4rem;
   border: 1px solid var(--rule-faint);
   border-radius: 0.25rem;
+}
+
+/* Disambiguating breadcrumb shown only on hits whose name collides
+   elsewhere in the index. Truncates with an ellipsis so deep paths can't
+   shove the kind tag off the row. */
+.search-hit-crumbs {
+  grid-column: 2;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--fg-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .search-hit-title {
