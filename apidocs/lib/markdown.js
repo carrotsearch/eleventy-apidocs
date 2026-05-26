@@ -91,6 +91,48 @@ turndown.addRule("apidocs-section", {
   replacement: content => `\n\n${content.trim()}\n\n`
 });
 
+// GFM tables require each row to be a single line, so cells can only
+// hold inline content. Tables whose cells contain lists, code blocks,
+// multiple paragraphs, or nested tables get emitted as raw HTML instead
+// — Markdown allows inline HTML, and most renderers/LLMs handle it.
+// Plain tables (all-inline cells) still go through turndown's gfm rule.
+const BLOCK_IN_CELL = new Set([
+  "UL",
+  "OL",
+  "PRE",
+  "BLOCKQUOTE",
+  "DL",
+  "TABLE",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6"
+]);
+
+function cellHasBlockContent(cell) {
+  let pCount = 0;
+  const children = Array.from(cell.childNodes || []);
+  for (const child of children) {
+    if (child.nodeType !== 1) continue;
+    if (BLOCK_IN_CELL.has(child.nodeName)) return true;
+    if (child.nodeName === "P") pCount++;
+  }
+  return pCount > 1;
+}
+
+function tableHasRichCells(table) {
+  const ths = Array.from(table.getElementsByTagName?.("th") || []);
+  const tds = Array.from(table.getElementsByTagName?.("td") || []);
+  return ths.some(cellHasBlockContent) || tds.some(cellHasBlockContent);
+}
+
+turndown.addRule("apidocs-rich-table", {
+  filter: node => node.nodeName === "TABLE" && tableHasRichCells(node),
+  replacement: (_content, node) => `\n\n${node.outerHTML}\n\n`
+});
+
 export function htmlToMarkdown(html) {
   const md = turndown.turndown(html);
   // Collapse runs of blank lines that adjacent rules can introduce when
