@@ -14,6 +14,14 @@ const SECTION_LIMIT = 8;
 const PAGE_LIMIT = 8;
 const SUB_LIMIT = 2; // sub-results per page
 
+// Deployment base path, recovered from where this bundle was loaded
+// from. The bundle lands at <BASE>/assets/apidocs/js/<file>; whatever
+// precedes that suffix is the base ("/" at site root, "/eleventy-apidocs/"
+// on a GitHub Pages project site, etc.). Pagefind and symbols.json URLs
+// are indexed without a path prefix, so we re-prefix them at render time.
+const BASE =
+  new URL(import.meta.url).pathname.match(/^(.*\/)assets\/apidocs\/js\/[^/]+$/)?.[1] ?? "/";
+
 function init() {
   const trigger = document.querySelector("[data-search-open]");
   const dialog = document.querySelector("[data-search-dialog]");
@@ -71,10 +79,13 @@ function init() {
   async function loadPagefind() {
     const url = new URL("../pagefind/pagefind.js", import.meta.url);
     pagefind = await import(url.href);
-    // baseUrl pinned to "/" because pagefind auto-detects it from
-    // pagefind.js's own location — now /assets/apidocs/pagefind/ — and
-    // would otherwise prefix every result URL with /assets/apidocs/.
-    await pagefind.options?.({ excerptLength: 24, baseUrl: "/" });
+    // baseUrl pinned to BASE because pagefind auto-detects it from
+    // pagefind.js's own location — now <BASE>/assets/apidocs/pagefind/ —
+    // and would otherwise prefix every result URL with that subdirectory.
+    // BASE recovers the deployment prefix so subpath deploys (e.g.
+    // /eleventy-apidocs/ on GitHub Pages) get correctly prefixed result
+    // URLs instead of 404s.
+    await pagefind.options?.({ excerptLength: 24, baseUrl: BASE });
   }
 
   function loadFuzzysort() {
@@ -365,7 +376,8 @@ function init() {
   }
 
   function symbolHref(sym) {
-    return sym.anchor ? `${sym.url}#${sym.anchor}` : sym.url;
+    const url = BASE === "/" ? sym.url : BASE + sym.url.replace(/^\//, "");
+    return sym.anchor ? `${url}#${sym.anchor}` : url;
   }
 
   // Append ?pagefind-highlight=<q> to a hit href so the destination page
