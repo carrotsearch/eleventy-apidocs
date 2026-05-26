@@ -10,8 +10,8 @@ export function extractFragment(content, id) {
   if (!content) return "";
 
   const lines = content.split(/\r?\n/);
-  const startRe = new RegExp(`fragment-start\\{${escape(id)}\\}`);
-  const endRe = new RegExp(`fragment-end\\{${escape(id)}\\}`);
+  const startRe = new RegExp(`fragment-start\\{${escapeRe(id)}\\}`);
+  const endRe = new RegExp(`fragment-end\\{${escapeRe(id)}\\}`);
 
   const output = [];
   let inside = false;
@@ -41,6 +41,6 @@ export function extractFragment(content, id) {
   return output.join("\n");
 }
 
-function escape(s) {
+function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

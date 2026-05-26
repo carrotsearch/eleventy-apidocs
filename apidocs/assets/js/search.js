@@ -387,7 +387,9 @@ function init() {
       return;
     }
     activeIndex = (i + rows.length) % rows.length;
-    rows.forEach((row, idx) => row.classList.toggle("is-active", idx === activeIndex));
+    rows.forEach((row, idx) => {
+      row.classList.toggle("is-active", idx === activeIndex);
+    });
     rows[activeIndex].scrollIntoView({ block: "nearest" });
   }
 

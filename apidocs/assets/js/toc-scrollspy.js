@@ -21,7 +21,9 @@ function init() {
   if (!links.length) return;
 
   const linkByAnchor = new Map();
-  links.forEach(a => linkByAnchor.set(a.dataset.tocAnchor, a));
+  links.forEach(a => {
+    linkByAnchor.set(a.dataset.tocAnchor, a);
+  });
 
   const sections = [];
   for (const anchor of linkByAnchor.keys()) {
@@ -36,7 +38,9 @@ function init() {
   const setActive = anchor => {
     if (anchor === activeAnchor) return;
     activeAnchor = anchor;
-    links.forEach(a => a.classList.toggle("active", a.dataset.tocAnchor === anchor));
+    links.forEach(a => {
+      a.classList.toggle("active", a.dataset.tocAnchor === anchor);
+    });
   };
 
   const update = () => {
