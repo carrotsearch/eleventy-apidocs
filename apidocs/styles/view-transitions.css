@@ -41,6 +41,8 @@
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
+    /* biome-ignore lint/complexity/noImportantStyles: required to override
+       the UA's view-transition animation under prefers-reduced-motion. */
     animation: none !important;
   }
 }

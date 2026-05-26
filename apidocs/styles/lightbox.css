@@ -120,6 +120,8 @@ html.apidocs-lightbox-closing .site-footer {
   ::view-transition-group(apidocs-lightbox-image),
   ::view-transition-old(apidocs-lightbox-image),
   ::view-transition-new(apidocs-lightbox-image) {
+    /* biome-ignore lint/complexity/noImportantStyles: required to override
+       the UA's view-transition animation under prefers-reduced-motion. */
     animation: none !important;
   }
 }
