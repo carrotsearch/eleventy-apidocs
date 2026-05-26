@@ -5,10 +5,16 @@ import nunjucks from "nunjucks";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { loadNavigation } from "./lib/load-navigation.js";
 import { extractH1 } from "./lib/extract-h1.js";
-import { relativizeHtml } from "./lib/relativize.js";
+import { relativizeHtml, relativizeUrl } from "./lib/relativize.js";
 import { buildCss } from "./lib/build-css.js";
 import { buildJs } from "./lib/build-js.js";
+import { writeHashedAsset } from "./lib/hashed-asset.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
+
+// Distinct from the window.__APIDOCS_SYMBOLS_URL__ identifier on purpose:
+// a plain replace() across each generated HTML would clobber the identifier
+// too. Using `@@…@@` keeps the placeholder unique to the value position.
+const SYMBOLS_URL_PLACEHOLDER = "@@APIDOCS_SYMBOLS_URL@@";
 
 const themeRoot = path.dirname(fileURLToPath(import.meta.url));
 
@@ -38,6 +44,11 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // ctx.symbols; eleventy.after writes the manifest to symbols.json.
   let symbols = [];
 
+  // Mutated in place by eleventy.before after the asset bundles are hashed.
+  // The shell data caches a reference to this object, so subsequent builds
+  // see fresh URLs without invalidating the cache.
+  const assets = { css: null, js: null };
+
   let cachedShell = null;
   async function getShellData() {
     if (cachedShell) return cachedShell;
@@ -46,7 +57,8 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       logo: await loadSourceFile(opts.logo, "html"),
       footer: await loadSourceFile(opts.footer, "html"),
       variables: opts.variables,
-      buildTime: new Date().toISOString()
+      buildTime: new Date().toISOString(),
+      assets
     };
     return cachedShell;
   }
@@ -62,8 +74,8 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     symbols = [];
     const output = directories?.output || dir?.output;
     if (output) {
-      await buildCss(themeRoot, output, opts.styles);
-      await buildJs(themeRoot, output);
+      assets.css = await buildCss(themeRoot, output, opts.styles);
+      assets.js = await buildJs(themeRoot, output);
     }
   });
 
@@ -123,10 +135,24 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     if (!output) return;
     const siteDir = path.resolve(output);
 
-    // Symbols manifest for the client-side fuzzysort index.
+    // Content-hashed symbols manifest for the client-side fuzzysort index.
+    // The hash can only be computed here because `symbols` is populated by
+    // the apidocs-shell transform as each page renders, so the layout can't
+    // bake the URL in directly — it injects a placeholder string instead,
+    // which we rewrite per page below with the relativized hashed URL.
     try {
-      const symbolsFile = path.join(siteDir, "symbols.json");
-      await fs.writeFile(symbolsFile, JSON.stringify(symbols));
+      // Sort before hashing so the manifest (and its hash) stay stable when
+      // the only thing that changed between builds is page render order.
+      const sorted = [...symbols].sort(compareSymbols);
+      const buf = Buffer.from(JSON.stringify(sorted));
+      const name = await writeHashedAsset(
+        path.join(siteDir, "assets/apidocs"),
+        "symbols",
+        "json",
+        buf
+      );
+      const symbolsUrl = `/assets/apidocs/${name}`;
+      await substituteSymbolsUrl(siteDir, symbolsUrl);
     } catch (err) {
       console.warn("[apidocs] symbols.json write failed:", err?.message || err);
     }
@@ -180,6 +206,56 @@ function flattenArticles(navigation) {
 function articleHref(article) {
   const slug = article.slug || "";
   return "/" + slug + (slug ? "/" : "");
+}
+
+// Walk every generated HTML file and replace the symbols-URL placeholder
+// (planted by the layout) with the hashed URL, relativized for that page so
+// the site still works from any URL prefix.
+async function substituteSymbolsUrl(siteDir, absUrl) {
+  const files = await collectHtml(siteDir);
+  await Promise.all(files.map(async file => {
+    const html = await fs.readFile(file, "utf8");
+    if (!html.includes(SYMBOLS_URL_PLACEHOLDER)) return;
+    const pageUrl = pageUrlFromFile(siteDir, file);
+    const url = relativizeUrl(absUrl, pageUrl);
+    await fs.writeFile(file, html.split(SYMBOLS_URL_PLACEHOLDER).join(url));
+  }));
+}
+
+function compareSymbols(a, b) {
+  return (
+    cmp(a.url, b.url) ||
+    cmp(a.anchor || "", b.anchor || "") ||
+    cmp(a.kind, b.kind) ||
+    cmp(a.name, b.name)
+  );
+}
+
+function cmp(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+async function collectHtml(root) {
+  const out = [];
+  async function recurse(dir) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) await recurse(p);
+      else if (e.isFile() && e.name.endsWith(".html")) out.push(p);
+    }
+  }
+  await recurse(root);
+  return out;
+}
+
+function pageUrlFromFile(siteDir, file) {
+  const rel = path.relative(siteDir, file).split(path.sep).join("/");
+  if (rel === "index.html") return "/";
+  if (rel.endsWith("/index.html")) {
+    return "/" + rel.slice(0, -"index.html".length);
+  }
+  return "/" + rel;
 }
 
 // Given Eleventy's resolved output path (e.g. "_site/code-blocks/index.html")

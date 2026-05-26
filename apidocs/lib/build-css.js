@@ -1,13 +1,13 @@
-import fs from "node:fs/promises";
 import path from "node:path";
 import { bundleAsync } from "lightningcss";
+import { writeHashedAsset } from "./hashed-asset.js";
 
 /**
- * Bundle the theme's CSS source tree into a single minified file, written
- * straight into the Eleventy output dir. Writing here (not into the theme's
- * own assets/) keeps the bundled artifact out of any passthrough-copy source
- * — otherwise the watcher would loop: build → write into a watched path →
- * rebuild.
+ * Bundle the theme's CSS source tree into a single minified, content-hashed
+ * file under the Eleventy output dir, and return its public URL. Writing here
+ * (not into the theme's own assets/) keeps the bundled artifact out of any
+ * passthrough-copy source — otherwise the watcher would loop: build → write
+ * into a watched path → rebuild.
  *
  * Optional `userStyles` (string | string[]) lets the consuming site append
  * its own CSS to the same bundle. Each user entry is bundled independently
@@ -17,7 +17,7 @@ import { bundleAsync } from "lightningcss";
  */
 export async function buildCss(themeRoot, outputDir, userStyles) {
   const themeEntry = path.join(themeRoot, "styles/apidocs.css");
-  const outFile = path.join(outputDir, "assets/apidocs/css/apidocs.css");
+  const outDir = path.join(outputDir, "assets/apidocs/css");
 
   const userEntries = (Array.isArray(userStyles) ? userStyles : [userStyles])
     .filter(Boolean)
@@ -33,7 +33,6 @@ export async function buildCss(themeRoot, outputDir, userStyles) {
     chunks.push(code);
   }
 
-  await fs.mkdir(path.dirname(outFile), { recursive: true });
-  await fs.writeFile(outFile, Buffer.concat(chunks));
-  return outFile;
+  const name = await writeHashedAsset(outDir, "apidocs", "css", Buffer.concat(chunks));
+  return `/assets/apidocs/css/${name}`;
 }

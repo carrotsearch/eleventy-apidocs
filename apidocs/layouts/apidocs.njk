@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <title>{{ title or "apidocs" }}</title>
-    <link rel="stylesheet" href="/assets/apidocs/css/apidocs.css">
+    <link rel="stylesheet" href="{{ apidocs.assets.css }}">
     <script type="speculationrules">
       {
         "prefetch": [{
@@ -14,6 +14,11 @@
           "eagerness": "moderate"
         }]
       }
+    </script>
+    <script>
+      // Hashed symbols.json URL — placeholder substituted post-build, after
+      // the symbols list is known (see eleventy.after in apidocs/index.js).
+      window.__APIDOCS_SYMBOLS_URL__ = "@@APIDOCS_SYMBOLS_URL@@";
     </script>
     <script>
       // FOUC-prevention: apply the persisted theme before paint.
@@ -44,6 +49,6 @@
       </div>
       <footer class="site-footer">{{ apidocs.footer | safe }}</footer>
     </div>
-    <script type="module" src="/assets/apidocs/js/apidocs.js"></script>
+    <script type="module" src="{{ apidocs.assets.js }}"></script>
   </body>
 </html>

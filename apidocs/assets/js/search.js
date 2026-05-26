@@ -59,8 +59,10 @@ function init() {
   }
 
   async function loadSymbols() {
-    const url = new URL("../../../symbols.json", import.meta.url);
-    // The url above is relative to /assets/apidocs/js/search.js → /symbols.json
+    // The layout injects window.__APIDOCS_SYMBOLS_URL__ with the
+    // content-hashed, per-page relativized URL of symbols.json.
+    const url = window.__APIDOCS_SYMBOLS_URL__;
+    if (!url) throw new Error("symbols URL not set");
     const res = await fetch(url);
     if (!res.ok) throw new Error(`symbols.json ${res.status}`);
     symbols = await res.json();

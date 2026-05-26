@@ -28,7 +28,7 @@ export function relativizeHtml(html, fromUrl) {
   return out;
 }
 
-function relativizeUrl(url, fromUrl) {
+export function relativizeUrl(url, fromUrl) {
   if (
     !url ||
     !url.startsWith("/") ||
