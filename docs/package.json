@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "eleventy --serve --quiet",
+    "dev": "eleventy --serve --incremental --quiet",
     "build": "eleventy",
     "clean": "rm -rf _site"
   },

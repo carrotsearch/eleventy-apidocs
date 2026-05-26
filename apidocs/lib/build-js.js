@@ -22,7 +22,7 @@ const require = createRequire(import.meta.url);
  * because search.js references it as a literal string — hashing it would
  * require a separate substitution pass that isn't worth the complexity yet.
  */
-export async function buildJs(themeRoot, outputDir) {
+export async function buildJs(themeRoot, outputDir, { hashed = true } = {}) {
   const entry = path.join(themeRoot, "assets/js/apidocs.js");
   const outDir = path.join(outputDir, "assets/apidocs/js");
 
@@ -52,6 +52,6 @@ export async function buildJs(themeRoot, outputDir) {
   ]);
 
   const bundle = Buffer.from(apidocsResult.outputFiles[0].contents);
-  const name = await writeHashedAsset(outDir, "apidocs", "js", bundle);
+  const name = await writeHashedAsset(outDir, "apidocs", "js", bundle, { hashed });
   return `/assets/apidocs/js/${name}`;
 }

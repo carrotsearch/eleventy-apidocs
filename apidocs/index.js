@@ -44,16 +44,29 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // ctx.symbols; eleventy.after writes the manifest to symbols.json.
   let symbols = [];
 
+  // Latched once we've emitted Pagefind + symbols.json in the dev server's
+  // lifetime. Subsequent dev rebuilds skip both — search reflects the
+  // start-up snapshot until the dev server restarts. Per design memo
+  // /Users/stanislawosinski/.claude/plans/is-it-viable-to-greedy-mccarthy.md
+  let devIndexedOnce = false;
+
+  // Carried from eleventy.before to other events so we can branch without
+  // re-checking process.env each time. Default matches Eleventy's own
+  // "build" runMode for the safe (production) path.
+  let currentRunMode = "build";
+
   // Mutated in place by eleventy.before after the asset bundles are hashed.
   // The shell data caches a reference to this object, so subsequent builds
   // see fresh URLs without invalidating the cache.
-  const assets = { css: null, js: null };
+  const assets = { css: null, js: null, symbolsUrl: SYMBOLS_URL_PLACEHOLDER };
 
   let cachedShell = null;
   async function getShellData() {
     if (cachedShell) return cachedShell;
     cachedShell = {
-      navigation: await loadNavigation(opts.navigation, opts.contentDir),
+      navigation: await loadNavigation(opts.navigation, opts.contentDir, {
+        cache: currentRunMode === "serve"
+      }),
       logo: await loadSourceFile(opts.logo, "html"),
       footer: await loadSourceFile(opts.footer, "html"),
       variables: opts.variables,
@@ -64,19 +77,31 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   }
 
   eleventyConfig.on("eleventy.beforeWatch", () => {
+    // Drop the cached shell so navigation gets re-derived. In dev this is
+    // cheap: loadNavigation's mtime cache short-circuits any source HTML
+    // whose file hasn't changed.
     cachedShell = null;
   });
 
   // Bundle the theme CSS and JS once before each build. Both write directly
   // into the Eleventy output dir to stay out of any passthrough-copy source
   // path — see lib/build-css.js and lib/build-js.js.
-  eleventyConfig.on("eleventy.before", async ({ directories, dir }) => {
+  //
+  // Under `--serve`, we emit stable filenames (no content hash) and a stable
+  // symbols.json URL so the layout can hard-code them — the per-page URL
+  // substitution pass in eleventy.after is skipped entirely in dev.
+  eleventyConfig.on("eleventy.before", async ({ directories, dir, runMode }) => {
+    currentRunMode = runMode || "build";
+    const hashed = currentRunMode !== "serve";
     symbols = [];
     const output = directories?.output || dir?.output;
     if (output) {
-      assets.css = await buildCss(themeRoot, output, opts.styles);
-      assets.js = await buildJs(themeRoot, output);
+      assets.css = await buildCss(themeRoot, output, opts.styles, { hashed });
+      assets.js = await buildJs(themeRoot, output, { hashed });
     }
+    assets.symbolsUrl = hashed
+      ? SYMBOLS_URL_PLACEHOLDER
+      : "/assets/apidocs/symbols.json";
   });
 
   // Watch source so dev rebuilds pick up token/layout/script edits.
@@ -130,16 +155,26 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   }
 
   // Post-build: emit the fuzzysort symbol manifest, then run Pagefind.
-  eleventyConfig.on("eleventy.after", async ({ directories, dir }) => {
+  //
+  // In dev (`runMode === "serve"`) both passes run once per process lifetime
+  // and then short-circuit — Pagefind reindexing the entire _site on every
+  // keystroke is the dominant per-build cost we're avoiding, and search.js
+  // degrades gracefully when the indices are stale or missing.
+  eleventyConfig.on("eleventy.after", async ({ directories, dir, runMode }) => {
     const output = directories?.output || dir?.output;
     if (!output) return;
     const siteDir = path.resolve(output);
 
+    const isDev = (runMode || currentRunMode) === "serve";
+    if (isDev && devIndexedOnce) return;
+
     // Content-hashed symbols manifest for the client-side fuzzysort index.
-    // The hash can only be computed here because `symbols` is populated by
-    // the apidocs-shell transform as each page renders, so the layout can't
-    // bake the URL in directly — it injects a placeholder string instead,
-    // which we rewrite per page below with the relativized hashed URL.
+    // In prod the hash can only be computed here because `symbols` is
+    // populated by the apidocs-shell transform as each page renders, so the
+    // layout can't bake the URL in directly — it injects a placeholder
+    // string, which we rewrite per page below with the relativized hashed
+    // URL. In dev we emit a stable filename and the layout uses that URL
+    // verbatim, so the per-page substitution pass is skipped.
     try {
       // Crumbs (page → ancestor section path) only disambiguate; drop them
       // from any entry whose name is unique across the whole index so the
@@ -153,10 +188,12 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
         path.join(siteDir, "assets/apidocs"),
         "symbols",
         "json",
-        buf
+        buf,
+        { hashed: !isDev }
       );
-      const symbolsUrl = `/assets/apidocs/${name}`;
-      await substituteSymbolsUrl(siteDir, symbolsUrl);
+      if (!isDev) {
+        await substituteSymbolsUrl(siteDir, `/assets/apidocs/${name}`);
+      }
     } catch (err) {
       console.warn("[apidocs] symbols.json write failed:", err?.message || err);
     }
@@ -167,14 +204,15 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       const { errors, index } = await createIndex({ verbose: false });
       if (errors?.length) {
         console.warn("[apidocs] pagefind init:", errors);
-        return;
+      } else if (index) {
+        await index.addDirectory({ path: siteDir });
+        await index.writeFiles({ outputPath: path.join(siteDir, "pagefind") });
       }
-      if (!index) return;
-      await index.addDirectory({ path: siteDir });
-      await index.writeFiles({ outputPath: path.join(siteDir, "pagefind") });
     } catch (err) {
       console.warn("[apidocs] pagefind failed:", err?.message || err);
     }
+
+    if (isDev) devIndexedOnce = true;
   });
 
   return {

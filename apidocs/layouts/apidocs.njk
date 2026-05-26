@@ -16,9 +16,11 @@
       }
     </script>
     <script>
-      // Hashed symbols.json URL — placeholder substituted post-build, after
-      // the symbols list is known (see eleventy.after in apidocs/index.js).
-      window.__APIDOCS_SYMBOLS_URL__ = "@@APIDOCS_SYMBOLS_URL@@";
+      // symbols.json URL. In prod this is a placeholder substituted per page
+      // post-build (relativized + content-hashed once symbols are known); in
+      // dev the shell injects a stable absolute URL directly. See
+      // eleventy.after in apidocs/index.js.
+      window.__APIDOCS_SYMBOLS_URL__ = "{{ apidocs.assets.symbolsUrl }}";
     </script>
     <script>
       // FOUC-prevention: apply the persisted theme before paint.

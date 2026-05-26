@@ -15,7 +15,7 @@ import { writeHashedAsset } from "./hashed-asset.js";
  * minified outputs are concatenated — theme first, user CSS last so it can
  * override theme rules without specificity tricks.
  */
-export async function buildCss(themeRoot, outputDir, userStyles) {
+export async function buildCss(themeRoot, outputDir, userStyles, { hashed = true } = {}) {
   const themeEntry = path.join(themeRoot, "styles/apidocs.css");
   const outDir = path.join(outputDir, "assets/apidocs/css");
 
@@ -33,6 +33,6 @@ export async function buildCss(themeRoot, outputDir, userStyles) {
     chunks.push(code);
   }
 
-  const name = await writeHashedAsset(outDir, "apidocs", "css", Buffer.concat(chunks));
+  const name = await writeHashedAsset(outDir, "apidocs", "css", Buffer.concat(chunks), { hashed });
   return `/assets/apidocs/css/${name}`;
 }
