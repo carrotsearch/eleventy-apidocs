@@ -18,6 +18,10 @@
 //     deployed /assets/apidocs/img/<hashed> URL without wrapping in
 //     <picture>. Shares loadImage() with imageProcessor so the second call
 //     hits eleventy-img's in-memory cache for free.
+//
+// Returns { markdown, title, summary } so the caller can both write the
+// per-page .md sibling and assemble an llms.txt index without having to
+// reparse the output.
 
 import * as cheerio from "cheerio";
 import { cleanCodeText } from "./code-text.js";
@@ -34,7 +38,32 @@ export async function processMarkdown(html, ctx) {
   linkRewriter($, ctx);
   cleanPreText($);
   await rewriteImageSrcs($, ctx);
-  return htmlToMarkdown($.html());
+  const title = extractTitle($);
+  const summary = extractSummary($);
+  const markdown = htmlToMarkdown($.html());
+  return { markdown, title, summary };
+}
+
+function extractTitle($) {
+  return normalize($("h1").first().text());
+}
+
+// Author-provided <meta name="description" content="..."> wins; otherwise
+// the first <p> in document order (works for pages whose intro paragraph
+// lives inside the first <section> rather than directly under <article>).
+// Returns "" when neither is available.
+function extractSummary($) {
+  const meta = $('meta[name="description"]').attr("content");
+  if (meta) return normalize(meta);
+  const firstP = $("p").first();
+  if (firstP.length) return normalize(firstP.text());
+  return "";
+}
+
+function normalize(s) {
+  return String(s || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function cleanPreText($) {

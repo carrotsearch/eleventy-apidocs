@@ -6,6 +6,7 @@ import { buildCss } from "./lib/build-css.js";
 import { buildJs } from "./lib/build-js.js";
 import { extractH1 } from "./lib/extract-h1.js";
 import { writeHashedAsset } from "./lib/hashed-asset.js";
+import { buildLlmsFull, buildLlmsIndex } from "./lib/llms-txt.js";
 import { loadNavigation } from "./lib/load-navigation.js";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
@@ -151,10 +152,14 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     // Stash a Markdown rendering of the article alongside the HTML. Runs
     // its own slim pipeline on the raw source HTML — see
     // lib/process-markdown.js — rather than turning processContent's
-    // browser-shaped output back into Markdown.
+    // browser-shaped output back into Markdown. Title and summary are
+    // captured for llms.txt assembly in eleventy.after.
+    const md = await processMarkdown(content, ctx);
     markdownPages.push({
       url: this.page?.url || "/",
-      markdown: await processMarkdown(content, ctx)
+      title: md.title,
+      summary: md.summary,
+      markdown: md.markdown
     });
 
     const { prev, next } = neighborsFor(apidocs.navigation, this.page?.url);
@@ -192,6 +197,11 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     // build — in dev with --incremental, markdownPages only carries the
     // pages that actually re-rendered, so the .md files stay in sync with
     // their .html counterparts without re-writing the whole tree.
+    //
+    // After the per-page files land, emit llms.txt (index) and llms-full.txt
+    // (every page concatenated in navigation order). Both are written from
+    // a full-build accumulator so they only make sense on full builds;
+    // skip during incremental dev rebuilds where markdownPages is partial.
     if (markdownPages.length) {
       await progress.stage("markdown", async () => {
         await Promise.all(
@@ -201,6 +211,17 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
             await fs.writeFile(file, markdown);
           })
         );
+        if (!isDev) {
+          const shell = await getShellData();
+          await fs.writeFile(
+            path.join(siteDir, "llms.txt"),
+            buildLlmsIndex(markdownPages, shell.navigation)
+          );
+          await fs.writeFile(
+            path.join(siteDir, "llms-full.txt"),
+            buildLlmsFull(markdownPages, shell.navigation)
+          );
+        }
       });
     }
 
