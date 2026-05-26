@@ -10,6 +10,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import Image from "@11ty/eleventy-img";
+import * as progress from "../progress.js";
 
 const RASTER = /\.(png|jpe?g|gif|webp|avif)$/i;
 const DEFAULT_WIDTHS = [320, 640, 960, 1280, 1920];
@@ -50,6 +51,8 @@ async function processOne($, el, ctx, imgDir, urlPath) {
     console.warn(`[apidocs] Failed to process image ${src}: ${e.message}`);
     return;
   }
+
+  progress.image(src);
 
   // Pick the largest variant in the original format for dimensions.
   const fallbackFormat = pickFallbackFormat(metadata);

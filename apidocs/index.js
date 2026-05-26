@@ -9,6 +9,7 @@ import { writeHashedAsset } from "./lib/hashed-asset.js";
 import { loadNavigation } from "./lib/load-navigation.js";
 import { loadSourceFile } from "./lib/load-source-file.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
+import * as progress from "./lib/progress.js";
 import { relativizeHtml, relativizeUrl } from "./lib/relativize.js";
 
 // Distinct from the window.__APIDOCS_SYMBOLS_URL__ identifier on purpose:
@@ -94,12 +95,15 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // substitution pass in eleventy.after is skipped entirely in dev.
   eleventyConfig.on("eleventy.before", async ({ directories, dir, runMode }) => {
     currentRunMode = runMode || "build";
+    progress.startBuild(currentRunMode);
     const hashed = currentRunMode !== "serve";
     symbols = [];
     const output = directories?.output || dir?.output;
     if (output) {
-      assets.css = await buildCss(themeRoot, output, opts.styles, { hashed });
-      assets.js = await buildJs(themeRoot, output, { hashed });
+      assets.css = await progress.stage("css", () =>
+        buildCss(themeRoot, output, opts.styles, { hashed })
+      );
+      assets.js = await progress.stage("js", () => buildJs(themeRoot, output, { hashed }));
     }
     assets.symbolsUrl = hashed ? SYMBOLS_URL_PLACEHOLDER : "/assets/apidocs/symbols.json";
   });
@@ -166,7 +170,10 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     const siteDir = path.resolve(output);
 
     const isDev = (runMode || currentRunMode) === "serve";
-    if (isDev && devIndexedOnce) return;
+    if (isDev && devIndexedOnce) {
+      progress.endBuild();
+      return;
+    }
 
     // Content-hashed symbols manifest for the client-side fuzzysort index.
     // In prod the hash can only be computed here because `symbols` is
@@ -175,46 +182,51 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     // string, which we rewrite per page below with the relativized hashed
     // URL. In dev we emit a stable filename and the layout uses that URL
     // verbatim, so the per-page substitution pass is skipped.
-    try {
-      // Crumbs (page → ancestor section path) only disambiguate; drop them
-      // from any entry whose name is unique across the whole index so the
-      // manifest doesn't carry payload no one will read.
-      pruneUniqueCrumbs(symbols);
-      // Sort before hashing so the manifest (and its hash) stay stable when
-      // the only thing that changed between builds is page render order.
-      const sorted = [...symbols].sort(compareSymbols);
-      const buf = Buffer.from(JSON.stringify(sorted));
-      const name = await writeHashedAsset(
-        path.join(siteDir, "assets/apidocs"),
-        "symbols",
-        "json",
-        buf,
-        { hashed: !isDev }
-      );
-      if (!isDev) {
-        await substituteSymbolsUrl(siteDir, `/assets/apidocs/${name}`);
+    await progress.stage("symbols", async () => {
+      try {
+        // Crumbs (page → ancestor section path) only disambiguate; drop them
+        // from any entry whose name is unique across the whole index so the
+        // manifest doesn't carry payload no one will read.
+        pruneUniqueCrumbs(symbols);
+        // Sort before hashing so the manifest (and its hash) stay stable when
+        // the only thing that changed between builds is page render order.
+        const sorted = [...symbols].sort(compareSymbols);
+        const buf = Buffer.from(JSON.stringify(sorted));
+        const name = await writeHashedAsset(
+          path.join(siteDir, "assets/apidocs"),
+          "symbols",
+          "json",
+          buf,
+          { hashed: !isDev }
+        );
+        if (!isDev) {
+          await substituteSymbolsUrl(siteDir, `/assets/apidocs/${name}`);
+        }
+      } catch (err) {
+        console.warn("[apidocs] symbols.json write failed:", err?.message || err);
       }
-    } catch (err) {
-      console.warn("[apidocs] symbols.json write failed:", err?.message || err);
-    }
+    });
 
     // Pagefind index for prose search.
-    try {
-      const { createIndex } = await import("pagefind");
-      const { errors, index } = await createIndex({ verbose: false });
-      if (errors?.length) {
-        console.warn("[apidocs] pagefind init:", errors);
-      } else if (index) {
-        await index.addDirectory({ path: siteDir });
-        await index.writeFiles({
-          outputPath: path.join(siteDir, "assets/apidocs/pagefind")
-        });
+    await progress.stage("pagefind", async () => {
+      try {
+        const { createIndex } = await import("pagefind");
+        const { errors, index } = await createIndex({ verbose: false });
+        if (errors?.length) {
+          console.warn("[apidocs] pagefind init:", errors);
+        } else if (index) {
+          await index.addDirectory({ path: siteDir });
+          await index.writeFiles({
+            outputPath: path.join(siteDir, "assets/apidocs/pagefind")
+          });
+        }
+      } catch (err) {
+        console.warn("[apidocs] pagefind failed:", err?.message || err);
       }
-    } catch (err) {
-      console.warn("[apidocs] pagefind failed:", err?.message || err);
-    }
+    });
 
     if (isDev) devIndexedOnce = true;
+    progress.endBuild();
   });
 
   return {
