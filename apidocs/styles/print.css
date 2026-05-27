@@ -1,0 +1,118 @@
+/* Print: strip UI chrome, linearize the layout, force the light palette
+   regardless of the on-screen theme, and add @page running headers/footers.
+   The logo from .site-header is kept as a banner at the top of the document;
+   everything else in the header (search, theme switch, nav toggle) is hidden. */
+
+@media print {
+  /* Force the light variant of every light-dark() token without having to
+     restate the palette. Setting color-scheme to a single keyword pins the
+     UA's resolution of light-dark() to that side. */
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light;
+  }
+
+  /* Drop the dvh shell and sticky behavior — both break pagination. */
+  .layout {
+    display: block;
+    min-height: 0;
+  }
+  .layout-body {
+    display: block;
+  }
+  .site-header,
+  .main-nav,
+  .toc {
+    position: static;
+    max-block-size: none;
+    overflow: visible;
+    block-size: auto;
+  }
+
+  /* UI chrome — nothing here belongs on paper. */
+  .search,
+  .theme-switch,
+  .nav-toggle,
+  .site-footer,
+  .main-nav,
+  .toc,
+  .prev-next,
+  .apidocs-progress,
+  dialog.apidocs-lightbox {
+    display: none !important;
+  }
+
+  /* Keep the logo as a banner at the top of the first page. Strip the
+     header's dim background and grid so the logo sits on the page like a
+     plain block. */
+  .site-header {
+    display: block;
+    background: transparent;
+    padding-inline: 0;
+    block-size: auto;
+    margin-block-end: var(--leading);
+    border-block-end: 1px solid var(--rule-faint);
+  }
+  .site-header .logo {
+    padding-block: 0.25rem;
+  }
+
+  /* Article reclaims the full page width and loses its reading-measure cap
+     so prose doesn't end up in a narrow column with huge right margins. */
+  .article {
+    max-inline-size: none;
+    padding: 0;
+  }
+
+  /* Code blocks: wrap long lines so they don't get clipped off the right
+     edge of the page. Keep the light inline-style background; the dark code
+     block bg gets overridden by light-dark() already. */
+  pre,
+  pre code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Pagination hygiene. */
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  figure,
+  table,
+  .info,
+  .warning,
+  .box,
+  .note {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  pre {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  img, svg {
+    max-inline-size: 100%;
+    height: auto;
+  }
+
+  /* Capture the article's h1 as the running header string. */
+  .article h1 {
+    string-set: doc-title content();
+  }
+}
+
+/* @page lives outside @media print but only affects print output. */
+@page {
+  margin: 2cm 1.8cm;
+  @top-left {
+    content: string(doc-title);
+    font: 9pt/1.2 system-ui, sans-serif;
+    color: #555;
+  }
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font: 9pt/1.2 system-ui, sans-serif;
+    color: #555;
+  }
+}
