@@ -12,6 +12,7 @@ let runMode = "build";
 let firstServeBuildDone = false;
 let seenImages = new Set();
 let buildStart = 0;
+let pendingNote = null;
 
 export function startBuild(mode) {
   runMode = mode || "build";
@@ -30,17 +31,32 @@ export function endBuild() {
 }
 
 export async function stage(label, fn) {
+  pendingNote = null;
   if (!isVerbose()) return await fn();
   const t0 = performance.now();
   console.log(`[apidocs] ${label}...`);
   try {
     const result = await fn();
-    console.log(`[apidocs] ${label} done in ${formatMs(performance.now() - t0)}`);
+    const tail = pendingNote ? `, ${pendingNote}` : "";
+    pendingNote = null;
+    console.log(`[apidocs] ${label} done in ${formatMs(performance.now() - t0)}${tail}`);
     return result;
   } catch (err) {
     console.log(`[apidocs] ${label} failed in ${formatMs(performance.now() - t0)}`);
     throw err;
   }
+}
+
+// Attach an extra detail (e.g. an artifact's uncompressed size) to the
+// current stage's "done in …" line. Cleared at the next stage entry.
+export function note(text) {
+  pendingNote = text;
+}
+
+export function formatBytes(n) {
+  if (n < 1000) return `${n} B`;
+  if (n < 1_000_000) return `${(n / 1000).toFixed(1)} kB`;
+  return `${(n / 1_000_000).toFixed(2)} MB`;
 }
 
 // Dedupe by src — the same image embedded on multiple pages still calls

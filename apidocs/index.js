@@ -254,6 +254,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
           buf,
           { hashed: !isDev }
         );
+        progress.note(progress.formatBytes(buf.length));
         if (!isDev) {
           await substituteSymbolsUrl(siteDir, `/assets/apidocs/${name}`);
         }
