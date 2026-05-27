@@ -12,7 +12,7 @@
 // data-plain-text so <apidocs-code-box> can copy it to clipboard.
 
 import { createHighlighter } from "shiki";
-import { cleanCodeText } from "../code-text.js";
+import { cleanCodeText, readPreSource } from "../code-text.js";
 
 const PRESERVED_DATA = new Set([
   "preserve-common-indent",
@@ -59,7 +59,7 @@ export async function codeHighlight($, _ctx) {
     const preserveIndent = has($el, "data-preserve-common-indent");
     const preserveNewlines = has($el, "data-preserve-leading-and-trailing-newlines");
 
-    const { content, highlighted } = cleanCodeText($el.text(), {
+    const { content, highlighted } = cleanCodeText(readPreSource($el), {
       preserveIndent,
       preserveNewlines
     });

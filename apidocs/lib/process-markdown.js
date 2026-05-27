@@ -24,7 +24,7 @@
 // reparse the output.
 
 import * as cheerio from "cheerio";
-import { cleanCodeText } from "./code-text.js";
+import { cleanCodeText, readPreSource } from "./code-text.js";
 import { htmlToMarkdown } from "./markdown.js";
 import { embedCode } from "./passes/embed-code.js";
 import { loadImage, pickFallbackFormat, RASTER } from "./passes/image-processor.js";
@@ -75,7 +75,7 @@ function cleanPreText($) {
     const $el = $(el);
     const preserveIndent = hasFlag($el, "data-preserve-common-indent");
     const preserveNewlines = hasFlag($el, "data-preserve-leading-and-trailing-newlines");
-    const { content } = cleanCodeText($el.text(), { preserveIndent, preserveNewlines });
+    const { content } = cleanCodeText(readPreSource($el), { preserveIndent, preserveNewlines });
     $el.text(content);
   });
 }

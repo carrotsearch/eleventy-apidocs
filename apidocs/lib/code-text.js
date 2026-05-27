@@ -18,6 +18,30 @@ const DIR_LINE_PATTERNS = [
 ];
 const DIR_INLINE = new RegExp(DIR_LINE_PATTERNS.map(r => `\\s*(${r.source})`).join("|"));
 
+// Read the text content of a <pre data-language> via the cloned HTML it
+// has already been parsed into, then decode the entity escapes that
+// re-serialization re-applied. Using $el.html() rather than $el.text() lets
+// authors inline real <script>/<style>/XML tags inside a markup code block
+// without escaping every angle bracket — cheerio promotes them to real
+// child elements while parsing, and $.text() would drop their tags and
+// only leave their inner text. Trade-off: this means literal <i>/<em> etc.
+// inside a code block also come back as their source markup, not as styled
+// text. The Gatsby-era theme made the same trade-off for the same reason.
+export function readPreSource($el) {
+  return decodeBasicEntities($el.html() || "");
+}
+
+function decodeBasicEntities(s) {
+  return s
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(parseInt(n, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&amp;/g, "&"); // last so &amp;lt; round-trips to &lt;, not <
+}
+
 // Returns { content, highlighted } — `highlighted` is a Set of 1-based line
 // numbers (Shiki's convention) for the HTML branch to paint; the Markdown
 // branch ignores it.
