@@ -113,10 +113,14 @@ pre code {
 }
 
 /* Callouts. Outdent matches the inner padding so the callout's text
-   lands on the article text edge — same alignment trick as code blocks. */
+   lands on the article text edge — same alignment trick as code blocks.
+   .note is an alias for .info: same colors, same icon, kept so content
+   carried over from older themes that used <div class="note"> still
+   renders correctly. */
 .info,
 .warning,
-.box {
+.box,
+.note {
   margin-block: var(--leading);
   margin-inline: calc(-1 * var(--leading));
   padding: var(--leading);
@@ -124,7 +128,8 @@ pre code {
   background: var(--bg-dim);
   overflow: hidden; /* contain margin collapse of children */
 }
-.info {
+.info,
+.note {
   background: var(--info-bg);
   border-inline-start-color: var(--info-bd);
 }
@@ -133,9 +138,7 @@ pre code {
   border-inline-start-color: var(--warn-bd);
 }
 
-.info > :is(strong, b):first-child,
-.warning > :is(strong, b):first-child,
-.box > :is(strong, b):first-child {
+:is(.info, .warning, .box, .note) > :is(strong, b):first-child {
   display: flex;
   align-items: center;
   gap: 0.5em;
@@ -145,22 +148,21 @@ pre code {
 /* No-heading / trailing element cases: drop the leading top/bottom margins
    so the callout's inner padding stays symmetric. overflow:hidden blocks
    margin collapse, so we need to zero them explicitly. */
-:is(.info, .warning, .box) > *:first-child {
+:is(.info, .warning, .box, .note) > *:first-child {
   margin-block-start: 0;
 }
-:is(.info, .warning, .box) > *:last-child {
+:is(.info, .warning, .box, .note) > *:last-child {
   margin-block-end: 0;
 }
 
 /* Code blocks inside callouts: drop the negative inline margin that pulls
    bare code boxes into the gutter so they align with the callout's text. */
-:is(.info, .warning, .box) apidocs-code-box {
+:is(.info, .warning, .box, .note) apidocs-code-box {
   margin-inline: 0;
 }
 
 /* Icon on info/warning heading. Box stays plain — generic container. */
-.info > :is(strong, b):first-child::before,
-.warning > :is(strong, b):first-child::before {
+:is(.info, .warning, .note) > :is(strong, b):first-child::before {
   content: "";
   flex: none;
   inline-size: 1.15em;
@@ -168,7 +170,7 @@ pre code {
   -webkit-mask: var(--callout-icon) center / contain no-repeat;
   mask: var(--callout-icon) center / contain no-repeat;
 }
-.info > :is(strong, b):first-child::before {
+:is(.info, .note) > :is(strong, b):first-child::before {
   --callout-icon: var(--icon-info);
   background: var(--info-bd);
 }
@@ -302,6 +304,28 @@ article dt.api {
   font-family: var(--font-mono);
   letter-spacing: 0;
   font-weight: 600;
+}
+
+/* "(required)" suffix on a <dt> marked as a required option. Authors
+   set class="required" on the term; the label is appended automatically
+   so the markup stays free of pure-presentational spans. */
+dt.required::after {
+  content: " (required)";
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+
+/* "[read-only]" marker on a <section class="api read-only">. Floats into
+   the article's right gutter (article is position: relative) so it
+   doesn't push the section content around. */
+article section.api.read-only::before {
+  content: "[read-only]";
+  position: absolute;
+  inset-inline-end: 2em;
+  margin-block-start: 2.75em;
+  color: var(--fg-faint);
+  font-size: var(--small);
+  font-weight: 300;
 }
 
 /* Tables */
