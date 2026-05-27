@@ -2,11 +2,20 @@
 // in a <dialog>. Uses the View Transitions API for the zoom animation when
 // available, otherwise opens/closes instantly. Close on ESC, click on the
 // backdrop, or click on the zoomed image.
+//
+// Resolution upgrade: the dialog initially shows the exact pixels already
+// rendered in-page (locked to the source <img>'s currentSrc, with srcset
+// and <source> stripped). VT animates that. Only after the transition
+// settles do we restore srcset/<source>, letting the browser pick a higher
+// variant for the new 100vw display box if one is warranted. Hover/focus/
+// pointerdown over a figure also prefetches the upgrade via <link
+// rel=preload> so the swap is already cached by the time it kicks in.
 
 const NAME = "apidocs-lightbox-image";
 
 let dialog;
 let lastSource = null;
+const preloaded = new WeakSet();
 
 function getDialog() {
   if (dialog) return dialog;
@@ -50,19 +59,27 @@ function openLightbox(figure, source) {
   const frame = d.querySelector(".frame");
   frame.replaceChildren();
 
+  // Belt-and-suspenders: a direct click (no prior hover, no keyboard focus)
+  // never had a chance to fire the preload listeners. Trigger here too —
+  // the WeakSet guard makes this cheap if it already ran.
+  preloadFigure(figure);
+
   const clone = source.cloneNode(true);
   if (clone.tagName === "PICTURE") {
     const img = clone.querySelector("img");
-    if (img) {
-      img.removeAttribute("loading");
-      img.setAttribute("sizes", "100vw");
-    }
+    if (img) img.removeAttribute("loading");
   }
   // Pin the clone's aspect-ratio to the image's natural dimensions so the
   // View Transitions snapshot box matches the image content exactly (no
   // letterbox padding inside the captured box).
   const ar = aspectRatioOf(clone);
   if (ar) clone.style.setProperty("--ar", ar);
+
+  // Lock the clone to the source's already-rendered image so the VT
+  // captures exactly those pixels (no late load, no LQIP flash). Returns
+  // an upgrade() that restores srcset/<source> after the transition.
+  const upgrade = lockAndCaptureUpgrade(source, clone);
+
   frame.appendChild(clone);
 
   const caption = figure.querySelector("figcaption");
@@ -77,6 +94,7 @@ function openLightbox(figure, source) {
 
   if (!document.startViewTransition) {
     finishOpen();
+    if (upgrade) upgrade();
     return;
   }
 
@@ -94,7 +112,89 @@ function openLightbox(figure, source) {
   // pick it up when the user dismisses.
   t.finished.finally(() => {
     document.documentElement.classList.remove("apidocs-lightbox-opening");
+    if (upgrade) upgrade();
   });
+}
+
+// Strip srcset/<source>/sizes from the clone and pin its <img> to the
+// source's currentSrc. Returns a function that puts them back (or null if
+// there's nothing to upgrade — e.g. an SVG, or the source hasn't loaded
+// yet so we have no currentSrc to pin to).
+function lockAndCaptureUpgrade(source, clone) {
+  if (source.tagName === "svg" || source.tagName === "SVG") return null;
+  const sourceImg = source.tagName === "PICTURE" ? source.querySelector("img") : source;
+  const clonedImg = clone.tagName === "PICTURE" ? clone.querySelector("img") : clone;
+  if (!sourceImg || !clonedImg) return null;
+  const currentSrc = sourceImg.currentSrc || sourceImg.src;
+  if (!currentSrc) return null;
+
+  // Read the upgrade attributes from `source`, not `clone` — we're about
+  // to mutate the clone, and reading from the live source is unambiguous.
+  const upgradeSrcset = sourceImg.getAttribute("srcset");
+  const upgradeSources =
+    source.tagName === "PICTURE"
+      ? Array.from(source.querySelectorAll(":scope > source")).map(s => ({
+          srcset: s.getAttribute("srcset"),
+          type: s.getAttribute("type"),
+          media: s.getAttribute("media")
+        }))
+      : [];
+
+  if (clone.tagName === "PICTURE") {
+    for (const s of clone.querySelectorAll(":scope > source")) s.remove();
+  }
+  clonedImg.removeAttribute("srcset");
+  clonedImg.removeAttribute("sizes");
+  clonedImg.src = currentSrc;
+
+  if (!upgradeSrcset && !upgradeSources.length) return null;
+
+  return () => {
+    if (!clone.isConnected) return;
+    if (upgradeSources.length && clone.tagName === "PICTURE") {
+      const frag = document.createDocumentFragment();
+      for (const s of upgradeSources) {
+        const el = document.createElement("source");
+        if (s.type) el.type = s.type;
+        if (s.media) el.setAttribute("media", s.media);
+        if (s.srcset) el.setAttribute("srcset", s.srcset);
+        el.setAttribute("sizes", "100vw");
+        frag.appendChild(el);
+      }
+      clone.insertBefore(frag, clonedImg);
+    }
+    if (upgradeSrcset) clonedImg.setAttribute("srcset", upgradeSrcset);
+    clonedImg.setAttribute("sizes", "100vw");
+  };
+}
+
+// Prefetch the lightbox-resolution variant(s) for this figure via
+// <link rel=preload as=image>. One link per <source> (with `type` so the
+// browser only fetches the format it supports) plus the fallback <img>'s
+// srcset as a backstop. Idempotent per figure.
+function preloadFigure(figure) {
+  if (preloaded.has(figure)) return;
+  if (figure.dataset.lightbox === "off") return;
+  const picture = figure.querySelector("picture");
+  if (!picture) return;
+  preloaded.add(figure);
+
+  for (const s of picture.querySelectorAll(":scope > source")) {
+    addImagePreload(s.getAttribute("srcset"), s.getAttribute("type"));
+  }
+  const img = picture.querySelector("img");
+  if (img) addImagePreload(img.getAttribute("srcset"), null);
+}
+
+function addImagePreload(srcset, type) {
+  if (!srcset) return;
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
+  if (type) link.type = type;
+  link.setAttribute("imagesrcset", srcset);
+  link.setAttribute("imagesizes", "100vw");
+  document.head.appendChild(link);
 }
 
 function closeLightbox() {
@@ -176,4 +276,15 @@ function onClick(e) {
   openLightbox(hit.figure, hit.visual);
 }
 
+function onPreloadCue(e) {
+  if (dialog?.open) return;
+  const figure = e.target?.closest?.("figure");
+  if (figure) preloadFigure(figure);
+}
+
 document.addEventListener("click", onClick);
+// pointerover catches desktop hover; focusin catches keyboard tab; pointerdown
+// gives touch users some head start on the network fetch before click fires.
+document.addEventListener("pointerover", onPreloadCue);
+document.addEventListener("focusin", onPreloadCue);
+document.addEventListener("pointerdown", onPreloadCue);
