@@ -24,6 +24,8 @@ const THEMES = { light: "github-light", dark: "github-dark" };
 const LANGS = [
   "javascript",
   "typescript",
+  "jsx",
+  "tsx",
   "json",
   "html",
   "css",
@@ -45,6 +47,8 @@ function getHighlighter() {
   return highlighterPromise;
 }
 
+const warnedLangs = new Set();
+
 export async function codeHighlight($, _ctx) {
   const targets = $("pre[data-language]").toArray();
   if (!targets.length) {
@@ -55,7 +59,8 @@ export async function codeHighlight($, _ctx) {
 
   for (const el of targets) {
     const $el = $(el);
-    const lang = normalizeLang($el.attr("data-language"));
+    const rawLang = $el.attr("data-language");
+    const lang = normalizeLang(rawLang);
     const preserveIndent = has($el, "data-preserve-common-indent");
     const preserveNewlines = has($el, "data-preserve-leading-and-trailing-newlines");
 
@@ -64,7 +69,15 @@ export async function codeHighlight($, _ctx) {
       preserveNewlines
     });
 
-    const safeLang = loaded.has(lang) ? lang : "text";
+    const known = loaded.has(lang);
+    if (!known && !warnedLangs.has(lang)) {
+      warnedLangs.add(lang);
+      console.warn(
+        `[apidocs] unknown data-language="${rawLang}" — rendered as plain text. ` +
+          `Add it to LANGS in code-highlight.js, or alias it in normalizeLang.`
+      );
+    }
+    const safeLang = known ? lang : "text";
     const html = highlighter.codeToHtml(content, {
       lang: safeLang,
       themes: THEMES,
