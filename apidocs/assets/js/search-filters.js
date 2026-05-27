@@ -22,10 +22,14 @@ export function queryWords(q) {
 // trusting .length (which can carry stale entries from longer queries).
 export function regionCount(indexes) {
   const n = indexes?.len ?? indexes?.length ?? 0;
-  if (!n) return 0;
+  if (!n) {
+    return 0;
+  }
   let runs = 1;
   for (let i = 1; i < n; i++) {
-    if (indexes[i] !== indexes[i - 1] + 1) runs++;
+    if (indexes[i] !== indexes[i - 1] + 1) {
+      runs++;
+    }
   }
   return runs;
 }
@@ -38,19 +42,27 @@ export function regionCount(indexes) {
 export function regionsStartAtBoundary(indexes, target) {
   const n = indexes?.len ?? indexes?.length ?? 0;
   for (let i = 0; i < n; i++) {
-    if (i > 0 && indexes[i] === indexes[i - 1] + 1) continue;
-    if (!isWordBoundary(indexes[i], target)) return false;
+    if (i > 0 && indexes[i] === indexes[i - 1] + 1) {
+      continue;
+    }
+    if (!isWordBoundary(indexes[i], target)) {
+      return false;
+    }
   }
   return true;
 }
 
 function isWordBoundary(pos, target) {
-  if (pos === 0) return true;
+  if (pos === 0) {
+    return true;
+  }
   const cur = target.charCodeAt(pos);
   const prev = target.charCodeAt(pos - 1);
   const prevAlnum =
     (prev >= 48 && prev <= 57) || (prev >= 65 && prev <= 90) || (prev >= 97 && prev <= 122);
-  if (!prevAlnum) return true;
+  if (!prevAlnum) {
+    return true;
+  }
   const curUpper = cur >= 65 && cur <= 90;
   const prevLower = prev >= 97 && prev <= 122;
   return curUpper && prevLower;

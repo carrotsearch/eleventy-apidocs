@@ -25,7 +25,9 @@ const BASE =
 function init() {
   const trigger = document.querySelector("[data-search-open]");
   const dialog = document.querySelector("[data-search-dialog]");
-  if (!trigger || !dialog) return;
+  if (!trigger || !dialog) {
+    return;
+  }
 
   const input = dialog.querySelector("[data-search-input]");
   const closeBtn = dialog.querySelector("[data-search-close]");
@@ -70,9 +72,13 @@ function init() {
     // The layout injects window.__APIDOCS_SYMBOLS_URL__ with the
     // content-hashed, per-page relativized URL of symbols.json.
     const url = window.__APIDOCS_SYMBOLS_URL__;
-    if (!url) throw new Error("symbols URL not set");
+    if (!url) {
+      throw new Error("symbols URL not set");
+    }
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`symbols.json ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`symbols.json ${res.status}`);
+    }
     symbols = await res.json();
   }
 
@@ -98,8 +104,11 @@ function init() {
       s.src = new URL("./fuzzysort.js", import.meta.url).href;
       s.onload = () => {
         fuzzysort = window.fuzzysort;
-        if (!fuzzysort) reject(new Error("fuzzysort failed to expose global"));
-        else resolve();
+        if (!fuzzysort) {
+          reject(new Error("fuzzysort failed to expose global"));
+        } else {
+          resolve();
+        }
       };
       s.onerror = () => reject(new Error("fuzzysort load failed"));
       document.head.appendChild(s);
@@ -123,7 +132,9 @@ function init() {
   let closingFromLink = false;
 
   function open() {
-    if (dialog.open) return;
+    if (dialog.open) {
+      return;
+    }
     ensureLoaded();
     dialog.showModal();
     input.value = "";
@@ -138,13 +149,17 @@ function init() {
   }
 
   function close() {
-    if (dialog.open) dialog.close();
+    if (dialog.open) {
+      dialog.close();
+    }
   }
 
   dialog.addEventListener("close", () => {
     const wasPushed = historyPushed;
     historyPushed = false;
-    if (!wasPushed || closingFromPopstate) return;
+    if (!wasPushed || closingFromPopstate) {
+      return;
+    }
     if (closingFromLink) {
       closingFromLink = false;
       history.replaceState(null, "");
@@ -154,7 +169,9 @@ function init() {
   });
 
   window.addEventListener("popstate", () => {
-    if (!dialog.open) return;
+    if (!dialog.open) {
+      return;
+    }
     closingFromPopstate = true;
     dialog.close();
     closingFromPopstate = false;
@@ -187,7 +204,9 @@ function init() {
 
   async function search(query) {
     const q = query.trim();
-    if (q === lastQuery) return;
+    if (q === lastQuery) {
+      return;
+    }
     lastQuery = q;
     if (!q) {
       clearResults();
@@ -204,7 +223,9 @@ function init() {
     // sym.group ("api" vs "section") at render time.
     (async () => {
       await apiReady;
-      if (q !== lastQuery) return;
+      if (q !== lastQuery) {
+        return;
+      }
       // fuzzysort v3 compresses scores to 0..1, so a single threshold no
       // longer separates good fuzzy hits from scattered ones. Pair the
       // threshold with a region-count cap to drop "doc"→"labelShadowColor"
@@ -225,14 +246,20 @@ function init() {
                 regionsStartAtBoundary(h._indexes, h.target)
             )
         : [];
-      if (q !== lastQuery) return;
+      if (q !== lastQuery) {
+        return;
+      }
       const apiHits = [];
       const sectionHits = [];
       for (const h of hits) {
         if (h.obj.group === "section") {
-          if (sectionHits.length < SECTION_LIMIT) sectionHits.push(h);
+          if (sectionHits.length < SECTION_LIMIT) {
+            sectionHits.push(h);
+          }
         } else {
-          if (apiHits.length < API_LIMIT) apiHits.push(h);
+          if (apiHits.length < API_LIMIT) {
+            apiHits.push(h);
+          }
         }
       }
       renderApi(apiHits, q);
@@ -242,15 +269,21 @@ function init() {
     // Pages path — pagefind handles its own debouncing.
     (async () => {
       await pagesReady;
-      if (q !== lastQuery) return;
+      if (q !== lastQuery) {
+        return;
+      }
       if (!pagefind) {
         renderPages([], q);
         return;
       }
       const r = await pagefind.debouncedSearch(q, PAGE_DEBOUNCE_MS);
-      if (r === null || q !== lastQuery) return;
+      if (r === null || q !== lastQuery) {
+        return;
+      }
       const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
-      if (q !== lastQuery) return;
+      if (q !== lastQuery) {
+        return;
+      }
       renderPages(pageHits, q);
     })();
   }
@@ -259,7 +292,9 @@ function init() {
     lists.api.replaceChildren();
     if (apiHits.length) {
       groups.api.hidden = false;
-      for (const hit of apiHits) lists.api.appendChild(renderApiHit(hit, q));
+      for (const hit of apiHits) {
+        lists.api.appendChild(renderApiHit(hit, q));
+      }
     } else {
       groups.api.hidden = true;
     }
@@ -272,7 +307,9 @@ function init() {
     lists.sections.replaceChildren();
     if (sectionHits.length) {
       groups.sections.hidden = false;
-      for (const hit of sectionHits) lists.sections.appendChild(renderSectionHit(hit, q));
+      for (const hit of sectionHits) {
+        lists.sections.appendChild(renderSectionHit(hit, q));
+      }
     } else {
       groups.sections.hidden = true;
     }
@@ -284,7 +321,9 @@ function init() {
     lists.pages.replaceChildren();
     if (pageHits.length) {
       groups.pages.hidden = false;
-      for (const page of pageHits) lists.pages.appendChild(renderPageHit(page, q));
+      for (const page of pageHits) {
+        lists.pages.appendChild(renderPageHit(page, q));
+      }
     } else {
       groups.pages.hidden = true;
     }
@@ -339,7 +378,9 @@ function init() {
   // section titles). Only present on entries whose name collides with another
   // somewhere in the index — index.js prunes the rest.
   function renderCrumbs(crumbs) {
-    if (!crumbs?.length) return "";
+    if (!crumbs?.length) {
+      return "";
+    }
     return `<span class="search-hit-crumbs">${crumbs.map(escapeHtml).join(" › ")}</span>`;
   }
 
@@ -385,7 +426,9 @@ function init() {
   // fragment still drives scroll. assets/js/pagefind-highlight.js
   // strips the param after applying highlights.
   function withHighlight(href, q) {
-    if (!q) return href;
+    if (!q) {
+      return href;
+    }
     const hashIdx = href.indexOf("#");
     const base = hashIdx >= 0 ? href.slice(0, hashIdx) : href;
     const hash = hashIdx >= 0 ? href.slice(hashIdx) : "";
@@ -425,7 +468,9 @@ function init() {
   closeBtn.addEventListener("click", close);
 
   dialog.addEventListener("click", e => {
-    if (e.target === dialog) close();
+    if (e.target === dialog) {
+      close();
+    }
   });
 
   input.addEventListener("input", () => search(input.value));
@@ -433,10 +478,14 @@ function init() {
   input.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (rows.length) setActive(activeIndex + 1);
+      if (rows.length) {
+        setActive(activeIndex + 1);
+      }
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      if (rows.length) setActive(activeIndex - 1);
+      if (rows.length) {
+        setActive(activeIndex - 1);
+      }
     } else if (e.key === "Enter") {
       if (activeIndex >= 0) {
         e.preventDefault();
@@ -456,20 +505,28 @@ function init() {
   // Show ⌘K on macOS, Ctrl K elsewhere. Both, plus "/", open the dialog.
   const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
   const kbd = trigger.querySelector("[data-search-kbd]");
-  if (kbd) kbd.textContent = isMac ? "⌘ K" : "Ctrl K";
+  if (kbd) {
+    kbd.textContent = isMac ? "⌘ K" : "Ctrl K";
+  }
 
   document.addEventListener("keydown", e => {
-    if (dialog.open) return;
+    if (dialog.open) {
+      return;
+    }
     const modK = (isMac ? e.metaKey : e.ctrlKey) && (e.key === "k" || e.key === "K");
     if (modK) {
       e.preventDefault();
       open();
       return;
     }
-    if (e.key !== "/") return;
+    if (e.key !== "/") {
+      return;
+    }
     const t = e.target;
     const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
-    if (typing) return;
+    if (typing) {
+      return;
+    }
     e.preventDefault();
     open();
   });

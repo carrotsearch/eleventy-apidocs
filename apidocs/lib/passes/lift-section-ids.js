@@ -14,7 +14,9 @@ export function liftSectionIds($) {
   $("article section[id]").each((_, section) => {
     const $section = $(section);
     const $heading = $section.children("h2, h3, h4, h5").first();
-    if (!$heading.length || $heading.attr("id")) return;
+    if (!$heading.length || $heading.attr("id")) {
+      return;
+    }
     $heading.attr("id", $section.attr("id"));
     $section.removeAttr("id");
   });

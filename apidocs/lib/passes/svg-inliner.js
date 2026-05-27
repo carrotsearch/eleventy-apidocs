@@ -11,7 +11,9 @@ import * as cheerio from "cheerio";
 export async function svgInliner($, ctx) {
   const targets = $('img[src$=".svg"], img[src$=".SVG"]').toArray();
   for (const el of targets) {
-    if ($(el).parents("pre").length) continue;
+    if ($(el).parents("pre").length) {
+      continue;
+    }
     await inlineOne($, el, ctx);
   }
 }

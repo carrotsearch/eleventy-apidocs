@@ -24,13 +24,17 @@ const titleCache = new Map();
 // passed by index.js under `runMode === "serve"` so dev rebuilds don't
 // re-read every article file on every keystroke.
 export async function loadNavigation(navigationPath, contentDir, { cache = false } = {}) {
-  if (!navigationPath) return null;
+  if (!navigationPath) {
+    return null;
+  }
   const abs = path.resolve(process.cwd(), navigationPath);
   let raw;
   try {
     raw = await readFile(abs, "utf8");
   } catch (err) {
-    if (err.code === "ENOENT") return null;
+    if (err.code === "ENOENT") {
+      return null;
+    }
     throw err;
   }
   const nav = JSON.parse(raw);
@@ -61,13 +65,17 @@ async function enrichNavigation(nav, contentDir, cache) {
     await normalize(nav);
   } else if (nav && Array.isArray(nav.chapters)) {
     for (const chapter of nav.chapters) {
-      if (Array.isArray(chapter.articles)) await normalize(chapter.articles);
+      if (Array.isArray(chapter.articles)) {
+        await normalize(chapter.articles);
+      }
     }
   }
 }
 
 async function readTitleForSlug(contentDir, slug, cache) {
-  if (!contentDir) return null;
+  if (!contentDir) {
+    return null;
+  }
   const file =
     slug === "" ? path.join(contentDir, "index.html") : path.join(contentDir, `${slug}.html`);
   const abs = path.resolve(process.cwd(), file);
@@ -77,7 +85,9 @@ async function readTitleForSlug(contentDir, slug, cache) {
     try {
       mtimeMs = (await stat(abs)).mtimeMs;
       const hit = titleCache.get(abs);
-      if (hit && hit.mtimeMs === mtimeMs) return hit.title;
+      if (hit && hit.mtimeMs === mtimeMs) {
+        return hit.title;
+      }
     } catch (err) {
       if (err.code === "ENOENT") {
         console.warn(

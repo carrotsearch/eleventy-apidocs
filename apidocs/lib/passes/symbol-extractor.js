@@ -23,7 +23,9 @@
 // extracted via the .api pass is skipped to avoid duplicates.
 
 export function extractSymbols($, ctx) {
-  if (!ctx?.symbols) return;
+  if (!ctx?.symbols) {
+    return;
+  }
   const url = ctx.page?.url || "/";
   const pageName = readHeadingText($("article > h1").first());
   const seenAnchors = new Set();
@@ -31,7 +33,9 @@ export function extractSymbols($, ctx) {
   $(".api").each((_, el) => {
     const $el = $(el);
     const name = readName($el);
-    if (!name) return;
+    if (!name) {
+      return;
+    }
     const anchor = readAnchor($el);
     if (!anchor) {
       console.warn(`[apidocs] .api element without anchor: "${name}" on ${url}`);
@@ -41,7 +45,9 @@ export function extractSymbols($, ctx) {
     ctx.symbols.push(
       withCrumbs({ name, kind, group: "api", url, anchor }, readCrumbs($, $el, pageName))
     );
-    if ($el.is("section")) seenAnchors.add(anchor);
+    if ($el.is("section")) {
+      seenAnchors.add(anchor);
+    }
   });
 
   if (pageName) {
@@ -50,13 +56,23 @@ export function extractSymbols($, ctx) {
 
   $("article section[id]").each((_, el) => {
     const $el = $(el);
-    if ($el.hasClass("api")) return;
-    if ($el.attr("data-toc") === "omit") return;
-    if (hasOmitChildrenAncestor($, $el)) return;
+    if ($el.hasClass("api")) {
+      return;
+    }
+    if ($el.attr("data-toc") === "omit") {
+      return;
+    }
+    if (hasOmitChildrenAncestor($, $el)) {
+      return;
+    }
     const anchor = $el.attr("id");
-    if (seenAnchors.has(anchor)) return;
+    if (seenAnchors.has(anchor)) {
+      return;
+    }
     const name = readSectionName($el);
-    if (!name) return;
+    if (!name) {
+      return;
+    }
     seenAnchors.add(anchor);
     ctx.symbols.push(
       withCrumbs(
@@ -75,22 +91,32 @@ function readCrumbs($, $el, pageName) {
   const ancestors = [];
   $el.parents("article section").each((_, p) => {
     const name = readSectionName($(p));
-    if (name) ancestors.push(name);
+    if (name) {
+      ancestors.push(name);
+    }
   });
   ancestors.reverse();
   return pageName ? [pageName, ...ancestors] : ancestors;
 }
 
 function withCrumbs(sym, crumbs) {
-  if (crumbs.length) sym.crumbs = crumbs;
+  if (crumbs.length) {
+    sym.crumbs = crumbs;
+  }
   return sym;
 }
 
 function readName($el) {
   const explicit = $el.attr("data-api-name");
-  if (explicit) return explicit.trim();
-  if ($el.is("dt")) return $el.text().trim();
-  if ($el.is("section")) return readSectionName($el);
+  if (explicit) {
+    return explicit.trim();
+  }
+  if ($el.is("dt")) {
+    return $el.text().trim();
+  }
+  if ($el.is("section")) {
+    return readSectionName($el);
+  }
   return $el.text().trim();
 }
 
@@ -99,7 +125,9 @@ function readSectionName($el) {
 }
 
 function readHeadingText($h) {
-  if (!$h?.length) return "";
+  if (!$h?.length) {
+    return "";
+  }
   const $clone = $h.clone();
   $clone.find("a.anchor").remove();
   return $clone.text().trim();
@@ -107,21 +135,29 @@ function readHeadingText($h) {
 
 function readAnchor($el) {
   const own = $el.attr("id");
-  if (own) return own;
+  if (own) {
+    return own;
+  }
   const $ancestor = $el.parents("[id]").first();
   return $ancestor.attr("id") || null;
 }
 
 function inferKind($el, name) {
-  if ($el.is("dt")) return "option";
-  if ($el.is("section")) return /\(.*\)$/.test(name) ? "method" : "property";
+  if ($el.is("dt")) {
+    return "option";
+  }
+  if ($el.is("section")) {
+    return /\(.*\)$/.test(name) ? "method" : "property";
+  }
   return null;
 }
 
 function hasOmitChildrenAncestor($, $el) {
   let omits = false;
   $el.parents("section").each((_, p) => {
-    if ($(p).attr("data-toc") === "omit-children") omits = true;
+    if ($(p).attr("data-toc") === "omit-children") {
+      omits = true;
+    }
   });
   return omits;
 }

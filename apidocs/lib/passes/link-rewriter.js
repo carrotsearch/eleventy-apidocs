@@ -23,15 +23,25 @@ export function linkRewriter($, ctx) {
 
   $("a[href]").each((_, el) => {
     const $a = $(el);
-    if ($a.attr("data-external") !== undefined) return;
+    if ($a.attr("data-external") !== undefined) {
+      return;
+    }
     const href = $a.attr("href");
-    if (!href || href.startsWith("#")) return;
-    if (ABSOLUTE.test(href)) return;
+    if (!href || href.startsWith("#")) {
+      return;
+    }
+    if (ABSOLUTE.test(href)) {
+      return;
+    }
 
     const m = href.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
-    if (!m) return;
+    if (!m) {
+      return;
+    }
     const [, pathPart, query = "", fragment = ""] = m;
-    if (!/\.html?$/i.test(pathPart)) return;
+    if (!/\.html?$/i.test(pathPart)) {
+      return;
+    }
 
     const resolved = pathPart.startsWith("/")
       ? pathPart

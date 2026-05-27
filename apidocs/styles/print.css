@@ -39,6 +39,9 @@
   .prev-next,
   .apidocs-progress,
   dialog.apidocs-lightbox {
+    /* biome-ignore lint/complexity/noImportantStyles: needed to beat
+       dialog[open]'s UA display when the lightbox is left open while
+       printing. */
     display: none !important;
   }
 
@@ -74,7 +77,12 @@
   }
 
   /* Pagination hygiene. */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     break-after: avoid;
     page-break-after: avoid;
   }
@@ -91,13 +99,16 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  img, svg {
+  img,
+  svg {
     max-inline-size: 100%;
     height: auto;
   }
 
   /* Capture the article's h1 as the running header string. */
   .article h1 {
+    /* biome-ignore lint/correctness/noUnknownFunction: content() is from
+       the CSS GCPM spec — Biome doesn't know it yet. */
     string-set: doc-title content();
   }
 }
@@ -106,13 +117,19 @@
 @page {
   margin: 2cm 1.8cm;
   @top-left {
+    /* biome-ignore lint/correctness/noUnknownFunction: string() is from
+       the CSS GCPM spec — Biome doesn't know it yet. */
     content: string(doc-title);
-    font: 9pt/1.2 system-ui, sans-serif;
+    font:
+      9pt / 1.2 system-ui,
+      sans-serif;
     color: #555;
   }
   @bottom-right {
     content: counter(page) " / " counter(pages);
-    font: 9pt/1.2 system-ui, sans-serif;
+    font:
+      9pt / 1.2 system-ui,
+      sans-serif;
     color: #555;
   }
 }

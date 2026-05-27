@@ -23,8 +23,12 @@ const DIR_INLINE = new RegExp(DIR_LINE_PATTERNS.map(r => `\\s*(${r.source})`).jo
 // branch ignores it.
 export function cleanCodeText(raw, { preserveIndent = false, preserveNewlines = false } = {}) {
   let text = raw;
-  if (!preserveIndent) text = removeCommonIndent(text);
-  if (!preserveNewlines) text = trimNewlines(text);
+  if (!preserveIndent) {
+    text = removeCommonIndent(text);
+  }
+  if (!preserveNewlines) {
+    text = trimNewlines(text);
+  }
   text = applyHide(text);
   return collectHighlight(text);
 }
@@ -36,14 +40,22 @@ function trimNewlines(s) {
 function parseDirective(line) {
   for (const re of DIR_LINE_PATTERNS) {
     const m = line.match(re);
-    if (!m) continue;
+    if (!m) {
+      continue;
+    }
     const action = m[2];
     const scope = m[3];
-    if (scope === "line") return { action, type: "line", start: 0, end: 1 };
-    if (scope === "next-line") return { action, type: "next-line", start: 1, end: 2 };
+    if (scope === "line") {
+      return { action, type: "line", start: 0, end: 1 };
+    }
+    if (scope === "next-line") {
+      return { action, type: "next-line", start: 1, end: 2 };
+    }
     const start = parseInt(m[4], 10);
     const end = parseInt(m[5], 10) + 1;
-    if (end < start) return null;
+    if (end < start) {
+      return null;
+    }
     return { action, type: "range", start, end };
   }
   return null;
@@ -54,12 +66,18 @@ function applyHide(content) {
   const drop = new Set();
   const out = [];
   for (let i = 0; i < lines.length; i++) {
-    if (drop.has(i)) continue;
+    if (drop.has(i)) {
+      continue;
+    }
     const dir = parseDirective(lines[i]);
     if (dir && dir.action === "hide") {
       const base = dir.type === "line" ? i : i + 1;
-      for (let k = dir.start; k < dir.end; k++) drop.add(base + (dir.type === "line" ? k : k - 1));
-      if (dir.type !== "line") continue;
+      for (let k = dir.start; k < dir.end; k++) {
+        drop.add(base + (dir.type === "line" ? k : k - 1));
+      }
+      if (dir.type !== "line") {
+        continue;
+      }
       continue;
     }
     out.push(lines[i]);
@@ -77,7 +95,9 @@ function collectHighlight(content) {
     const dir = parseDirective(input[i]);
     if (dir && dir.action === "highlight") {
       const base = dir.type === "line" ? i - offset : i - 1 - offset;
-      for (let k = dir.start; k < dir.end; k++) highlighted.add(base + k + 1); // Shiki lines are 1-based
+      for (let k = dir.start; k < dir.end; k++) {
+        highlighted.add(base + k + 1); // Shiki lines are 1-based
+      }
       if (dir.type !== "line") {
         offset++;
         continue;

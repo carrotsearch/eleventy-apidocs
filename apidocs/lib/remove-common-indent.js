@@ -3,10 +3,14 @@
 // based on the first non-empty line; mixed indentation is left alone.
 
 export function removeCommonIndent(content) {
-  if (!content) return "";
+  if (!content) {
+    return "";
+  }
 
   const lines = content.split(/[\r\n]/);
-  if (!lines.length) return content;
+  if (!lines.length) {
+    return content;
+  }
 
   let indentChar;
   for (const l of lines) {
@@ -15,16 +19,26 @@ export function removeCommonIndent(content) {
       break;
     }
   }
-  if (indentChar !== " " && indentChar !== "\t") return content;
+  if (indentChar !== " " && indentChar !== "\t") {
+    return content;
+  }
 
   let min = Infinity;
   for (const l of lines) {
-    if (!l.trim().length) continue;
+    if (!l.trim().length) {
+      continue;
+    }
     let c = 0;
-    while (c < l.length && l[c] === indentChar) c++;
-    if (c < min) min = c;
+    while (c < l.length && l[c] === indentChar) {
+      c++;
+    }
+    if (c < min) {
+      min = c;
+    }
   }
-  if (!Number.isFinite(min)) return content;
+  if (!Number.isFinite(min)) {
+    return content;
+  }
 
   return lines.map(l => l.slice(min)).join("\n");
 }

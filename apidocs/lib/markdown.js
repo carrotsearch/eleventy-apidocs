@@ -24,7 +24,9 @@ turndown.use(gfm);
 // implement classList consistently.
 function hasClass(node, name) {
   const cls = node.getAttribute?.("class");
-  if (!cls) return false;
+  if (!cls) {
+    return false;
+  }
   return cls.split(/\s+/).includes(name);
 }
 
@@ -42,7 +44,9 @@ turndown.addRule("apidocs-pre-lang", {
 // Callouts: info → [!NOTE], warning → [!WARNING], box → plain blockquote.
 turndown.addRule("apidocs-callout", {
   filter: node => {
-    if (node.nodeName !== "DIV") return false;
+    if (node.nodeName !== "DIV") {
+      return false;
+    }
     return hasClass(node, "info") || hasClass(node, "warning") || hasClass(node, "box");
   },
   replacement: (content, node) => {
@@ -52,7 +56,9 @@ turndown.addRule("apidocs-callout", {
         ? "[!WARNING]"
         : null;
     const body = content.trim();
-    if (!body) return "";
+    if (!body) {
+      return "";
+    }
     const lines = body.split("\n");
     const prefixed = lines.map(l => (l ? `> ${l}` : ">")).join("\n");
     const head = admonition ? `> ${admonition}\n` : "";
@@ -71,7 +77,9 @@ turndown.addRule("apidocs-dt", {
   filter: "dt",
   replacement: (content, node) => {
     const text = content.trim();
-    if (!text) return "";
+    if (!text) {
+      return "";
+    }
     return hasClass(node, "api") ? `\n\n### ${text}\n\n` : `\n\n**${text}**\n\n`;
   }
 });
@@ -119,8 +127,12 @@ const BLOCK_IN_CELL = new Set([
 function cellHasBlockContent(cell) {
   const children = Array.from(cell.childNodes || []);
   for (const child of children) {
-    if (child.nodeType !== 1) continue;
-    if (BLOCK_IN_CELL.has(child.nodeName)) return true;
+    if (child.nodeType !== 1) {
+      continue;
+    }
+    if (BLOCK_IN_CELL.has(child.nodeName)) {
+      return true;
+    }
   }
   return false;
 }

@@ -47,7 +47,9 @@ function getHighlighter() {
 
 export async function codeHighlight($, _ctx) {
   const targets = $("pre[data-language]").toArray();
-  if (!targets.length) return;
+  if (!targets.length) {
+    return;
+  }
   const highlighter = await getHighlighter();
   const loaded = new Set(highlighter.getLoadedLanguages());
 
@@ -70,7 +72,9 @@ export async function codeHighlight($, _ctx) {
       transformers: [
         {
           line(node, line) {
-            if (highlighted.has(line)) this.addClassToHast(node, "highlighted");
+            if (highlighted.has(line)) {
+              this.addClassToHast(node, "highlighted");
+            }
           }
         }
       ]
@@ -87,11 +91,17 @@ export async function codeHighlight($, _ctx) {
 function collectAttrs($el) {
   const attrs = [];
   const cls = $el.attr("class");
-  if (cls) attrs.push(`class="${encodeAttr(cls)}"`);
+  if (cls) {
+    attrs.push(`class="${encodeAttr(cls)}"`);
+  }
   for (const [name, value] of Object.entries($el.attr() || {})) {
-    if (!name.startsWith("data-")) continue;
+    if (!name.startsWith("data-")) {
+      continue;
+    }
     const key = name.slice(5);
-    if (PRESERVED_DATA.has(key)) continue;
+    if (PRESERVED_DATA.has(key)) {
+      continue;
+    }
     attrs.push(`${name}="${encodeAttr(value)}"`);
   }
   return attrs.length ? ` ${attrs.join(" ")}` : "";
@@ -103,13 +113,25 @@ function has($el, name) {
 }
 
 function normalizeLang(l) {
-  if (!l) return "text";
+  if (!l) {
+    return "text";
+  }
   const v = l.trim().toLowerCase();
-  if (v === "js") return "javascript";
-  if (v === "ts") return "typescript";
-  if (v === "sh") return "bash";
-  if (v === "yml") return "yaml";
-  if (v === "md") return "markdown";
+  if (v === "js") {
+    return "javascript";
+  }
+  if (v === "ts") {
+    return "typescript";
+  }
+  if (v === "sh") {
+    return "bash";
+  }
+  if (v === "yml") {
+    return "yaml";
+  }
+  if (v === "md") {
+    return "markdown";
+  }
   return v;
 }
 

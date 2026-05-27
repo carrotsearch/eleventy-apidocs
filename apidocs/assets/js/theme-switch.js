@@ -5,7 +5,9 @@ const STORAGE_KEY = "apidocs-theme";
 
 class ApidocsThemeSwitch extends HTMLElement {
   connectedCallback() {
-    if (this.shadowRoot || this.firstElementChild) return;
+    if (this.shadowRoot || this.firstElementChild) {
+      return;
+    }
     this.innerHTML = `
       <button type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle dark mode">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -25,7 +27,9 @@ class ApidocsThemeSwitch extends HTMLElement {
     // If the user changes OS preference and they haven't pinned a manual choice,
     // re-sync the button's aria-pressed state.
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-      if (!document.documentElement.hasAttribute("data-theme")) this.#sync();
+      if (!document.documentElement.hasAttribute("data-theme")) {
+        this.#sync();
+      }
     });
   }
 
@@ -41,13 +45,17 @@ class ApidocsThemeSwitch extends HTMLElement {
 
   #isDark() {
     const explicit = document.documentElement.getAttribute("data-theme");
-    if (explicit) return explicit === "dark";
+    if (explicit) {
+      return explicit === "dark";
+    }
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
 
   #sync() {
     const btn = this.querySelector("button");
-    if (btn) btn.setAttribute("aria-pressed", String(this.#isDark()));
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(this.#isDark()));
+    }
   }
 }
 

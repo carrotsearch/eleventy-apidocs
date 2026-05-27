@@ -24,8 +24,11 @@ if (layout && toggle && nav) {
   let historyPushed = false;
 
   const setOpen = (open, { fromPopstate = false, fromLink = false } = {}) => {
-    if (open) layout.setAttribute("data-nav-open", "");
-    else layout.removeAttribute("data-nav-open");
+    if (open) {
+      layout.setAttribute("data-nav-open", "");
+    } else {
+      layout.removeAttribute("data-nav-open");
+    }
     toggle.setAttribute("aria-expanded", String(open));
     toggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
     nav.inert = !open && mql.matches;
@@ -44,8 +47,11 @@ if (layout && toggle && nav) {
         // Pop the marker entry — unless a link's default navigation is
         // about to fire, in which case we replace the marker so the
         // forward nav has nothing to race with.
-        if (fromLink) history.replaceState(null, "");
-        else history.back();
+        if (fromLink) {
+          history.replaceState(null, "");
+        } else {
+          history.back();
+        }
       }
     }
   };
@@ -54,7 +60,9 @@ if (layout && toggle && nav) {
     if (!mql.matches) {
       // Desktop / tablet — drawer state is meaningless. Route through
       // setOpen so any pushed history entry gets cleaned up.
-      if (layout.hasAttribute("data-nav-open")) setOpen(false);
+      if (layout.hasAttribute("data-nav-open")) {
+        setOpen(false);
+      }
       nav.inert = false;
     } else {
       // Mobile — start closed; nav is inert until opened.
@@ -78,7 +86,9 @@ if (layout && toggle && nav) {
   // when the new page renders the same drawer state.
   nav.addEventListener("click", e => {
     const link = e.target.closest("a");
-    if (link) setOpen(false, { fromLink: true });
+    if (link) {
+      setOpen(false, { fromLink: true });
+    }
   });
 
   // Device back button: if our marker is on top of the stack, the user

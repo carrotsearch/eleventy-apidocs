@@ -5,7 +5,9 @@
 const PATTERN = /\$([A-Z][A-Z0-9_]*)\$/g;
 
 export function substituteVariables(html, variables) {
-  if (!variables) return html;
+  if (!variables) {
+    return html;
+  }
   return html.replace(PATTERN, (match, name) =>
     Object.hasOwn(variables, name) ? String(variables[name]) : match
   );

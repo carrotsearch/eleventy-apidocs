@@ -22,17 +22,23 @@ export function startBuild(mode) {
 
 export function endBuild() {
   if (!isVerbose()) {
-    if (runMode === "serve") firstServeBuildDone = true;
+    if (runMode === "serve") {
+      firstServeBuildDone = true;
+    }
     return;
   }
   const dt = formatMs(performance.now() - buildStart);
   console.log(`[apidocs] build done: ${seenImages.size} images, ${dt}`);
-  if (runMode === "serve") firstServeBuildDone = true;
+  if (runMode === "serve") {
+    firstServeBuildDone = true;
+  }
 }
 
 export async function stage(label, fn) {
   pendingNote = null;
-  if (!isVerbose()) return await fn();
+  if (!isVerbose()) {
+    return await fn();
+  }
   const t0 = performance.now();
   console.log(`[apidocs] ${label}...`);
   try {
@@ -54,8 +60,12 @@ export function note(text) {
 }
 
 export function formatBytes(n) {
-  if (n < 1000) return `${n} B`;
-  if (n < 1_000_000) return `${(n / 1000).toFixed(1)} kB`;
+  if (n < 1000) {
+    return `${n} B`;
+  }
+  if (n < 1_000_000) {
+    return `${(n / 1000).toFixed(1)} kB`;
+  }
   return `${(n / 1_000_000).toFixed(2)} MB`;
 }
 
@@ -64,8 +74,12 @@ export function formatBytes(n) {
 // every call after the first a no-op. Logging only the first sighting
 // keeps the counter honest.
 export function image(src) {
-  if (!isVerbose()) return;
-  if (seenImages.has(src)) return;
+  if (!isVerbose()) {
+    return;
+  }
+  if (seenImages.has(src)) {
+    return;
+  }
   seenImages.add(src);
   console.log(`[apidocs] image #${seenImages.size}: ${src}`);
 }
@@ -75,6 +89,8 @@ function isVerbose() {
 }
 
 function formatMs(ms) {
-  if (ms < 1000) return `${Math.round(ms)}ms`;
+  if (ms < 1000) {
+    return `${Math.round(ms)}ms`;
+  }
   return `${(ms / 1000).toFixed(2)}s`;
 }

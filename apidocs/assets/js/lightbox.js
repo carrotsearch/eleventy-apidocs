@@ -18,7 +18,9 @@ let lastSource = null;
 const preloaded = new WeakSet();
 
 function getDialog() {
-  if (dialog) return dialog;
+  if (dialog) {
+    return dialog;
+  }
   dialog = document.createElement("dialog");
   dialog.className = "apidocs-lightbox";
   const frame = document.createElement("div");
@@ -43,14 +45,18 @@ function getDialog() {
 
 function findVisual(target) {
   const figure = target.closest?.("figure");
-  if (!figure) return null;
+  if (!figure) {
+    return null;
+  }
   // Prefer the element actually clicked when it's the visual itself
   // (svg or img), but fall back to the figure's primary visual.
   let visual = target.closest("picture, img, svg");
   if (!visual || !figure.contains(visual)) {
     visual = figure.querySelector("picture, img, svg");
   }
-  if (!visual) return null;
+  if (!visual) {
+    return null;
+  }
   return { figure, visual };
 }
 
@@ -67,13 +73,17 @@ function openLightbox(figure, source) {
   const clone = source.cloneNode(true);
   if (clone.tagName === "PICTURE") {
     const img = clone.querySelector("img");
-    if (img) img.removeAttribute("loading");
+    if (img) {
+      img.removeAttribute("loading");
+    }
   }
   // Pin the clone's aspect-ratio to the image's natural dimensions so the
   // View Transitions snapshot box matches the image content exactly (no
   // letterbox padding inside the captured box).
   const ar = aspectRatioOf(clone);
-  if (ar) clone.style.setProperty("--ar", ar);
+  if (ar) {
+    clone.style.setProperty("--ar", ar);
+  }
 
   // Lock the clone to the source's already-rendered image so the VT
   // captures exactly those pixels (no late load, no LQIP flash). Returns
@@ -83,7 +93,9 @@ function openLightbox(figure, source) {
   frame.appendChild(clone);
 
   const caption = figure.querySelector("figcaption");
-  if (caption) frame.appendChild(caption.cloneNode(true));
+  if (caption) {
+    frame.appendChild(caption.cloneNode(true));
+  }
 
   lastSource = source;
 
@@ -94,7 +106,9 @@ function openLightbox(figure, source) {
 
   if (!document.startViewTransition) {
     finishOpen();
-    if (upgrade) upgrade();
+    if (upgrade) {
+      upgrade();
+    }
     return;
   }
 
@@ -112,7 +126,9 @@ function openLightbox(figure, source) {
   // pick it up when the user dismisses.
   t.finished.finally(() => {
     document.documentElement.classList.remove("apidocs-lightbox-opening");
-    if (upgrade) upgrade();
+    if (upgrade) {
+      upgrade();
+    }
   });
 }
 
@@ -121,12 +137,18 @@ function openLightbox(figure, source) {
 // there's nothing to upgrade — e.g. an SVG, or the source hasn't loaded
 // yet so we have no currentSrc to pin to).
 function lockAndCaptureUpgrade(source, clone) {
-  if (source.tagName === "svg" || source.tagName === "SVG") return null;
+  if (source.tagName === "svg" || source.tagName === "SVG") {
+    return null;
+  }
   const sourceImg = source.tagName === "PICTURE" ? source.querySelector("img") : source;
   const clonedImg = clone.tagName === "PICTURE" ? clone.querySelector("img") : clone;
-  if (!sourceImg || !clonedImg) return null;
+  if (!sourceImg || !clonedImg) {
+    return null;
+  }
   const currentSrc = sourceImg.currentSrc || sourceImg.src;
-  if (!currentSrc) return null;
+  if (!currentSrc) {
+    return null;
+  }
 
   // Read the upgrade attributes from `source`, not `clone` — we're about
   // to mutate the clone, and reading from the live source is unambiguous.
@@ -141,29 +163,43 @@ function lockAndCaptureUpgrade(source, clone) {
       : [];
 
   if (clone.tagName === "PICTURE") {
-    for (const s of clone.querySelectorAll(":scope > source")) s.remove();
+    for (const s of clone.querySelectorAll(":scope > source")) {
+      s.remove();
+    }
   }
   clonedImg.removeAttribute("srcset");
   clonedImg.removeAttribute("sizes");
   clonedImg.src = currentSrc;
 
-  if (!upgradeSrcset && !upgradeSources.length) return null;
+  if (!upgradeSrcset && !upgradeSources.length) {
+    return null;
+  }
 
   return () => {
-    if (!clone.isConnected) return;
+    if (!clone.isConnected) {
+      return;
+    }
     if (upgradeSources.length && clone.tagName === "PICTURE") {
       const frag = document.createDocumentFragment();
       for (const s of upgradeSources) {
         const el = document.createElement("source");
-        if (s.type) el.type = s.type;
-        if (s.media) el.setAttribute("media", s.media);
-        if (s.srcset) el.setAttribute("srcset", s.srcset);
+        if (s.type) {
+          el.type = s.type;
+        }
+        if (s.media) {
+          el.setAttribute("media", s.media);
+        }
+        if (s.srcset) {
+          el.setAttribute("srcset", s.srcset);
+        }
         el.setAttribute("sizes", "100vw");
         frag.appendChild(el);
       }
       clone.insertBefore(frag, clonedImg);
     }
-    if (upgradeSrcset) clonedImg.setAttribute("srcset", upgradeSrcset);
+    if (upgradeSrcset) {
+      clonedImg.setAttribute("srcset", upgradeSrcset);
+    }
     clonedImg.setAttribute("sizes", "100vw");
   };
 }
@@ -173,39 +209,55 @@ function lockAndCaptureUpgrade(source, clone) {
 // browser only fetches the format it supports) plus the fallback <img>'s
 // srcset as a backstop. Idempotent per figure.
 function preloadFigure(figure) {
-  if (preloaded.has(figure)) return;
-  if (figure.dataset.lightbox === "off") return;
+  if (preloaded.has(figure)) {
+    return;
+  }
+  if (figure.dataset.lightbox === "off") {
+    return;
+  }
   const picture = figure.querySelector("picture");
-  if (!picture) return;
+  if (!picture) {
+    return;
+  }
   preloaded.add(figure);
 
   for (const s of picture.querySelectorAll(":scope > source")) {
     addImagePreload(s.getAttribute("srcset"), s.getAttribute("type"));
   }
   const img = picture.querySelector("img");
-  if (img) addImagePreload(img.getAttribute("srcset"), null);
+  if (img) {
+    addImagePreload(img.getAttribute("srcset"), null);
+  }
 }
 
 function addImagePreload(srcset, type) {
-  if (!srcset) return;
+  if (!srcset) {
+    return;
+  }
   const link = document.createElement("link");
   link.rel = "preload";
   link.as = "image";
-  if (type) link.type = type;
+  if (type) {
+    link.type = type;
+  }
   link.setAttribute("imagesrcset", srcset);
   link.setAttribute("imagesizes", "100vw");
   document.head.appendChild(link);
 }
 
 function closeLightbox() {
-  if (!dialog?.open) return;
+  if (!dialog?.open) {
+    return;
+  }
   const frame = dialog.querySelector(".frame");
   const clone = frame.querySelector("picture, img, svg");
 
   const finishClose = () => {
     dialog.close();
     document.body.classList.remove("apidocs-lightbox-open");
-    if (lastSource) lastSource.style.viewTransitionName = "";
+    if (lastSource) {
+      lastSource.style.viewTransitionName = "";
+    }
     lastSource = null;
     frame.replaceChildren();
   };
@@ -219,14 +271,20 @@ function closeLightbox() {
   // source so the snapshot animates to the in-page position.
   document.documentElement.classList.add("apidocs-lightbox-closing");
   const t = document.startViewTransition(() => {
-    if (clone) clone.style.viewTransitionName = "";
-    if (lastSource) lastSource.style.viewTransitionName = NAME;
+    if (clone) {
+      clone.style.viewTransitionName = "";
+    }
+    if (lastSource) {
+      lastSource.style.viewTransitionName = NAME;
+    }
     dialog.close();
     document.body.classList.remove("apidocs-lightbox-open");
   });
   t.finished.finally(() => {
     document.documentElement.classList.remove("apidocs-lightbox-closing");
-    if (lastSource) lastSource.style.viewTransitionName = "";
+    if (lastSource) {
+      lastSource.style.viewTransitionName = "";
+    }
     lastSource = null;
     frame.replaceChildren();
   });
@@ -238,7 +296,9 @@ function closeLightbox() {
 function aspectRatioOf(el) {
   if (el.tagName === "PICTURE") {
     const img = el.querySelector("img");
-    if (!img) return null;
+    if (!img) {
+      return null;
+    }
     return arFromWH(img.getAttribute("width"), img.getAttribute("height"));
   }
   if (el.tagName === "IMG") {
@@ -263,23 +323,35 @@ function aspectRatioOf(el) {
 function arFromWH(w, h) {
   const wn = parseFloat(w);
   const hn = parseFloat(h);
-  if (wn > 0 && hn > 0) return `${wn} / ${hn}`;
+  if (wn > 0 && hn > 0) {
+    return `${wn} / ${hn}`;
+  }
   return null;
 }
 
 function onClick(e) {
-  if (dialog?.open) return;
+  if (dialog?.open) {
+    return;
+  }
   const hit = findVisual(e.target);
-  if (!hit) return;
-  if (hit.figure.dataset.lightbox === "off") return;
+  if (!hit) {
+    return;
+  }
+  if (hit.figure.dataset.lightbox === "off") {
+    return;
+  }
   e.preventDefault();
   openLightbox(hit.figure, hit.visual);
 }
 
 function onPreloadCue(e) {
-  if (dialog?.open) return;
+  if (dialog?.open) {
+    return;
+  }
   const figure = e.target?.closest?.("figure");
-  if (figure) preloadFigure(figure);
+  if (figure) {
+    preloadFigure(figure);
+  }
 }
 
 document.addEventListener("click", onClick);

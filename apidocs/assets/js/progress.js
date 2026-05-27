@@ -17,15 +17,29 @@ let hideTimer = null;
 let bar = null;
 
 document.addEventListener("click", event => {
-  if (event.defaultPrevented) return;
-  if (event.button !== 0) return;
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (event.defaultPrevented) {
+    return;
+  }
+  if (event.button !== 0) {
+    return;
+  }
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
 
   const link = event.target.closest("a[href]");
-  if (!link) return;
-  if (link.target && link.target !== "_self") return;
-  if (link.hasAttribute("download")) return;
-  if (link.getAttribute("rel")?.includes("external")) return;
+  if (!link) {
+    return;
+  }
+  if (link.target && link.target !== "_self") {
+    return;
+  }
+  if (link.hasAttribute("download")) {
+    return;
+  }
+  if (link.getAttribute("rel")?.includes("external")) {
+    return;
+  }
 
   let url;
   try {
@@ -34,9 +48,13 @@ document.addEventListener("click", event => {
     return;
   }
 
-  if (url.origin !== location.origin) return;
+  if (url.origin !== location.origin) {
+    return;
+  }
   // Same-page anchor / hash — no document fetch.
-  if (url.pathname === location.pathname && url.search === location.search) return;
+  if (url.pathname === location.pathname && url.search === location.search) {
+    return;
+  }
 
   arm();
 });
@@ -63,7 +81,9 @@ function cancel() {
 }
 
 function show() {
-  if (bar) return;
+  if (bar) {
+    return;
+  }
   bar = document.createElement("div");
   bar.className = "apidocs-progress";
   document.body.appendChild(bar);

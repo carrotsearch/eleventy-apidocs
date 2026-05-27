@@ -19,14 +19,18 @@ export function buildLlmsIndex(pages, navigation) {
   const siteSummary = home?.summary || "";
 
   const lines = [`# ${siteName}`];
-  if (siteSummary) lines.push("", `> ${siteSummary}`);
+  if (siteSummary) {
+    lines.push("", `> ${siteSummary}`);
+  }
 
   const chapters = navChapters(navigation);
   for (const chapter of chapters) {
     const articles = (chapter.articles || [])
       .map(a => byUrl.get(articleHref(a)))
       .filter(p => p && p.url !== "/");
-    if (!articles.length) continue;
+    if (!articles.length) {
+      continue;
+    }
     lines.push("", `## ${chapter.title || "Pages"}`, "");
     for (const page of articles) {
       const summary = page.summary ? `: ${page.summary}` : "";
@@ -51,7 +55,9 @@ export function buildLlmsFull(pages, navigation) {
   for (const chapter of navChapters(navigation)) {
     for (const article of chapter.articles || []) {
       const page = byUrl.get(articleHref(article));
-      if (!page || seen.has(page.url)) continue;
+      if (!page || seen.has(page.url)) {
+        continue;
+      }
       ordered.push(page);
       seen.add(page.url);
     }
@@ -67,9 +73,15 @@ export function buildLlmsFull(pages, navigation) {
 }
 
 function navChapters(navigation) {
-  if (!navigation) return [];
-  if (Array.isArray(navigation)) return [{ title: null, articles: navigation }];
-  if (Array.isArray(navigation.chapters)) return navigation.chapters;
+  if (!navigation) {
+    return [];
+  }
+  if (Array.isArray(navigation)) {
+    return [{ title: null, articles: navigation }];
+  }
+  if (Array.isArray(navigation.chapters)) {
+    return navigation.chapters;
+  }
   return [];
 }
 
@@ -81,7 +93,9 @@ function articleHref(article) {
 // Map a page URL ("/" or "/foo/") to the public path of its .md sibling.
 // Mirrors mdPathFor() in index.js: trailing slash dropped, ".md" appended.
 function mdUrl(url) {
-  if (!url || url === "/") return "/index.md";
+  if (!url || url === "/") {
+    return "/index.md";
+  }
   return `${url.replace(/\/$/, "")}.md`;
 }
 

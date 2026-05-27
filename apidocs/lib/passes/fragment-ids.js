@@ -13,10 +13,14 @@ const SELECTOR = "p, li, dt";
 export function fragmentIds($) {
   $(SELECTOR).each((_, el) => {
     const $el = $(el);
-    if ($el.attr("id")) return;
+    if ($el.attr("id")) {
+      return;
+    }
 
     const text = $el.text().trim().slice(0, 200);
-    if (!text) return;
+    if (!text) {
+      return;
+    }
 
     const hash = crypto.createHash("md5").update(text).digest("hex").slice(0, 8);
     $el.attr("id", `_${hash}`);

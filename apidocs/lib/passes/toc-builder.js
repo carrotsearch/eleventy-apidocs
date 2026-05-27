@@ -22,19 +22,27 @@ export function buildToc($) {
 }
 
 function entryFor($, $section) {
-  if ($section.attr("data-toc") === "omit") return null;
+  if ($section.attr("data-toc") === "omit") {
+    return null;
+  }
 
   const id = $section.attr("id");
-  if (!id) return null;
+  if (!id) {
+    return null;
+  }
 
   const $heading = $section.children("h2, h3, h4, h5").first();
-  if (!$heading.length) return null;
+  if (!$heading.length) {
+    return null;
+  }
 
   // Heading text without the prepended anchor-link icon.
   const $clone = $heading.clone();
   $clone.find("a.anchor").remove();
   const heading = $clone.text().trim();
-  if (!heading) return null;
+  if (!heading) {
+    return null;
+  }
 
   const entry = { heading, anchor: id };
 
@@ -44,7 +52,9 @@ function entryFor($, $section) {
       .toArray()
       .map(el => entryFor($, $(el)))
       .filter(Boolean);
-    if (children.length) entry.sections = children;
+    if (children.length) {
+      entry.sections = children;
+    }
   }
 
   return entry;

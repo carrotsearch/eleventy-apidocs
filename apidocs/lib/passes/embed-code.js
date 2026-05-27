@@ -14,7 +14,9 @@ import { substituteVariables } from "./variables.js";
 export async function embedCode($, ctx) {
   const targets = $("pre[data-embed], embed[src]").toArray();
   for (const el of targets) {
-    if ($(el).parents("pre[data-language]").length) continue;
+    if ($(el).parents("pre[data-language]").length) {
+      continue;
+    }
     await embedOne($, el, ctx);
   }
 }

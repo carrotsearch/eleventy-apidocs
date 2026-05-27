@@ -16,9 +16,13 @@ const CLICK_SUPPRESS_MS = 800;
 
 function init() {
   const tocRoot = document.querySelector(".toc");
-  if (!tocRoot) return;
+  if (!tocRoot) {
+    return;
+  }
   const links = tocRoot.querySelectorAll("[data-toc-anchor]");
-  if (!links.length) return;
+  if (!links.length) {
+    return;
+  }
 
   const linkByAnchor = new Map();
   links.forEach(a => {
@@ -28,15 +32,21 @@ function init() {
   const sections = [];
   for (const anchor of linkByAnchor.keys()) {
     const sec = document.getElementById(anchor);
-    if (sec) sections.push(sec);
+    if (sec) {
+      sections.push(sec);
+    }
   }
-  if (!sections.length) return;
+  if (!sections.length) {
+    return;
+  }
 
   let activeAnchor = null;
   let suppressedUntil = 0;
 
   const setActive = anchor => {
-    if (anchor === activeAnchor) return;
+    if (anchor === activeAnchor) {
+      return;
+    }
     activeAnchor = anchor;
     links.forEach(a => {
       a.classList.toggle("active", a.dataset.tocAnchor === anchor);
@@ -44,12 +54,17 @@ function init() {
   };
 
   const update = () => {
-    if (performance.now() < suppressedUntil) return;
+    if (performance.now() < suppressedUntil) {
+      return;
+    }
     const fold = window.innerHeight * FOLD_FRACTION;
     let active = null;
     for (const s of sections) {
-      if (s.getBoundingClientRect().top <= fold) active = s;
-      else break;
+      if (s.getBoundingClientRect().top <= fold) {
+        active = s;
+      } else {
+        break;
+      }
     }
     setActive(active ? active.id : null);
   };
@@ -73,7 +88,9 @@ function init() {
 
   let scheduled = false;
   const schedule = () => {
-    if (scheduled) return;
+    if (scheduled) {
+      return;
+    }
     scheduled = true;
     requestAnimationFrame(() => {
       scheduled = false;

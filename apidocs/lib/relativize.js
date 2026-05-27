@@ -5,7 +5,9 @@ import path from "node:path";
 //
 // Covers href, src, and srcset. Inline style url() is a roadmap item.
 export function relativizeHtml(html, fromUrl) {
-  if (!fromUrl) return html;
+  if (!fromUrl) {
+    return html;
+  }
   let out = html.replace(/\b(href|src)="([^"]+)"/g, (_match, attr, url) => {
     return `${attr}="${relativizeUrl(url, fromUrl)}"`;
   });
@@ -14,10 +16,14 @@ export function relativizeHtml(html, fromUrl) {
       .split(",")
       .map(part => {
         const trimmed = part.trim();
-        if (!trimmed) return trimmed;
+        if (!trimmed) {
+          return trimmed;
+        }
         // "url [descriptor]" — split on whitespace; descriptor may be absent.
         const ws = trimmed.indexOf(" ");
-        if (ws === -1) return relativizeUrl(trimmed, fromUrl);
+        if (ws === -1) {
+          return relativizeUrl(trimmed, fromUrl);
+        }
         const url = trimmed.slice(0, ws);
         const descriptor = trimmed.slice(ws);
         return relativizeUrl(url, fromUrl) + descriptor;
@@ -35,7 +41,11 @@ export function relativizeUrl(url, fromUrl) {
 
   const fromDir = fromUrl.endsWith("/") ? fromUrl : `${path.dirname(fromUrl)}/`;
   let rel = path.relative(fromDir, url);
-  if (!rel.startsWith(".")) rel = `./${rel}`;
-  if (url.endsWith("/") && !rel.endsWith("/")) rel += "/";
+  if (!rel.startsWith(".")) {
+    rel = `./${rel}`;
+  }
+  if (url.endsWith("/") && !rel.endsWith("/")) {
+    rel += "/";
+  }
   return rel;
 }

@@ -17,7 +17,9 @@ const PARAM = "pagefind-highlight";
 
 async function run() {
   const url = new URL(window.location.href);
-  if (!url.searchParams.has(PARAM)) return;
+  if (!url.searchParams.has(PARAM)) {
+    return;
+  }
   try {
     const url = new URL("../pagefind/pagefind-highlight.js", import.meta.url);
     const mod = await import(url.href);

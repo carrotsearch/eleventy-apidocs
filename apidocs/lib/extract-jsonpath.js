@@ -8,7 +8,9 @@ import * as jsonc from "jsonc-parser";
 import { JSONPath } from "jsonpath-plus";
 
 export function extractJsonpath(content, expr) {
-  if (!content) throw new Error("Cannot apply jsonpath to empty content.");
+  if (!content) {
+    throw new Error("Cannot apply jsonpath to empty content.");
+  }
 
   const opts = parseSuffix(expr);
   const text = opts.removeComments
@@ -29,21 +31,33 @@ export function extractJsonpath(content, expr) {
   } catch (e) {
     throw new Error(`JSONPath ${opts.path} failed: ${e.message}`);
   }
-  if (!results.length) throw new Error(`No matches for JSONPath ${opts.path}.`);
+  if (!results.length) {
+    throw new Error(`No matches for JSONPath ${opts.path}.`);
+  }
 
   if (opts.keyFilter) {
     results = results.map(v => {
-      if (v === null || typeof v !== "object" || Array.isArray(v)) return v;
+      if (v === null || typeof v !== "object" || Array.isArray(v)) {
+        return v;
+      }
       const out = {};
-      for (const k of Object.keys(v)) if (opts.keyFilter(k)) out[k] = v[k];
+      for (const k of Object.keys(v)) {
+        if (opts.keyFilter(k)) {
+          out[k] = v[k];
+        }
+      }
       return out;
     });
   }
 
   return results.map(v => {
-    if (typeof v === "number" || typeof v === "string") return String(v);
+    if (typeof v === "number" || typeof v === "string") {
+      return String(v);
+    }
     let s = JSON.stringify(v, null, "  ");
-    if (opts.trimBrackets) s = s.replace(/^\s*\{[ \t]*\r?\n?|[ \t]*\}\s*$/g, "");
+    if (opts.trimBrackets) {
+      s = s.replace(/^\s*\{[ \t]*\r?\n?|[ \t]*\}\s*$/g, "");
+    }
     return s;
   });
 }
@@ -78,7 +92,9 @@ function parseSuffix(raw) {
         throw new Error(`Unknown jsonpath option: ${tok}`);
       }
     }
-    if (matchers.length) keyFilter = k => matchers.some(m => m(k));
+    if (matchers.length) {
+      keyFilter = k => matchers.some(m => m(k));
+    }
   }
 
   return { path, trimBrackets, removeComments, keyFilter };

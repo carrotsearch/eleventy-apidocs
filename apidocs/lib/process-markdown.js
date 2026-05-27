@@ -54,9 +54,13 @@ function extractTitle($) {
 // Returns "" when neither is available.
 function extractSummary($) {
   const meta = $('meta[name="description"]').attr("content");
-  if (meta) return normalize(meta);
+  if (meta) {
+    return normalize(meta);
+  }
   const firstP = $("p").first();
-  if (firstP.length) return normalize(firstP.text());
+  if (firstP.length) {
+    return normalize(firstP.text());
+  }
   return "";
 }
 
@@ -88,13 +92,17 @@ async function rewriteImageSrcs($, ctx) {
       const src = $(el).attr("src");
       return src && RASTER.test(src) && !$(el).parents("pre").length;
     });
-  if (!targets.length) return;
+  if (!targets.length) {
+    return;
+  }
 
   await Promise.all(
     targets.map(async el => {
       const $img = $(el);
       const metadata = await loadImage($img.attr("src"), ctx);
-      if (!metadata) return;
+      if (!metadata) {
+        return;
+      }
       const fallback = metadata[pickFallbackFormat(metadata)];
       const largest = fallback[fallback.length - 1];
       $img.attr("src", largest.url);

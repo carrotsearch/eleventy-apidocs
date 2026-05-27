@@ -7,7 +7,9 @@
 const MARKER = /fragment-(start|end)\{[\w-]+\}/;
 
 export function extractFragment(content, id) {
-  if (!content) return "";
+  if (!content) {
+    return "";
+  }
 
   const lines = content.split(/\r?\n/);
   const startRe = new RegExp(`fragment-start\\{${escapeRe(id)}\\}`);
@@ -24,20 +26,27 @@ export function extractFragment(content, id) {
         found = true;
         continue;
       }
-      if (endRe.test(line))
+      if (endRe.test(line)) {
         throw new Error(`Expected fragment-start{${id}}, saw fragment-end first.`);
+      }
       continue;
     }
     if (endRe.test(line)) {
       inside = false;
       continue;
     }
-    if (MARKER.test(line)) continue;
+    if (MARKER.test(line)) {
+      continue;
+    }
     output.push(line);
   }
 
-  if (inside) throw new Error(`fragment-end{${id}} not found.`);
-  if (!found) throw new Error(`Fragment ${id} not found.`);
+  if (inside) {
+    throw new Error(`fragment-end{${id}} not found.`);
+  }
+  if (!found) {
+    throw new Error(`Fragment ${id} not found.`);
+  }
   return output.join("\n");
 }
 

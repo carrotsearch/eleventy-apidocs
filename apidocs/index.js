@@ -71,7 +71,9 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 
   let cachedShell = null;
   async function getShellData() {
-    if (cachedShell) return cachedShell;
+    if (cachedShell) {
+      return cachedShell;
+    }
     cachedShell = {
       navigation: await loadNavigation(opts.navigation, opts.contentDir, {
         cache: currentRunMode === "serve"
@@ -120,11 +122,15 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   eleventyConfig.addWatchTarget(path.join(themeRoot, "styles"));
   eleventyConfig.addWatchTarget(path.join(themeRoot, "assets/js"));
   for (const f of [].concat(opts.styles || [])) {
-    if (f) eleventyConfig.addWatchTarget(f);
+    if (f) {
+      eleventyConfig.addWatchTarget(f);
+    }
   }
 
   eleventyConfig.addTransform("apidocs-shell", async function (content, outputPath) {
-    if (!outputPath?.endsWith(".html")) return content;
+    if (!outputPath?.endsWith(".html")) {
+      return content;
+    }
     const apidocs = await getShellData();
 
     const sourceDir = this.page?.inputPath
@@ -177,7 +183,9 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   });
 
   for (const f of [opts.navigation, opts.logo, opts.footer, opts.head]) {
-    if (f) eleventyConfig.addWatchTarget(f);
+    if (f) {
+      eleventyConfig.addWatchTarget(f);
+    }
   }
 
   // Post-build: emit the fuzzysort symbol manifest, then run Pagefind.
@@ -188,7 +196,9 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // degrades gracefully when the indices are stale or missing.
   eleventyConfig.on("eleventy.after", async ({ directories, dir, runMode }) => {
     const output = directories?.output || dir?.output;
-    if (!output) return;
+    if (!output) {
+      return;
+    }
     const siteDir = path.resolve(output);
 
     const isDev = (runMode || currentRunMode) === "serve";
@@ -281,7 +291,9 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       }
     });
 
-    if (isDev) devIndexedOnce = true;
+    if (isDev) {
+      devIndexedOnce = true;
+    }
     progress.endBuild();
   });
 
@@ -296,9 +308,13 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 // and return the {prev, next} entries surrounding the current page.
 function neighborsFor(navigation, currentUrl) {
   const flat = flattenArticles(navigation);
-  if (!flat.length || !currentUrl) return { prev: null, next: null };
+  if (!flat.length || !currentUrl) {
+    return { prev: null, next: null };
+  }
   const idx = flat.findIndex(a => articleHref(a) === currentUrl);
-  if (idx < 0) return { prev: null, next: null };
+  if (idx < 0) {
+    return { prev: null, next: null };
+  }
   return {
     prev: idx > 0 ? flat[idx - 1] : null,
     next: idx < flat.length - 1 ? flat[idx + 1] : null
@@ -306,8 +322,12 @@ function neighborsFor(navigation, currentUrl) {
 }
 
 function flattenArticles(navigation) {
-  if (!navigation) return [];
-  if (Array.isArray(navigation)) return navigation;
+  if (!navigation) {
+    return [];
+  }
+  if (Array.isArray(navigation)) {
+    return navigation;
+  }
   if (Array.isArray(navigation.chapters)) {
     return navigation.chapters.flatMap(c => c.articles || []);
   }
@@ -327,7 +347,9 @@ async function substituteSymbolsUrl(siteDir, absUrl) {
   await Promise.all(
     files.map(async file => {
       const html = await fs.readFile(file, "utf8");
-      if (!html.includes(SYMBOLS_URL_PLACEHOLDER)) return;
+      if (!html.includes(SYMBOLS_URL_PLACEHOLDER)) {
+        return;
+      }
       const pageUrl = pageUrlFromFile(siteDir, file);
       const url = relativizeUrl(absUrl, pageUrl);
       await fs.writeFile(file, html.split(SYMBOLS_URL_PLACEHOLDER).join(url));
@@ -337,9 +359,13 @@ async function substituteSymbolsUrl(siteDir, absUrl) {
 
 function pruneUniqueCrumbs(symbols) {
   const counts = new Map();
-  for (const s of symbols) counts.set(s.name, (counts.get(s.name) || 0) + 1);
   for (const s of symbols) {
-    if (s.crumbs && counts.get(s.name) === 1) delete s.crumbs;
+    counts.set(s.name, (counts.get(s.name) || 0) + 1);
+  }
+  for (const s of symbols) {
+    if (s.crumbs && counts.get(s.name) === 1) {
+      delete s.crumbs;
+    }
   }
 }
 
@@ -362,8 +388,11 @@ async function collectHtml(root) {
     const entries = await fs.readdir(dir, { withFileTypes: true });
     for (const e of entries) {
       const p = path.join(dir, e.name);
-      if (e.isDirectory()) await recurse(p);
-      else if (e.isFile() && e.name.endsWith(".html")) out.push(p);
+      if (e.isDirectory()) {
+        await recurse(p);
+      } else if (e.isFile() && e.name.endsWith(".html")) {
+        out.push(p);
+      }
     }
   }
   await recurse(root);
@@ -375,14 +404,18 @@ async function collectHtml(root) {
 //   /foo/   → <siteDir>/foo.md
 //   /a/b/   → <siteDir>/a/b.md
 function mdPathFor(siteDir, url) {
-  if (!url || url === "/") return path.join(siteDir, "index.md");
+  if (!url || url === "/") {
+    return path.join(siteDir, "index.md");
+  }
   const clean = url.replace(/^\//, "").replace(/\/$/, "");
   return path.join(siteDir, `${clean}.md`);
 }
 
 function pageUrlFromFile(siteDir, file) {
   const rel = path.relative(siteDir, file).split(path.sep).join("/");
-  if (rel === "index.html") return "/";
+  if (rel === "index.html") {
+    return "/";
+  }
   if (rel.endsWith("/index.html")) {
     return `/${rel.slice(0, -"index.html".length)}`;
   }
@@ -393,7 +426,9 @@ function pageUrlFromFile(siteDir, file) {
 // and the page's URL (e.g. "/code-blocks/"), strip the URL-derived suffix to
 // recover the Eleventy output root (e.g. "_site").
 function deriveOutputDir(outputPath, pageUrl) {
-  if (!outputPath) return "_site";
+  if (!outputPath) {
+    return "_site";
+  }
   const url = pageUrl || "/";
   const suffix = `${url.replace(/^\//, "")}index.html`;
   if (outputPath.endsWith(suffix)) {

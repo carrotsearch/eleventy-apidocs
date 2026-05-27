@@ -4,7 +4,9 @@
 
 class ApidocsCodeBox extends HTMLElement {
   connectedCallback() {
-    if (this.#button) return;
+    if (this.#button) {
+      return;
+    }
     const button = document.createElement("button");
     button.type = "button";
     button.className = "copy";

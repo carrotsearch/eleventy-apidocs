@@ -16,7 +16,9 @@ export function sectionAnchors($) {
   $("article :is(h2, h3, h4, h5)[id]").each((_, heading) => {
     const $heading = $(heading);
     const $section = $heading.parent("section");
-    if (!$section.length || $section.attr("id")) return;
+    if (!$section.length || $section.attr("id")) {
+      return;
+    }
     $section.attr("id", $heading.attr("id"));
     $heading.removeAttr("id");
   });
@@ -25,7 +27,9 @@ export function sectionAnchors($) {
   $("article section[id]").each((_, section) => {
     const $section = $(section);
     const $heading = $section.children("h2, h3, h4, h5").first();
-    if (!$heading.length || $heading.find("a.anchor").length) return;
+    if (!$heading.length || $heading.find("a.anchor").length) {
+      return;
+    }
     const id = $section.attr("id");
     $heading.prepend(
       `<a class="anchor" href="#${escapeAttr(id)}" aria-label="Link to this section">${ICON}</a>`

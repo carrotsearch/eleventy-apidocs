@@ -47,7 +47,9 @@ export async function loadImage(src, ctx) {
 // fallback URL we use for the HTML <picture>'s <img src>.
 export function pickFallbackFormat(metadata) {
   for (const fmt of ["jpeg", "png", "gif", "webp"]) {
-    if (metadata[fmt]?.length) return fmt;
+    if (metadata[fmt]?.length) {
+      return fmt;
+    }
   }
   return Object.keys(metadata)[0];
 }
@@ -59,7 +61,9 @@ export async function imageProcessor($, ctx) {
       const src = $(el).attr("src");
       return src && RASTER.test(src) && !$(el).parents("pre").length;
     });
-  if (!targets.length) return;
+  if (!targets.length) {
+    return;
+  }
 
   await Promise.all(targets.map(el => processOne($, el, ctx)));
 }
@@ -69,7 +73,9 @@ async function processOne($, el, ctx) {
   const src = $img.attr("src");
 
   const metadata = await loadImage(src, ctx);
-  if (!metadata) return;
+  if (!metadata) {
+    return;
+  }
 
   progress.image(src);
 
@@ -119,11 +125,17 @@ async function readLqip(metadata) {
   let smallest;
   for (const entries of Object.values(metadata)) {
     for (const e of entries) {
-      if (e.width !== LQIP_WIDTH) continue;
-      if (!smallest || e.size < smallest.size) smallest = e;
+      if (e.width !== LQIP_WIDTH) {
+        continue;
+      }
+      if (!smallest || e.size < smallest.size) {
+        smallest = e;
+      }
     }
   }
-  if (!smallest) return null;
+  if (!smallest) {
+    return null;
+  }
   try {
     const buf = await fs.readFile(smallest.outputPath);
     return `data:${smallest.sourceType};base64,${buf.toString("base64")}`;
