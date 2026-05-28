@@ -1,6 +1,6 @@
 // Strip the longest run of leading whitespace shared by every non-blank line.
-// Mirrors the Gatsby helper: detects whether the indent uses spaces or tabs
-// based on the first non-empty line; mixed indentation is left alone.
+// Detects whether the indent uses spaces or tabs based on the first non-empty
+// line; mixed indentation is left alone.
 
 export function removeCommonIndent(content) {
   if (!content) {

@@ -1,5 +1,5 @@
 // Apply a JSONPath expression to embedded JSON(C) content.
-// Supports the Gatsby contract's `{ ... }` suffix:
+// Supports a `{ ... }` suffix for post-processing:
 //   path{ 'key1', /key.*/, trim-brackets, remove-comments }
 // Key selectors filter retained properties; trim-brackets strips outer
 // braces from each rendered object; remove-comments parses JSONC strictly.

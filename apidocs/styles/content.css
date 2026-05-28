@@ -1,5 +1,4 @@
 /* Article body — sections, anchors, code blocks, callouts, dl, figure, table.
-   Modernization vs Gatsby:
    - Single :target selector — Eleventy is multi-page, no manual .target injection needed.
    - light-dark() colors flow from tokens.
    - Container queries on figures/callouts: full-bleed when the article is wide. */

@@ -1,24 +1,12 @@
-// HTML pipeline. Ported from gatsby-transformer-html.
+// HTML pipeline. Pass order is fixed — each step depends on the shape
+// produced by the previous ones; the per-call comments below explain why
+// each pass sits where it does.
 //
-// Pass order is fixed (see apidocs_authoring_contract memory):
-//   1. user transformers
-//   2. svg inliner                       [Phase 4]
-//   3. image processor                   [Phase 4]
-//   4. internal link rewriter
-//   5. section anchor injection
-//   6. embed code                        [Phase 3]
-//   7. code highlighter                  [Phase 3]
-//   8. fragment-ID assignment
-//   9. toc + symbol extraction           (consume section ids)
-//   10. pagefind-ignore tagging          (hide page h1 from Pagefind body)
-//   11. lift section ids to headings     (final HTML shape — for Pagefind)
-//   12. user finalizers
-//   13. variable substitution            (runs on the wrapped document — see processDocument)
-//
-// processContent() runs the inner-content passes (1-9). processDocument()
-// runs whole-document passes (current-year + $VAR$) after the layout wraps
-// the content. Splitting them lets variables and current-year reach
-// layout-injected markup, matching the Gatsby behavior.
+// processContent() runs the inner-content passes on the raw article HTML.
+// processDocument() runs whole-document passes (current-year + $VAR$) on
+// the page after the layout wraps the content. Splitting them lets
+// variables and current-year reach layout-injected markup (e.g. footer
+// year, header $SITE_NAME$), not just article body.
 
 import * as cheerio from "cheerio";
 import { codeHighlight } from "./passes/code-highlight.js";
@@ -53,33 +41,71 @@ function loadDocument(html) {
 export async function processContent(html, ctx) {
   const $ = loadFragment(html);
 
+  // User transformers run first so callers can mutate source before any
+  // built-in pass observes it.
   for (const fn of ctx.transformers ?? []) {
     await fn($, ctx);
   }
 
+  // Inline <img src="*.svg"> as actual <svg>. Must precede imageProcessor,
+  // which only handles raster sources and would otherwise wrap the SVG in
+  // a <picture> it can't make variants for.
   await svgInliner($, ctx);
+
+  // Wrap raster <img> in responsive <picture> + LQIP. Runs before the link
+  // rewriter so the absolute /assets/ URLs it emits aren't picked up as
+  // candidates for foo.html → /foo/ rewriting.
   await imageProcessor($, ctx);
+
+  // foo.html → /foo/ on <a href>. External and data-external links are
+  // left alone.
   linkRewriter($, ctx);
+
+  // Normalize id placement (lift heading id onto its parent <section>
+  // when the section has none; either authoring form is accepted, the
+  // internal shape from here on is always section-id) and inject
+  // <a class="anchor"> icons into the first heading of every id-bearing
+  // section.
   sectionAnchors($);
+
+  // Resolve <pre data-embed> / <embed src> by loading the referenced
+  // file. Runs before the highlighter so embedded source gets highlighted
+  // like any other <pre data-language>.
   await embedCode($, ctx);
+
+  // Shiki + highlight/hide directives. Reads <pre data-language>;
+  // replaces it with <apidocs-code-box> wrapping highlighted HTML. Runs
+  // after embed so external sources are highlighted, and before
+  // fragmentIds so md5 ids don't get stamped on code text.
   await codeHighlight($, ctx);
+
+  // md5-based ids on p/li/dt for deep links. Stable across builds so
+  // bookmarks survive unrelated content drift.
   fragmentIds($);
-  // Build ToC after anchor injection so heading text excludes the
-  // anchor icon.
+
+  // Walk <article> > <section> into a nested entry tree. Runs after
+  // sectionAnchors so the heading's <a.anchor> icon can be stripped from
+  // the label.
   ctx.toc = buildToc($);
-  // Symbol harvest runs after fragmentIds so anchor resolution can fall
-  // back to the nearest ancestor id (the enclosing section).
+
+  // Collect API names (class="api", <code id>, <dt><code>) for
+  // fuzzysort. Runs after fragmentIds so symbols inside prose can fall
+  // back to the nearest id-bearing ancestor for their anchor.
   extractSymbols($, ctx);
+
   // Strip the page h1 from Pagefind's content stream — fuzzysort owns
   // page-title matches, and otherwise every prose excerpt would start
   // with the title prefix. Section headings stay indexed: Pagefind
   // builds sub-result anchors from heading text + id together.
   tagPagefindIgnore($);
-  // Move section ids onto their headings — final HTML carries heading
-  // ids so Pagefind's sub-result anchors work. Runs after the section-id
-  // consumers above.
+
+  // Move <section id> onto the section's first heading. Runs last among
+  // content passes because buildToc and extractSymbols read the
+  // section-id shape, while Pagefind's sub-result anchors need the
+  // heading-id shape in the final HTML.
   liftSectionIds($);
 
+  // User finalizers run on the near-final shape.
   for (const fn of ctx.finalizers ?? []) {
     await fn($, ctx);
   }
@@ -95,6 +121,10 @@ export function processDocument(html, ctx) {
   const $ = loadDocument(html);
   currentYear($, ctx.buildYear);
   let out = $.html();
+
+  // $VAR$ substitution runs LAST, on the wrapped document, so variables
+  // can appear anywhere — including in layout-injected markup like the
+  // footer year or header site name.
   out = substituteVariables(out, ctx.variables);
   return out;
 }

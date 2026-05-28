@@ -26,7 +26,8 @@ const DIR_INLINE = new RegExp(DIR_LINE_PATTERNS.map(r => `\\s*(${r.source})`).jo
 // child elements while parsing, and $.text() would drop their tags and
 // only leave their inner text. Trade-off: this means literal <i>/<em> etc.
 // inside a code block also come back as their source markup, not as styled
-// text. The Gatsby-era theme made the same trade-off for the same reason.
+// text — the right call for a code block, where the source form is what
+// the reader wants to see anyway.
 export function readPreSource($el) {
   return decodeBasicEntities($el.html() || "");
 }

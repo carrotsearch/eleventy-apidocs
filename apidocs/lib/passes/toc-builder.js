@@ -6,7 +6,7 @@
 // Read-only — doesn't mutate the DOM, just returns a nested array of
 // { heading, anchor, sections? } entries that the layout renders.
 //
-// Honors two opt-out attributes mirroring the gatsby-theme-apidocs contract:
+// Honors two opt-out attributes:
 //   data-toc="omit"           — skip this section entirely
 //   data-toc="omit-children"  — include this section but not its descendants
 //

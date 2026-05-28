@@ -1,10 +1,11 @@
 // Assign stable IDs to indexable fragments so search results can deep-link
 // to a specific paragraph, list item, or definition term.
 //
-// Recipe (matches gatsby-transformer-html so existing bookmarks survive):
+// Recipe:
 //   - Targets: p, li, dt that don't already have an id
 //   - ID = "_" + md5(textContent.slice(0, 200).trim())
-//   - Stable across builds for unchanged content; small drift acceptable.
+//   - Stable across builds for unchanged content so bookmarks survive; small
+//     drift acceptable.
 
 import crypto from "node:crypto";
 

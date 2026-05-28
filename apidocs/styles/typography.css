@@ -1,6 +1,6 @@
 /* Typography. System stack — no web fonts, instant first paint.
-   Modular scale ports the Gatsby ratios (1.0625 phone, 1.125 desktop)
-   but rebuilt with rem-relative custom properties + text-wrap. */
+   Modular scale: 1.0625 phone, 1.125 desktop — rem-relative custom
+   properties + text-wrap for fluid line breaks. */
 :root {
   --font-body:
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI",
