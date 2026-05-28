@@ -50,19 +50,27 @@ async function embedOne($, el, ctx) {
   const ext = path.extname(declared).slice(1).toLowerCase();
   const language = declaredLanguage || ext || "text";
 
+  const langAttr = encodeAttr(language);
   if (jsonpath) {
     const fragments = extractJsonpath(raw, jsonpath);
     const html = fragments
-      .map(f => `<pre data-language="${language}">${encode(f)}</pre>`)
+      .map(f => `<pre data-language="${langAttr}">${encode(f)}</pre>`)
       .join("\n");
     $el.replaceWith(html);
     return;
   }
 
   const content = fragment ? extractFragment(raw, fragment) : raw;
-  $el.replaceWith(`<pre data-language="${language}">${encode(content)}</pre>`);
+  $el.replaceWith(`<pre data-language="${langAttr}">${encode(content)}</pre>`);
 }
 
+// Element text content: quotes are safe between tags, so & < > suffice.
 function encode(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Double-quoted attribute value: also escape the quote so the value can't
+// break out of data-language="…" (re-read downstream by code-highlight).
+function encodeAttr(s) {
+  return encode(s).replace(/"/g, "&quot;");
 }
