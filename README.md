@@ -77,7 +77,7 @@ pnpm dev             # serve docs with hot reload
 pnpm build           # build docs to docs/_site/
 pnpm clean           # remove docs/_site/
 pnpm test            # run the pipeline unit tests
-pnpm format          # run Prettier
+pnpm check           # lint + format check with Biome (check:fix to auto-fix)
 ```
 
 GitHub Actions runs `pnpm test` and `pnpm build` on every push and pull
