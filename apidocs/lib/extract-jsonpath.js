@@ -82,7 +82,12 @@ function parseSuffix(raw) {
         const name = tok.slice(1, -1);
         matchers.push(k => k === name);
       } else if (/^\/.+\/$/.test(tok)) {
-        const re = new RegExp(tok.slice(1, -1));
+        let re;
+        try {
+          re = new RegExp(tok.slice(1, -1));
+        } catch (e) {
+          throw new Error(`Invalid jsonpath key regex ${tok}: ${e.message}`);
+        }
         matchers.push(k => re.test(k));
       } else if (tok.toLowerCase() === "trim-brackets") {
         trimBrackets = true;
