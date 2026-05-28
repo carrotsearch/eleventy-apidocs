@@ -353,7 +353,7 @@ function init() {
     const a = document.createElement("a");
     a.href = withHighlight(symbolHref(hit.obj), q);
     a.innerHTML = `
-      <span class="search-hit-name">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>
+      <span class="search-hit-name">${highlightMatch(hit)}</span>
       ${renderCrumbs(hit.obj.crumbs)}
       ${hit.obj.kind ? `<span class="search-hit-kind">${escapeHtml(hit.obj.kind)}</span>` : ""}
     `;
@@ -367,7 +367,7 @@ function init() {
     const a = document.createElement("a");
     a.href = withHighlight(symbolHref(hit.obj), q);
     a.innerHTML = `
-      <span class="search-hit-title">${hit.highlight("<mark>", "</mark>") || escapeHtml(hit.obj.name)}</span>
+      <span class="search-hit-title">${highlightMatch(hit)}</span>
       ${renderCrumbs(hit.obj.crumbs)}
     `;
     li.appendChild(a);
@@ -460,6 +460,34 @@ function init() {
           "'": "&#39;"
         })[c]
     );
+  }
+
+  // Build highlighted markup for a fuzzysort hit. fuzzysort's own
+  // .highlight() concatenates raw target characters, so a symbol name with
+  // <, > or & (generics, operators, HTML tag names — routine in API docs)
+  // would inject unescaped into innerHTML. Reconstruct from target +
+  // matched indexes instead, escaping every character and wrapping matched
+  // runs in <mark>.
+  function highlightMatch(hit) {
+    const target = hit.target || "";
+    const matched = new Set(hit.indexes);
+    let out = "";
+    let open = false;
+    for (let i = 0; i < target.length; i++) {
+      const isMatch = matched.has(i);
+      if (isMatch && !open) {
+        out += "<mark>";
+        open = true;
+      } else if (!isMatch && open) {
+        out += "</mark>";
+        open = false;
+      }
+      out += escapeHtml(target[i]);
+    }
+    if (open) {
+      out += "</mark>";
+    }
+    return out;
   }
 
   // --- Event wiring ---
