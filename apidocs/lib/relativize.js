@@ -39,8 +39,10 @@ export function relativizeUrl(url, fromUrl) {
     return url;
   }
 
-  const fromDir = fromUrl.endsWith("/") ? fromUrl : `${path.dirname(fromUrl)}/`;
-  let rel = path.relative(fromDir, url);
+  // URL paths always use "/" — path.posix keeps the output forward-slashed
+  // on Windows, where the platform default would emit backslashes.
+  const fromDir = fromUrl.endsWith("/") ? fromUrl : `${path.posix.dirname(fromUrl)}/`;
+  let rel = path.posix.relative(fromDir, url);
   if (!rel.startsWith(".")) {
     rel = `./${rel}`;
   }
