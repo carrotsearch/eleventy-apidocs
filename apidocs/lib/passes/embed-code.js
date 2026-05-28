@@ -37,6 +37,17 @@ async function embedOne($, el, ctx) {
   }
 
   const filePath = path.resolve(ctx.sourceDir || ".", declared);
+
+  // Embeds resolve relative to the page, so a path like "../../../etc/passwd"
+  // could reach outside the project. Confine reads to the build root (cwd,
+  // where Eleventy resolves contentDir and friends) and fail the build on
+  // escape — a missing file is recoverable, reading arbitrary files is not.
+  const root = path.resolve(ctx.rootDir || process.cwd());
+  const rel = path.relative(root, filePath);
+  if (rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
+    throw new Error(`Refusing to embed ${declared}: path escapes the project root.`);
+  }
+
   let raw;
   try {
     raw = await fs.readFile(filePath, "utf8");
