@@ -35,12 +35,16 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     ...userOptions
   };
 
+  // autoescape on: page titles, ToC headings, nav/prev-next labels and
+  // section anchors all flow from author content and must be escaped. The
+  // four genuinely-raw slots (content, logo, footer, head) opt out per-use
+  // with the `| safe` filter in the templates.
   const env = new nunjucks.Environment(
     new nunjucks.FileSystemLoader(
       [path.join(themeRoot, "layouts"), path.join(themeRoot, "partials")],
       { noCache: true }
     ),
-    { autoescape: false }
+    { autoescape: true }
   );
 
   // Build-scoped symbol accumulator. Reset before each build; the
