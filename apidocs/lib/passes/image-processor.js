@@ -94,19 +94,26 @@ async function processOne($, el, ctx) {
   const sources = Object.entries(metadata)
     .filter(([fmt]) => fmt !== fallbackFormat)
     .map(([_fmt, entries]) => {
+      // A source narrower than LQIP_WIDTH yields only the LQIP variant, so
+      // filtering it out leaves nothing — skip the <source> rather than
+      // dereference visible[0] of an empty list.
       const visible = entries.filter(e => e.width !== LQIP_WIDTH);
+      if (!visible.length) {
+        return "";
+      }
       const srcset = visible.map(e => `${e.url} ${e.width}w`).join(", ");
       return `<source type="${visible[0].sourceType}" srcset="${srcset}" sizes="100vw">`;
     });
 
   const fallbackVisible = fallbackList.filter(e => e.width !== LQIP_WIDTH);
   const fallbackSrcset = fallbackVisible.map(e => `${e.url} ${e.width}w`).join(", ");
+  const fallbackSrcsetAttr = fallbackSrcset ? ` srcset="${fallbackSrcset}" sizes="100vw"` : "";
 
   const titleAttr = title ? ` title="${escapeAttr(title)}"` : "";
   const picture =
     `<picture>` +
     sources.join("") +
-    `<img src="${largest.url}" srcset="${fallbackSrcset}" sizes="100vw"` +
+    `<img src="${largest.url}"${fallbackSrcsetAttr}` +
     ` width="${largest.width}" height="${largest.height}"` +
     ` alt="${escapeAttr(alt)}"${titleAttr}` +
     ` loading="lazy" decoding="async">` +
