@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { relativizeHtml, relativizeUrl } from "../lib/relativize.js";
+import { relativizeHtml, relativizeUrl, relativizeUrls } from "../lib/relativize.js";
+import { loadFragment } from "./helpers.js";
 
 test("rewrites a sibling asset relative to a directory URL", () => {
   assert.equal(relativizeUrl("/assets/x.css", "/foo/"), "../assets/x.css");
@@ -24,16 +25,40 @@ test("emits forward slashes (path.posix, not platform default)", () => {
   assert.equal(relativizeUrl("/a/b/c.css", "/x/y/page.html"), "../../a/b/c.css");
 });
 
-test("returns html unchanged when no fromUrl is given", () => {
+test("rewrites href and src attributes", () => {
+  const $ = loadFragment('<a href="/a/b.html"></a><img src="/a/c.png">');
+  relativizeUrls($, "/a/");
+  assert.equal($("a").attr("href"), "./b.html");
+  assert.equal($("img").attr("src"), "./c.png");
+});
+
+test("rewrites each candidate in a srcset, preserving descriptors", () => {
+  const $ = loadFragment('<img srcset="/a/x.png 1x, /a/y.png 2x">');
+  relativizeUrls($, "/b/");
+  assert.equal($("img").attr("srcset"), "../a/x.png 1x, ../a/y.png 2x");
+});
+
+test("only touches real attributes, not URL-shaped text in scripts", () => {
+  const $ = loadFragment('<script>var href = "/a/keep.js";</script><a href="/a/go.html"></a>');
+  relativizeUrls($, "/a/");
+  assert.match($("script").html(), /\/a\/keep\.js/);
+  assert.equal($("a").attr("href"), "./go.html");
+});
+
+test("relativizeUrls is a no-op without a fromUrl", () => {
+  const $ = loadFragment('<a href="/x"></a>');
+  relativizeUrls($, "");
+  assert.equal($("a").attr("href"), "/x");
+});
+
+test("relativizeHtml returns html unchanged when no fromUrl is given", () => {
   const html = '<a href="/x">';
   assert.equal(relativizeHtml(html, ""), html);
 });
 
-test("rewrites href and src attributes", () => {
-  assert.equal(relativizeHtml('<a href="/a/b.html">', "/a/"), '<a href="./b.html">');
-});
-
-test("rewrites each candidate in a srcset, preserving descriptors", () => {
-  const out = relativizeHtml('<img srcset="/a/x.png 1x, /a/y.png 2x">', "/b/");
-  assert.equal(out, '<img srcset="../a/x.png 1x, ../a/y.png 2x">');
+test("relativizeHtml relativizes a wrapped document and preserves the doctype", () => {
+  const html = '<!doctype html><html><head></head><body><a href="/a/b.html">x</a></body></html>';
+  const out = relativizeHtml(html, "/a/");
+  assert.match(out, /^<!DOCTYPE html>/);
+  assert.match(out, /href="\.\/b\.html"/);
 });

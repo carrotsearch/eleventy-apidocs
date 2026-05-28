@@ -1,37 +1,62 @@
 import path from "node:path";
+import * as cheerio from "cheerio";
 
 // Rewrites absolute URLs (leading "/") to be relative to the given page URL,
 // so the generated site works from any URL prefix without a rebuild.
 //
-// Covers href, src, and srcset. Inline style url() is a roadmap item.
+// Covers href, src, and srcset. Inline style url() is a roadmap item. Runs
+// on the wrapped document after $VAR$ substitution, so a variable that
+// expands to an absolute path (e.g. href="$BASE$/page" → /page) is
+// relativized too.
 export function relativizeHtml(html, fromUrl) {
   if (!fromUrl) {
     return html;
   }
-  let out = html.replace(/\b(href|src)="([^"]+)"/g, (_match, attr, url) => {
-    return `${attr}="${relativizeUrl(url, fromUrl)}"`;
+  const $ = cheerio.load(html);
+  relativizeUrls($, fromUrl);
+  return $.html();
+}
+
+// Walk the parsed document and relativize every href/src/srcset. Working on
+// the DOM rather than a regexp over the serialized HTML means we only touch
+// real attributes — never a URL-shaped string sitting in script text, a
+// comment, or prose.
+export function relativizeUrls($, fromUrl) {
+  if (!fromUrl) {
+    return;
+  }
+  $("[href]").each((_, el) => {
+    const $el = $(el);
+    $el.attr("href", relativizeUrl($el.attr("href"), fromUrl));
   });
-  out = out.replace(/\bsrcset="([^"]+)"/g, (_match, value) => {
-    const rewritten = value
-      .split(",")
-      .map(part => {
-        const trimmed = part.trim();
-        if (!trimmed) {
-          return trimmed;
-        }
-        // "url [descriptor]" — split on whitespace; descriptor may be absent.
-        const ws = trimmed.indexOf(" ");
-        if (ws === -1) {
-          return relativizeUrl(trimmed, fromUrl);
-        }
-        const url = trimmed.slice(0, ws);
-        const descriptor = trimmed.slice(ws);
-        return relativizeUrl(url, fromUrl) + descriptor;
-      })
-      .join(", ");
-    return `srcset="${rewritten}"`;
+  $("[src]").each((_, el) => {
+    const $el = $(el);
+    $el.attr("src", relativizeUrl($el.attr("src"), fromUrl));
   });
-  return out;
+  $("[srcset]").each((_, el) => {
+    const $el = $(el);
+    $el.attr("srcset", relativizeSrcset($el.attr("srcset"), fromUrl));
+  });
+}
+
+function relativizeSrcset(value, fromUrl) {
+  return value
+    .split(",")
+    .map(part => {
+      const trimmed = part.trim();
+      if (!trimmed) {
+        return trimmed;
+      }
+      // "url [descriptor]" — split on whitespace; descriptor may be absent.
+      const ws = trimmed.indexOf(" ");
+      if (ws === -1) {
+        return relativizeUrl(trimmed, fromUrl);
+      }
+      const url = trimmed.slice(0, ws);
+      const descriptor = trimmed.slice(ws);
+      return relativizeUrl(url, fromUrl) + descriptor;
+    })
+    .join(", ");
 }
 
 export function relativizeUrl(url, fromUrl) {
