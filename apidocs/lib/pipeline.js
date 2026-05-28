@@ -88,9 +88,10 @@ export async function processContent(html, ctx) {
   // the label.
   ctx.toc = buildToc($);
 
-  // Collect API names (class="api", <code id>, <dt><code>) for
-  // fuzzysort. Runs after fragmentIds so symbols inside prose can fall
-  // back to the nearest id-bearing ancestor for their anchor.
+  // Collect symbol names (.api elements, the page <h1>, id-bearing
+  // sections) for fuzzysort. Runs after fragmentIds so symbols inside
+  // prose can fall back to the nearest id-bearing ancestor for their
+  // anchor.
   extractSymbols($, ctx);
 
   // Strip the page h1 from Pagefind's content stream — fuzzysort owns

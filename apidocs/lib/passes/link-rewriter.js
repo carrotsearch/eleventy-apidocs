@@ -16,6 +16,7 @@ const ABSOLUTE = /^([a-z][a-z0-9+.-]*:|\/\/)/i;
 
 export function linkRewriter($, ctx) {
   const pageUrl = ctx?.page?.url || "/";
+
   // Source URL: where this page would live before Eleventy's pretty-URL
   // rewrite. /callouts/ → /callouts.html, / → /index.html.
   const sourceUrl = pageUrl === "/" ? "/index.html" : pageUrl.replace(/\/$/, ".html");

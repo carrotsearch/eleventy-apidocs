@@ -48,6 +48,7 @@ function findVisual(target) {
   if (!figure) {
     return null;
   }
+
   // Prefer the element actually clicked when it's the visual itself
   // (svg or img), but fall back to the figure's primary visual.
   let visual = target.closest("picture, img, svg");
@@ -77,6 +78,7 @@ function openLightbox(figure, source) {
       img.removeAttribute("loading");
     }
   }
+
   // Pin the clone's aspect-ratio to the image's natural dimensions so the
   // View Transitions snapshot box matches the image content exactly (no
   // letterbox padding inside the captured box).
@@ -113,6 +115,7 @@ function openLightbox(figure, source) {
   }
 
   source.style.viewTransitionName = NAME;
+
   // Scope the root crossfade timing for the duration of this transition.
   // CSS in lightbox.css keys off the html class to fade the page out fast
   // so the header is hidden before the image morph reaches the top.
@@ -122,6 +125,7 @@ function openLightbox(figure, source) {
     clone.style.viewTransitionName = NAME;
     finishOpen();
   });
+
   // Keep the clone's view-transition-name so the close animation can
   // pick it up when the user dismisses.
   t.finished.finally(() => {
@@ -355,6 +359,7 @@ function onPreloadCue(e) {
 }
 
 document.addEventListener("click", onClick);
+
 // pointerover catches desktop hover; focusin catches keyboard tab; pointerdown
 // gives touch users some head start on the network fetch before click fires.
 document.addEventListener("pointerover", onPreloadCue);

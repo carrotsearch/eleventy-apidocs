@@ -1,5 +1,6 @@
-// apidocs runtime entry. Loads the theme switch custom element.
-// Other components (nav, search, view transitions) join here in later phases.
+// apidocs runtime entry. Loads every browser-side component: theme switch,
+// code box, lightbox, ToC scrollspy, search, Pagefind highlighting, the
+// navigation progress bar, and the mobile nav toggle.
 import "./theme-switch.js";
 import "./code-box.js";
 import "./lightbox.js";

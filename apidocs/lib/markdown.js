@@ -150,6 +150,7 @@ turndown.addRule("apidocs-rich-table", {
 
 export function htmlToMarkdown(html) {
   const md = turndown.turndown(html);
+
   // Collapse runs of blank lines that adjacent rules can introduce when
   // each pads with its own \n\n.
   return `${md.replace(/\n{3,}/g, "\n\n").trim()}\n`;

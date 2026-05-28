@@ -145,6 +145,7 @@ function normalizeLang(l) {
   if (v === "md") {
     return "markdown";
   }
+
   // Prism's "markup" grammar covers HTML/XML/SVG. Shiki has no single
   // umbrella grammar — `html` is the closest match and handles inline
   // <script>/<style> the way authors using `markup` would expect.

@@ -3,7 +3,7 @@
 //
 // Recipe:
 //   - Targets: p, li, dt that don't already have an id
-//   - ID = "_" + md5(textContent.slice(0, 200).trim())
+//   - ID = "_" + md5(textContent.trim().slice(0, 200))
 //   - Stable across builds for unchanged content so bookmarks survive; small
 //     drift acceptable.
 

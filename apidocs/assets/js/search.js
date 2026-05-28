@@ -85,6 +85,7 @@ function init() {
   async function loadPagefind() {
     const url = new URL("../pagefind/pagefind.js", import.meta.url);
     pagefind = await import(url.href);
+
     // baseUrl pinned to BASE because pagefind auto-detects it from
     // pagefind.js's own location — now <BASE>/assets/apidocs/pagefind/ —
     // and would otherwise prefix every result URL with that subdirectory.
@@ -226,6 +227,7 @@ function init() {
       if (q !== lastQuery) {
         return;
       }
+
       // fuzzysort v3 compresses scores to 0..1, so a single threshold no
       // longer separates good fuzzy hits from scattered ones. Pair the
       // threshold with a region-count cap to drop "doc"→"labelShadowColor"

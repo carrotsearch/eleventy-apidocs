@@ -7,6 +7,7 @@
 // root, so we don't need to clear it ourselves on success.
 
 const SHOW_AFTER = 150;
+
 // Auto-hide if a click somehow didn't lead to a navigation (defaultPrevented
 // downstream, link resolved to the current page, etc.) so the bar can't get
 // stuck.

@@ -246,6 +246,7 @@ test("plain section that contains .api items keeps both: section + items", () =>
       </section>
     </article>
   `);
+
   // Two .api options anchor to their nearest id ("opts"). The section
   // itself is also a section entry. Both options share the anchor — the
   // dedupe only keys off section anchors, so this is intentional.

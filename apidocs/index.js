@@ -192,12 +192,15 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     }
   }
 
-  // Post-build: emit the fuzzysort symbol manifest, then run Pagefind.
+  // Post-build: write the per-page Markdown siblings (plus llms.txt /
+  // llms-full.txt on full builds), then emit the fuzzysort symbol manifest
+  // and run Pagefind.
   //
-  // In dev (`runMode === "serve"`) both passes run once per process lifetime
-  // and then short-circuit — Pagefind reindexing the entire _site on every
-  // keystroke is the dominant per-build cost we're avoiding, and search.js
-  // degrades gracefully when the indices are stale or missing.
+  // In dev (`runMode === "serve"`) the symbol and Pagefind passes run once
+  // per process lifetime and then short-circuit — Pagefind reindexing the
+  // entire _site on every keystroke is the dominant per-build cost we're
+  // avoiding, and search.js degrades gracefully when the indices are stale
+  // or missing.
   eleventyConfig.on("eleventy.after", async ({ directories, dir, runMode }) => {
     const output = directories?.output || dir?.output;
     if (!output) {
@@ -257,6 +260,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
         // from any entry whose name is unique across the whole index so the
         // manifest doesn't carry payload no one will read.
         pruneUniqueCrumbs(symbols);
+
         // Sort before hashing so the manifest (and its hash) stay stable when
         // the only thing that changed between builds is page render order.
         const sorted = [...symbols].sort(compareSymbols);
