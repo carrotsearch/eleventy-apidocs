@@ -2,8 +2,7 @@
   <h1>eleventy-apidocs</h1>
   <p>
     An Eleventy plugin for HTML-first product documentation. Authored content
-    is plain HTML &mdash; no Markdown flavor quirks, no MDX, no shortcodes
-    &mdash; wrapped in a responsive shell with light/dark themes, syntax
+    is plain HTML, wrapped in a responsive shell with light/dark themes, syntax
     highlighting, a per-page table of contents, prose and API-symbol search,
     image processing, and View-Transition-driven navigation.
   </p>
@@ -99,15 +98,14 @@
   <section id="design-goals">
     <h2>Design goals</h2>
     <p>
-      The theme is shaped around three commitments that came out of years of
-      maintaining a Gatsby-based predecessor:
+      The theme is shaped around three commitments:
     </p>
     <ol>
       <li>
         <p>
           <strong>Author in HTML.</strong> The browser&rsquo;s native language is
-          the most expressive substrate available, and round-tripping through
-          Markdown flavors costs more than it saves on a documentation site.
+          the most expressive substrate available, and authoring directly in it
+          keeps the source close to what ships in the browser.
         </p>
       </li>
       <li>

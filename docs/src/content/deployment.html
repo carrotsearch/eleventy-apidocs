@@ -12,7 +12,7 @@
     <p>
       <code>pnpm build</code> runs Eleventy, which writes the site under
       <code>_site/</code> (or whatever <code>--output</code> you pass).
-      After Eleventy completes, two additional artifacts are produced:
+      After Eleventy completes, a few more artifacts are produced:
     </p>
     <ul>
       <li>
@@ -28,9 +28,18 @@
           <a href="search.html#prose">Search &rarr; Prose search</a>.
         </p>
       </li>
+      <li>
+        <p>
+          A Markdown sibling for every page (<code>_site/foo.md</code> next to
+          <code>_site/foo/index.html</code>), plus <code>_site/llms.txt</code>
+          (an index) and <code>_site/llms-full.txt</code> (every page
+          concatenated in navigation order) &mdash; plain-text renderings for
+          LLM consumption.
+        </p>
+      </li>
     </ul>
     <p>
-      Both run from the same <code>eleventy.after</code> hook, so the
+      These all run from the same <code>eleventy.after</code> hook, so the
       output directory is fully self-contained the moment the build
       command exits.
     </p>
@@ -66,11 +75,11 @@
       </tbody>
     </table>
     <p>
-      The rewrite covers <code>href</code>, <code>src</code>,
-      <code>srcset</code>, and CSS <code>url(...)</code> references. Absolute
-      URLs to external hosts are left alone. Protocol-relative URLs
-      (<code>//cdn.example.com/...</code>) are left alone too &mdash;
-      they&rsquo;re explicitly anchored to the current scheme.
+      The rewrite covers <code>href</code>, <code>src</code>, and
+      <code>srcset</code> attributes. Absolute URLs to external hosts are left
+      alone. Protocol-relative URLs (<code>//cdn.example.com/...</code>) are
+      left alone too &mdash; they&rsquo;re explicitly anchored to the current
+      scheme.
     </p>
   </section>
 
@@ -83,16 +92,17 @@
       <li>
         <p>
           No leading-slash URLs survive in emitted HTML. From the
-          workspace root:
+          project root (the <code>--include</code> skips the
+          <code>.md</code> siblings, whose links stay absolute by design):
         </p>
-        <pre data-language="bash">grep -rE 'href="/|src="/' sample-docs/_site/ && echo "FAILED" || echo "OK"</pre>
+        <pre data-language="bash">grep -rE 'href="/|src="/' --include='*.html' _site/ && echo "FAILED" || echo "OK"</pre>
       </li>
       <li>
         <p>
           Serving the directory from any prefix renders correctly. The
           quickest local test:
         </p>
-        <pre data-language="bash">python3 -m http.server -d sample-docs/_site 8000
+        <pre data-language="bash">python3 -m http.server -d _site 8000
 # visit http://localhost:8000/ &mdash; site loads
 # move _site under some/prefix/ on another server and load
 # http://that-server/some/prefix/ &mdash; site still loads</pre>

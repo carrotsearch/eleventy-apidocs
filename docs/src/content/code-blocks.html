@@ -4,8 +4,7 @@
     <h2>Basics</h2>
     <p>
       Code blocks use the <code>&lt;pre data-language="..."&gt;</code> contract.
-      Shiki provides dual-theme syntax highlighting (no client JS for the colors;
-      the page just swaps CSS variables on theme change).
+      Shiki provides dual-theme syntax highlighting.
     </p>
     <pre data-language="javascript">function greet(name) {
   return `Hello, ${name}!`;
@@ -78,14 +77,5 @@ export function publicApi() {
       from a JSON file. Each match becomes its own block.
     </p>
     <pre data-embed="../embeds/api-spec.json" data-jsonpath="$.paths['/users'].get"></pre>
-  </section>
-
-  <section id="copy">
-    <h2>Copy to clipboard</h2>
-    <p>
-      Hover any code block above to reveal a copy button in the top-right
-      corner. Click it to copy the unhighlighted source text. The button
-      flashes green on success or red on failure.
-    </p>
   </section>
 </article>

@@ -16,13 +16,13 @@
         { "slug": "callouts", "title": "Callouts" },
         { "slug": "tables", "title": "Tables" },
         { "slug": "lists", "title": "Lists and definitions" },
+        { "slug": "api-reference", "title": "API reference style" },
         { "slug": "variables", "title": "Variables" }
       ]
     },
     {
       "title": "Reference",
       "articles": [
-        { "slug": "api-reference", "title": "API reference style" },
         { "slug": "navigation", "title": "Navigation" },
         { "slug": "search", "title": "Search" },
         { "slug": "themes", "title": "Themes" },

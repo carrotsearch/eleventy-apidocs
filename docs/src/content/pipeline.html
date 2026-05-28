@@ -15,29 +15,41 @@
     <ol>
       <li>
         <p>
-          Eleventy renders the article and the apidocs layout into a single
-          HTML string.
+          Eleventy renders the source article into an HTML string. The
+          pipeline receives this article fragment &mdash; the layout
+          hasn&rsquo;t wrapped it yet.
         </p>
       </li>
       <li>
-        <p>The string is parsed into cheerio.</p>
+        <p>The fragment is parsed into cheerio.</p>
       </li>
       <li>
         <p><strong>Transformers</strong> run, in declared order.</p>
       </li>
       <li>
         <p>
-          Built-in content passes run: variable substitution, anchor
-          injection, ToC building, code highlighting, embedding, image
-          processing, SVG inlining, symbol extraction, fragment IDs, link
-          rewriting.
+          Built-in content passes run on the article: SVG inlining, image
+          processing, link rewriting, section anchors, code embedding, code
+          highlighting, fragment IDs, ToC building, symbol extraction,
+          Pagefind-ignore tagging, and section-id lifting.
         </p>
       </li>
       <li>
         <p><strong>Finalizers</strong> run, in declared order.</p>
       </li>
       <li>
-        <p>The cheerio document is serialized back to HTML.</p>
+        <p>
+          The processed article is serialized and wrapped in the apidocs
+          layout by Nunjucks.
+        </p>
+      </li>
+      <li>
+        <p>
+          Whole-document passes run on the wrapped page: current-year
+          injection, then <code>$VAR$</code> substitution &mdash; last, so
+          variables resolve in layout markup (footer year, header site name)
+          as well as the article body.
+        </p>
       </li>
       <li>
         <p>URLs are relativized for portability.</p>
@@ -60,7 +72,7 @@
       context object:
     </p>
     <pre data-language="javascript">async function myPass($, ctx) {
-  // $ is the cheerio root for this page (cheerio.load(html))
+  // $ is the cheerio root for this article fragment
   // ctx is the per-page context
 }</pre>
     <p>The context exposes:</p>
@@ -114,8 +126,9 @@
   <section id="transformers">
     <h2>Transformers</h2>
     <p>
-      Transformers run after Nunjucks but before any built-in pass. Wire
-      them via <code>options.transformers</code>:
+      Transformers run on the raw article fragment, before any built-in pass
+      and before the layout wraps it. Wire them via
+      <code>options.transformers</code>:
     </p>
     <pre data-language="javascript">import apidocs from "@carrotsearch/eleventy-apidocs";
 
@@ -150,9 +163,10 @@ export default async function (eleventyConfig) {
   <section id="finalizers">
     <h2>Finalizers</h2>
     <p>
-      Finalizers run last, with full access to the processed document.
-      They&rsquo;re the place for cross-cutting concerns that depend on the
-      built-in passes having already run:
+      Finalizers run last in the content pipeline, with full access to the
+      processed article &mdash; every built-in pass has run, but the layout
+      hasn&rsquo;t wrapped it yet. They&rsquo;re the place for cross-cutting
+      concerns that depend on the built-in passes having already run:
     </p>
     <pre data-language="javascript">async function markExternalLinks($, ctx) {
   $("a[href^='http']").each((_, el) =&gt; {

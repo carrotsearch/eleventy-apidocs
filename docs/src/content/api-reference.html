@@ -75,6 +75,42 @@
     </section>
   </section>
 
+  <section id="markers">
+    <h2>Markers</h2>
+    <p>
+      Two presentational classes annotate entries without adding markup noise
+      &mdash; the labels are generated from CSS, so the source stays clean.
+    </p>
+    <p>
+      Add <code>required</code> to a <code>dt.api</code> term to append a
+      muted <em>(required)</em> suffix:
+    </p>
+    <pre data-language="html">&lt;dt class="api required" id="idempotencyKey"&gt;idempotencyKey&lt;/dt&gt;</pre>
+    <dl>
+      <dt class="api required" id="markers:required">idempotencyKey</dt>
+      <dd>
+        <p>
+          The same option, marked required &mdash; the suffix is added by the
+          stylesheet.
+        </p>
+      </dd>
+    </dl>
+    <p>
+      Add <code>read-only</code> to a <code>section.api</code> to float a
+      <code>[read-only]</code> marker into the article&rsquo;s right gutter:
+    </p>
+    <pre data-language="html">&lt;section class="api read-only"&gt;
+  &lt;h3 id="createdAt"&gt;createdAt&lt;/h3&gt;
+&lt;/section&gt;</pre>
+    <section class="api read-only" id="markers:read-only">
+      <h3>createdAt</h3>
+      <p>
+        Timestamp set when the record is created and never changed afterward.
+        The <code>[read-only]</code> marker sits in the right gutter.
+      </p>
+    </section>
+  </section>
+
   <section id="symbol-index">
     <h2>The symbol index</h2>
     <p>
@@ -87,8 +123,8 @@
     </p>
     <p>Each harvested entry looks like:</p>
     <pre data-language="json">{
-  "name": "processOrder",
-  "kind": "section",
+  "name": "processOrder(order, options)",
+  "kind": "method",
   "url": "/api-reference/",
   "anchor": "processOrder"
 }</pre>
@@ -113,9 +149,11 @@
       <h3>kind</h3>
       <p>
         A short label rendered next to the entry in the search results.
-        Inferred by default: <code>section</code> for
-        <code>&lt;section class="api"&gt;</code>, <code>option</code> for
-        <code>&lt;dt class="api"&gt;</code>. Override with
+        Inferred by default: <code>option</code> for
+        <code>&lt;dt class="api"&gt;</code>, and for
+        <code>&lt;section class="api"&gt;</code> either <code>method</code>
+        when the name ends in <code>(&hellip;)</code> or
+        <code>property</code> otherwise. Override with
         <code>data-api-kind</code> when you want a more specific label:
       </p>
       <pre data-language="html">&lt;section class="api" data-api-kind="endpoint"&gt;

@@ -125,18 +125,20 @@
       </li>
     </ul>
     <p>
-      In <code>pnpm dev</code>, both indexes are rebuilt on each watch
-      cycle, so search results stay in sync with the content you&rsquo;re
-      editing.
+      In <code>pnpm dev</code>, the symbol and Pagefind indexes are built once
+      at start-up and then reused for the rest of the dev server&rsquo;s
+      lifetime &mdash; reindexing the whole site on every keystroke is the
+      dominant per-build cost, so later rebuilds skip it. Search reflects the
+      start-up snapshot; restart the dev server (or run a full
+      <code>pnpm build</code>) to pick up content you&rsquo;ve since edited.
     </p>
     <div class="warning">
-      <strong>Pagefind needs real files</strong>
+      <strong>Search can lag the page in dev</strong>
       <p>
-        Pagefind reads <code>_site/</code> from disk, so it only sees what
-        Eleventy has actually emitted. If you&rsquo;re testing search
-        results, run a full build at least once &mdash; the dev server
-        keeps the index fresh from there on, but the first run is what
-        creates it.
+        Because the indexes are frozen at start-up, a symbol or passage you
+        add mid-session won&rsquo;t appear in search until you restart the dev
+        server. The search UI degrades gracefully when an index is stale or
+        missing, so the page itself keeps working in the meantime.
       </p>
     </div>
   </section>
