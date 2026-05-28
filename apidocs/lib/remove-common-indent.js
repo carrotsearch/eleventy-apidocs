@@ -7,7 +7,9 @@ export function removeCommonIndent(content) {
     return "";
   }
 
-  const lines = content.split(/[\r\n]/);
+  // Split on the line break, not on each \r/\n char — splitting on the
+  // class turns every CRLF into two breaks and injects a blank line.
+  const lines = content.split(/\r?\n/);
   if (!lines.length) {
     return content;
   }
