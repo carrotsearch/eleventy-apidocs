@@ -51,3 +51,21 @@ test("trim-brackets strips the outer braces", () => {
   assert.doesNotMatch(out[0], /[{}]/);
   assert.match(out[0], /"b": 1/);
 });
+
+test("comments in JSONC source are dropped by the parser", () => {
+  const src = '{\n  // a line comment\n  "a": /* inline */ 1\n}';
+  assert.deepEqual(extractJsonpath(src, "$.a"), ["1"]);
+});
+
+test("remove-comments is accepted as a no-op", () => {
+  const src = '{\n  // a comment\n  "a": 1\n}';
+  assert.deepEqual(extractJsonpath(src, "$.a{remove-comments}"), ["1"]);
+});
+
+test("comment-like substrings inside string values survive", () => {
+  // Regression: a regexp comment-strip ate // and /* */ inside strings,
+  // turning "https://x" into "https:" and corrupting the parse.
+  const src = '{"endpoint": "https://api.example.com/v1", "glob": "src/**/*.js"}';
+  assert.deepEqual(extractJsonpath(src, "$.endpoint"), ["https://api.example.com/v1"]);
+  assert.deepEqual(extractJsonpath(src, "$.glob"), ["src/**/*.js"]);
+});

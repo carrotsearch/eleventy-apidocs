@@ -2,7 +2,8 @@
 // Supports a `{ ... }` suffix for post-processing:
 //   path{ 'key1', /key.*/, trim-brackets, remove-comments }
 // Key selectors filter retained properties; trim-brackets strips outer
-// braces from each rendered object; remove-comments parses JSONC strictly.
+// braces from each rendered object. Comments are always dropped by the
+// JSONC parser, so remove-comments is accepted but a no-op.
 
 import * as jsonc from "jsonc-parser";
 import { JSONPath } from "jsonpath-plus";
@@ -13,12 +14,12 @@ export function extractJsonpath(content, expr) {
   }
 
   const opts = parseSuffix(expr);
-  const text = opts.removeComments
-    ? jsonc.applyEdits(content, []).replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, "")
-    : content;
 
+  // jsonc.parse ignores // and /* */ comments natively, so JSONC source
+  // parses without any pre-stripping — and a regexp strip would corrupt
+  // comment-like substrings inside string values (e.g. "https://…").
   const errors = [];
-  const parsed = jsonc.parse(text, errors, { allowTrailingComma: true });
+  const parsed = jsonc.parse(content, errors, { allowTrailingComma: true });
   if (errors.length) {
     throw new Error(
       `JSON parse failed: ${errors.map(e => jsonc.printParseErrorCode(e.error)).join(", ")}`
@@ -65,7 +66,6 @@ export function extractJsonpath(content, expr) {
 function parseSuffix(raw) {
   let path = raw.trim();
   let trimBrackets = false;
-  let removeComments = false;
   let keyFilter = null;
 
   if (path.endsWith("}")) {
@@ -92,7 +92,7 @@ function parseSuffix(raw) {
       } else if (tok.toLowerCase() === "trim-brackets") {
         trimBrackets = true;
       } else if (tok.toLowerCase() === "remove-comments") {
-        removeComments = true;
+        // Accepted for compatibility; jsonc.parse always ignores comments.
       } else {
         throw new Error(`Unknown jsonpath option: ${tok}`);
       }
@@ -102,5 +102,5 @@ function parseSuffix(raw) {
     }
   }
 
-  return { path, trimBrackets, removeComments, keyFilter };
+  return { path, trimBrackets, keyFilter };
 }
