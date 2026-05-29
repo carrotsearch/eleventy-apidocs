@@ -1,4 +1,5 @@
 import apidocs from "@carrotsearch/eleventy-apidocs";
+import pkg from "@carrotsearch/eleventy-apidocs/package.json" with { type: "json" };
 
 export default async function (eleventyConfig) {
   return apidocs(eleventyConfig, {
@@ -7,7 +8,7 @@ export default async function (eleventyConfig) {
     footer: "src/footer.html",
     contentDir: "src/content",
     variables: {
-      VERSION: "0.1.0",
+      VERSION: pkg.version,
       SITE_OWNER: "Carrot Search"
     }
   });
