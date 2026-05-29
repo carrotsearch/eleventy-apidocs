@@ -1,24 +1,50 @@
-# apidocs
+# @carrotsearch/eleventy-apidocs
 
-Eleventy-based framework for HTML-source product documentation. Replaces the
-unmaintained [`gatsby-theme-apidocs`](https://github.com/carrotsearch/gatsby-theme-apidocs).
+An [Eleventy](https://www.11ty.dev/) plugin for product and API documentation
+authored in plain HTML. Write `<article>` files, point the plugin at them, and
+get a fast, searchable, themeable static site whose URLs are relative to each
+page &mdash; so the build is portable to any URL prefix without rebuilding.
 
-This repository is a pnpm workspace with two packages:
+## Features
 
-- `apidocs/` &mdash; the theme, published as `@carrotsearch/eleventy-apidocs`
-- `docs/` &mdash; a sample site that consumes the theme, used as a
-  living integration test
+- **Plain HTML source, no frontmatter.** The first `<h1>` is the page title;
+  file paths map to URLs (`index.html` &rarr; `/`, `guide.html` &rarr; `/guide/`).
+- **Portable output.** Every internal `href`/`src`/`srcset` is rewritten
+  page-relative, so `_site/` works under `/`, `/docs/`, or `file://` unchanged.
+- **Built-in search.** Pagefind full-text prose search and a fuzzysort symbol
+  index, in one dialog (&#8984;K / Ctrl+K, or `/`). Both are static files &mdash;
+  no search backend to host.
+- **API reference styling.** `<section class="api">` and `<dt class="api">`
+  render as monospace symbols and feed the symbol index automatically.
+- **Code blocks** highlighted with [Shiki](https://shiki.style/), with a
+  `highlight-line` directive, file embeds, and a copy button.
+- **Responsive images** via `@11ty/eleventy-img` &mdash; srcset, LQIP, and
+  separate light/dark variants.
+- **Themed UI.** Light/dark switch with FOUC prevention, ToC scrollspy,
+  lightbox, prev/next navigation, cross-document View Transitions, and
+  speculation-rules prefetch.
+- **LLM-friendly output.** A Markdown sibling for every page, plus `llms.txt`
+  and `llms-full.txt` at the site root.
+- **Extensible pipeline.** Splice your own cheerio passes in before
+  (`transformers`) or after (`finalizers`) the built-in ones.
 
-## Using the theme in your own project
+## Requirements
 
-1. Install Eleventy 3.x and the theme:
+- [Eleventy](https://www.11ty.dev/) 3.x (declared as a peer dependency)
+- Node.js &ge; 20.11
+- ESM &mdash; the plugin ships as ES modules only
 
-   ```sh
-   pnpm add -D @11ty/eleventy
-   pnpm add @carrotsearch/eleventy-apidocs
-   ```
+## Install
 
-2. Create `eleventy.config.js`:
+```sh
+pnpm add -D @11ty/eleventy
+pnpm add @carrotsearch/eleventy-apidocs
+```
+
+## Quick start
+
+1. Create `eleventy.config.js` and return the plugin. It sets Eleventy's input
+   directory for you, so there's nothing else to configure:
 
    ```js
    import apidocs from "@carrotsearch/eleventy-apidocs";
@@ -26,14 +52,13 @@ This repository is a pnpm workspace with two packages:
    export default async function (eleventyConfig) {
      return apidocs(eleventyConfig, {
        navigation: "src/navigation.json",
-       logo:       "src/logo.html",
-       footer:     "src/footer.html",
        contentDir: "src/content"
      });
    }
    ```
 
-3. Write your documentation as plain HTML files under `src/content/`:
+2. Write your documentation as plain HTML files under `src/content/`. No
+   frontmatter &mdash; the first `<h1>` becomes the page title:
 
    ```html
    <!-- src/content/index.html -->
@@ -46,20 +71,28 @@ This repository is a pnpm workspace with two packages:
    </article>
    ```
 
-   No frontmatter. The first `<h1>` becomes the page title. File paths map
-   to URLs (`index.html` &rarr; `/`, `getting-started.html` &rarr; `/getting-started/`).
-
-4. Provide the navigation, logo, and footer:
+3. Describe the navigation. Entries may be bare slugs (the title is read from
+   the page's `<h1>`) or `{ slug, title }` objects, and may be grouped into
+   chapters:
 
    ```json
    // src/navigation.json
-   [
-     { "slug": "",                "title": "Home" },
-     { "slug": "getting-started", "title": "Getting started" }
-   ]
+   {
+     "chapters": [
+       {
+         "title": "Introduction",
+         "articles": [
+           { "slug": "",                "title": "Home" },
+           { "slug": "getting-started", "title": "Getting started" }
+         ]
+       }
+     ]
+   }
    ```
 
-5. Build and serve:
+   A flat array works too: `[ "", "getting-started" ]`.
+
+4. Build and serve:
 
    ```sh
    pnpm exec eleventy --serve   # dev with hot reload
@@ -67,44 +100,58 @@ This repository is a pnpm workspace with two packages:
    ```
 
 All URLs in the generated HTML are relative to the page, so you can host
-`_site/` from any URL prefix (`/`, `/docs/`, `file://...`) without rebuilding.
+`_site/` from any URL prefix without rebuilding.
 
-## Working on this repo
+## Options
 
-```sh
-pnpm install         # install workspace deps
-pnpm dev             # serve docs with hot reload
-pnpm build           # build docs to docs/_site/
-pnpm clean           # remove docs/_site/
-pnpm test            # run the pipeline unit tests
-pnpm check           # lint + format check with Biome (check:fix to auto-fix)
-```
+Pass options as the second argument to `apidocs(eleventyConfig, options)`. All
+paths are resolved relative to the project root. Every option is optional;
+defaults are shown.
 
-GitHub Actions runs `pnpm test` and `pnpm build` on every push and pull
-request &mdash; see `.github/workflows/ci.yml`.
+| Option         | Default               | Description |
+| -------------- | --------------------- | ----------- |
+| `contentDir`   | `"src/content"`       | Directory of source HTML articles. Becomes Eleventy's input dir. |
+| `navigation`   | `"src/navigation.json"` | Navigation manifest (flat or chaptered). Drives the sidebar and prev/next links. |
+| `logo`         | `"src/logo.html"`     | Raw HTML for the header logo slot. |
+| `footer`       | `"src/footer.html"`   | Raw HTML for the page footer. |
+| `head`         | `"src/head.html"`     | Raw HTML injected into `<head>` (meta tags, analytics, custom links). |
+| `variables`    | `{}`                  | Map of `$VAR$` tokens substituted across content and layout (e.g. version strings). |
+| `styles`       | `[]`                  | Extra CSS files merged into the bundled, minified stylesheet. |
+| `transformers` | `[]`                  | Cheerio passes run on the raw article **before** the built-in passes. |
+| `finalizers`   | `[]`                  | Cheerio passes run on the article **after** the built-in passes. |
+
+A pass is an async `($, ctx) => {}` function receiving the cheerio root and a
+per-page context. See the **Pipeline extensions** page in the documentation for
+the context shape and ordering guarantees.
+
+## Documentation
+
+The full guide is at **<https://carrotsearch.github.io/eleventy-apidocs/>** &mdash;
+it covers page structure, code blocks, images, callouts, tables, API reference
+style, theming, search, the pipeline, and deployment. Its source is the sample
+site under [`docs/`](docs/), built with this plugin, so it doubles as a living
+example and an integration test.
 
 ## Status
 
-Feature-complete against the original `gatsby-theme-apidocs`. Not yet
-published to npm &mdash; consume via `workspace:*` or a git dependency
-until then.
+Pre-1.0: feature-complete against the original `gatsby-theme-apidocs`, but the
+options surface may still shift before a 1.0 release.
 
-What ships today:
+## Developing this repo
 
-- Plain HTML source, no frontmatter, auto-wrapped page shell
-- Per-page relative URLs that survive any URL prefix without rebuild
-- HTML pipeline: section anchors, fragment IDs, ToC, internal link
-  rewriting, `$VAR$` substitution, code embeds, inline SVG, plus
-  consumer-supplied transformers and finalizers
-- Responsive images via `@11ty/eleventy-img` with srcset, LQIP, and
-  separate light/dark variants
-- Shiki code highlighting with `highlight-line` directive
-- Pagefind prose search + fuzzysort symbol search in one dialog
-  (&#8984;K / Ctrl+K, or `/`)
-- Light/dark theme switch with FOUC-prevention
-- ToC scrollspy, lightbox, code-block copy button
-- Cross-document View Transitions
-- Bundled, minified CSS (lightningcss) and JS (esbuild)
-- Prev/next navigation and speculation-rules prefetch
+This repository is a pnpm workspace with two packages: `apidocs/` (the plugin)
+and `docs/` (the sample site). To work on the plugin itself:
 
-Remaining for a v1 release: version bump and `npm publish`.
+```sh
+pnpm install   # install workspace deps
+pnpm dev       # serve docs with hot reload
+pnpm build     # build docs to docs/_site/
+pnpm test      # run the pipeline unit tests
+pnpm check     # lint + format check with Biome (check:fix to auto-fix)
+```
+
+See [CLAUDE.md](CLAUDE.md) for repository conventions.
+
+## License
+
+MIT
