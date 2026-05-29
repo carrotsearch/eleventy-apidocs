@@ -34,17 +34,17 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # pnpm needs to be on PATH before setup-node can read it from
       # packageManager / wire up the cache.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       # No registry-url here on purpose: it writes an .npmrc auth line that
       # expects NODE_AUTH_TOKEN, which OIDC doesn't provide — its presence
       # breaks the trusted-publish exchange. lts/* is Node 24 (npm 11.13),
       # comfortably above OIDC's npm >= 11.5.1 requirement.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: lts/*
           cache: pnpm
@@ -83,7 +83,7 @@ jobs:
       # way to see why — surface them as an artifact.
       - name: Upload npm debug logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-debug-logs
           path: |
