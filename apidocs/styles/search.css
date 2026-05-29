@@ -66,7 +66,7 @@
 
   &[open] {
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto 1fr auto;
   }
 
   &::backdrop {
@@ -267,6 +267,34 @@
   font-size: 0.85rem;
 }
 
+.search-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0.5rem 0.875rem;
+  border-block-start: 1px solid var(--rule-faint);
+  background: var(--bg);
+  font-size: 0.75rem;
+  color: var(--fg-faint);
+}
+.search-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+
+  & kbd {
+    font-family: inherit;
+    font-size: 0.95em;
+    min-inline-size: 1.1em;
+    padding: 0.05rem 0.35rem;
+    text-align: center;
+    border: 1px solid var(--rule-faint);
+    border-radius: 0.25rem;
+    color: var(--fg-muted);
+    background: var(--bg-dim);
+  }
+}
+
 /* Mobile — full-screen overlay matching the nav breakpoint. Swap the
    "Esc" kbd hint for an X icon: no physical Esc key on phones, so the
    tappable target needs to read as one. */
@@ -296,5 +324,9 @@
     & .search-close-icon {
       display: block;
     }
+  }
+
+  .search-footer {
+    display: none;
   }
 }
