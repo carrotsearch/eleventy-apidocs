@@ -1,4 +1,4 @@
-# apidocs
+# @carrotsearch/eleventy-apidocs
 
 Monorepo for `@carrotsearch/eleventy-apidocs`, an [Eleventy](https://www.11ty.dev/)
 plugin for HTML-source product documentation. Replaces the unmaintained
@@ -15,8 +15,7 @@ A pnpm workspace with two packages:
 
 - `apidocs/` &mdash; the plugin, published as `@carrotsearch/eleventy-apidocs`.
 - `docs/` &mdash; a sample site that consumes the plugin. It doubles as a
-  **living integration test**: if a plugin change isn't reflected correctly in
-  the built sample site, the change isn't done.
+  living integration test.
 
 ## Working on this repo
 
@@ -33,8 +32,7 @@ pnpm check     # lint + format check with Biome (check:fix to auto-fix)
 
 GitHub Actions runs `pnpm test` and `pnpm build` on every push and pull request,
 then deploys `docs/` to GitHub Pages from `main` &mdash; see
-`.github/workflows/ci.yml`. Publishing to npm is a manual, dry-run-by-default
-workflow that authenticates via OIDC trusted publishing (no stored token) &mdash;
+`.github/workflows/ci.yml`. Publishing to npm is a manual, dry-run-by-default,
 see `.github/workflows/publish.yml`.
 
 See [CLAUDE.md](CLAUDE.md) for repository conventions.

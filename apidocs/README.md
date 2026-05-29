@@ -28,6 +28,15 @@ page &mdash; so the build is portable to any URL prefix without rebuilding.
 - **Extensible pipeline.** Splice your own cheerio passes in before
   (`transformers`) or after (`finalizers`) the built-in ones.
 
+## Documentation
+
+The full guide is at **<https://carrotsearch.github.io/eleventy-apidocs/>** &mdash;
+it covers page structure, code blocks, images, callouts, tables, API reference
+style, theming, search, the pipeline, and deployment. Its source is the sample
+site under [`docs/`](https://github.com/carrotsearch/eleventy-apidocs/tree/main/docs),
+built with this plugin, so it doubles as a living example and an integration test.
+
+
 ## Requirements
 
 - [Eleventy](https://www.11ty.dev/) 3.x (declared as a peer dependency)
@@ -123,19 +132,6 @@ defaults are shown.
 A pass is an async `($, ctx) => {}` function receiving the cheerio root and a
 per-page context. See the **Pipeline extensions** page in the documentation for
 the context shape and ordering guarantees.
-
-## Documentation
-
-The full guide is at **<https://carrotsearch.github.io/eleventy-apidocs/>** &mdash;
-it covers page structure, code blocks, images, callouts, tables, API reference
-style, theming, search, the pipeline, and deployment. Its source is the sample
-site under [`docs/`](https://github.com/carrotsearch/eleventy-apidocs/tree/main/docs),
-built with this plugin, so it doubles as a living example and an integration test.
-
-## Status
-
-Pre-1.0: feature-complete against the original `gatsby-theme-apidocs`, but the
-options surface may still shift before a 1.0 release.
 
 ## License
 
