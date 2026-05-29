@@ -203,7 +203,7 @@ function init() {
     noHitsEl.hidden = !(apiRendered && pagesRendered && !hasHits);
   }
 
-  async function search(query) {
+  function search(query) {
     const q = query.trim();
     if (q === lastQuery) {
       return;
@@ -219,75 +219,77 @@ function init() {
     pagesRendered = false;
     updateEmptyState();
 
-    // API + Sections path — synchronous, paints on every keystroke. One
-    // fuzzysort pass over the symbols index, split into the two groups by
-    // sym.group ("api" vs "section") at render time.
-    (async () => {
-      await apiReady;
-      if (q !== lastQuery) {
-        return;
-      }
+    searchApiAndSections(q);
+    searchPages(q);
+  }
 
-      // fuzzysort v3 compresses scores to 0..1, so a single threshold no
-      // longer separates good fuzzy hits from scattered ones. Pair the
-      // threshold with a region-count cap to drop "doc"→"labelShadowColor"
-      // noise, then let the boundary escape hatch readmit initialism and
-      // prefix-at-boundary matches ("lbc"→"labelBoxColor", "lab"→"labelBox")
-      // even when their region count exceeds the cap.
-      const maxRegions = Math.max(2, queryWords(q) + 1);
-      const hits = fuzzysort
-        ? fuzzysort
-            .go(q, symbols || [], {
-              key: "name",
-              limit: (API_LIMIT + SECTION_LIMIT) * 2,
-              threshold: 0.3
-            })
-            .filter(
-              h =>
-                regionCount(h._indexes) <= maxRegions ||
-                regionsStartAtBoundary(h._indexes, h.target)
-            )
-        : [];
-      if (q !== lastQuery) {
-        return;
-      }
-      const apiHits = [];
-      const sectionHits = [];
-      for (const h of hits) {
-        if (h.obj.group === "section") {
-          if (sectionHits.length < SECTION_LIMIT) {
-            sectionHits.push(h);
-          }
-        } else {
-          if (apiHits.length < API_LIMIT) {
-            apiHits.push(h);
-          }
+  // API + Sections path — synchronous, paints on every keystroke. One
+  // fuzzysort pass over the symbols index, split into the two groups by
+  // sym.group ("api" vs "section") at render time.
+  async function searchApiAndSections(q) {
+    await apiReady;
+    if (q !== lastQuery) {
+      return;
+    }
+
+    // fuzzysort v3 compresses scores to 0..1, so a single threshold no
+    // longer separates good fuzzy hits from scattered ones. Pair the
+    // threshold with a region-count cap to drop "doc"→"labelShadowColor"
+    // noise, then let the boundary escape hatch readmit initialism and
+    // prefix-at-boundary matches ("lbc"→"labelBoxColor", "lab"→"labelBox")
+    // even when their region count exceeds the cap.
+    const maxRegions = Math.max(2, queryWords(q) + 1);
+    const hits = fuzzysort
+      ? fuzzysort
+          .go(q, symbols || [], {
+            key: "name",
+            limit: (API_LIMIT + SECTION_LIMIT) * 2,
+            threshold: 0.3
+          })
+          .filter(
+            h =>
+              regionCount(h._indexes) <= maxRegions || regionsStartAtBoundary(h._indexes, h.target)
+          )
+      : [];
+    if (q !== lastQuery) {
+      return;
+    }
+    const apiHits = [];
+    const sectionHits = [];
+    for (const h of hits) {
+      if (h.obj.group === "section") {
+        if (sectionHits.length < SECTION_LIMIT) {
+          sectionHits.push(h);
+        }
+      } else {
+        if (apiHits.length < API_LIMIT) {
+          apiHits.push(h);
         }
       }
-      renderApi(apiHits, q);
-      renderSections(sectionHits, q);
-    })();
+    }
+    renderApi(apiHits, q);
+    renderSections(sectionHits, q);
+  }
 
-    // Pages path — pagefind handles its own debouncing.
-    (async () => {
-      await pagesReady;
-      if (q !== lastQuery) {
-        return;
-      }
-      if (!pagefind) {
-        renderPages([], q);
-        return;
-      }
-      const r = await pagefind.debouncedSearch(q, PAGE_DEBOUNCE_MS);
-      if (r === null || q !== lastQuery) {
-        return;
-      }
-      const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
-      if (q !== lastQuery) {
-        return;
-      }
-      renderPages(pageHits, q);
-    })();
+  // Pages path — pagefind handles its own debouncing.
+  async function searchPages(q) {
+    await pagesReady;
+    if (q !== lastQuery) {
+      return;
+    }
+    if (!pagefind) {
+      renderPages([], q);
+      return;
+    }
+    const r = await pagefind.debouncedSearch(q, PAGE_DEBOUNCE_MS);
+    if (r === null || q !== lastQuery) {
+      return;
+    }
+    const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
+    if (q !== lastQuery) {
+      return;
+    }
+    renderPages(pageHits, q);
   }
 
   function renderApi(apiHits, q) {
