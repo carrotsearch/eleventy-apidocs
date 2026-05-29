@@ -36,7 +36,8 @@ const LANGS = [
   "xml",
   "markdown",
   "java",
-  "python"
+  "python",
+  "http"
 ];
 
 let highlighterPromise;
