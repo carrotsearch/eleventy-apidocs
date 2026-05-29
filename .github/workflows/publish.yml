@@ -1,0 +1,92 @@
+name: Publish to npm
+run-name: "Publish @carrotsearch/eleventy-apidocs by ${{ github.actor }}${{ inputs.dry-run == true && ' (dry run)' || '' }}"
+
+# Manual-only. The version in apidocs/package.json is the source of truth:
+# bump and commit it first, then dispatch this workflow. dry-run defaults to
+# true so an accidental click packs and validates without publishing.
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run (pack and validate, do not publish)"
+        type: boolean
+        default: true
+
+# Never let two publishes overlap; queue rather than cancel so an in-flight
+# publish always runs to completion.
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+env:
+  DRY_RUN: "${{ inputs.dry-run == true && '--dry-run' || '' }}"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+      # Mints the OIDC token npm exchanges for a short-lived publish
+      # credential. No NPM_TOKEN secret is stored anywhere — npmjs.com is
+      # configured with this repo + workflow as a trusted publisher.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm needs to be on PATH before setup-node can read it from
+      # packageManager / wire up the cache.
+      - uses: pnpm/action-setup@v4
+
+      # No registry-url here on purpose: it writes an .npmrc auth line that
+      # expects NODE_AUTH_TOKEN, which OIDC doesn't provide — its presence
+      # breaks the trusted-publish exchange. lts/* is Node 24 (npm 11.13),
+      # comfortably above OIDC's npm >= 11.5.1 requirement.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Gate the publish on the same checks CI runs, so we never ship a build
+      # that wouldn't pass on main.
+      - run: pnpm exec biome ci
+
+      - run: pnpm test
+
+      - run: pnpm build
+
+      # Prereleases (1.2.0-rc.1) must not move the `latest` tag; route any
+      # version containing a hyphen to `next` instead.
+      - name: Resolve dist-tag
+        id: tag
+        run: |
+          VERSION=$(node -p "require('./apidocs/package.json').version")
+          TAG=latest
+          if [[ "$VERSION" == *-* ]]; then
+            TAG=next
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # --provenance attaches a signed build attestation; it works here only
+      # because this repo is public. --no-git-checks skips pnpm's clean-tree
+      # guard (the build writes into the tree before we publish).
+      - name: Publish
+        working-directory: apidocs
+        run: pnpm publish --tag "${{ steps.tag.outputs.tag }}" --provenance --no-git-checks ${{ env.DRY_RUN }}
+
+      # If the OIDC exchange or publish fails, the npm/pnpm logs are the only
+      # way to see why — surface them as an artifact.
+      - name: Upload npm debug logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-debug-logs
+          path: |
+            /home/runner/.npm/_logs/
+            /home/runner/.local/share/pnpm/logs/
+          if-no-files-found: ignore
