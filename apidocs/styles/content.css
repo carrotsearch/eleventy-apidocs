@@ -270,7 +270,11 @@ dd > p:first-child {
   margin-block-start: 0;
 }
 
-@container article (min-width: 48rem) {
+/* Switch to the two-column term/description layout once the article is wide
+   enough. Threshold sits below the article's max measure (48rem) because a
+   container query measures the content box — after padding the article never
+   reaches 48rem, so a 48rem query would never fire and the list stayed stacked. */
+@container article (min-width: 34rem) {
   dl {
     --dl-indent: 10rem;
   }
