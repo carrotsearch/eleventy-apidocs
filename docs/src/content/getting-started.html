@@ -27,6 +27,19 @@ pnpm add @carrotsearch/eleventy-apidocs</pre>
         expects an ESM consumer config.
       </p>
     </section>
+    <section id="install:build-scripts">
+      <h3>Build scripts (pnpm and Bun)</h3>
+      <p>
+        pnpm and Bun don't run dependencies' install scripts by default. The
+        theme needs <code>sharp</code> (responsive images) and
+        <code>esbuild</code> (search bundling) built, so allow them after
+        installing — otherwise image processing and search fail at build time.
+        With pnpm, run <code>pnpm approve-builds</code> and allow both; with
+        Bun, add them to <code>trustedDependencies</code> in
+        <code>package.json</code>. npm and Yarn run these automatically and need
+        nothing.
+      </p>
+    </section>
   </section>
 
   <section id="configure-eleventy">

@@ -50,6 +50,13 @@ pnpm add -D @11ty/eleventy
 pnpm add @carrotsearch/eleventy-apidocs
 ```
 
+> **Using pnpm or Bun?** These managers don't run dependencies' install scripts
+> by default. The theme needs `sharp` (responsive images) and `esbuild` (search
+> bundling) built, so allow them after installing — otherwise image processing
+> and search fail at build time. With pnpm, run `pnpm approve-builds` and allow
+> both; with Bun, add them to `trustedDependencies` in `package.json`. npm and
+> Yarn run these automatically and need nothing.
+
 ## Quick start
 
 1. Create `eleventy.config.js` and return the plugin. It sets Eleventy's input
