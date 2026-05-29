@@ -129,8 +129,8 @@ the context shape and ordering guarantees.
 The full guide is at **<https://carrotsearch.github.io/eleventy-apidocs/>** &mdash;
 it covers page structure, code blocks, images, callouts, tables, API reference
 style, theming, search, the pipeline, and deployment. Its source is the sample
-site under [`docs/`](docs/), built with this plugin, so it doubles as a living
-example and an integration test.
+site under [`docs/`](https://github.com/carrotsearch/eleventy-apidocs/tree/main/docs),
+built with this plugin, so it doubles as a living example and an integration test.
 
 ## Status
 
@@ -150,7 +150,8 @@ pnpm test      # run the pipeline unit tests
 pnpm check     # lint + format check with Biome (check:fix to auto-fix)
 ```
 
-See [CLAUDE.md](CLAUDE.md) for repository conventions.
+See [CLAUDE.md](https://github.com/carrotsearch/eleventy-apidocs/blob/main/CLAUDE.md)
+for repository conventions.
 
 ## License
 

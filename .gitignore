@@ -4,3 +4,6 @@ _site/
 .DS_Store
 *.log
 .idea/
+
+# Generated at pack time by apidocs/ prepack (copied from the root README).
+apidocs/README.md
