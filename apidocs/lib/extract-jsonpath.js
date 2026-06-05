@@ -64,43 +64,55 @@ export function extractJsonpath(content, expr) {
 }
 
 function parseSuffix(raw) {
-  let path = raw.trim();
-  let trimBrackets = false;
-  let keyFilter = null;
-
-  if (path.endsWith("}")) {
-    const lastBrace = path.lastIndexOf("{");
-    const tokens = path
-      .slice(lastBrace + 1, -1)
-      .trim()
-      .split(/\s*,\s*/);
-    path = path.slice(0, lastBrace).trim();
-
-    const matchers = [];
-    for (const tok of tokens) {
-      if (/^'.+'$|^".+"$/.test(tok)) {
-        const name = tok.slice(1, -1);
-        matchers.push(k => k === name);
-      } else if (/^\/.+\/$/.test(tok)) {
-        let re;
-        try {
-          re = new RegExp(tok.slice(1, -1));
-        } catch (e) {
-          throw new Error(`Invalid jsonpath key regex ${tok}: ${e.message}`);
-        }
-        matchers.push(k => re.test(k));
-      } else if (tok.toLowerCase() === "trim-brackets") {
-        trimBrackets = true;
-      } else if (tok.toLowerCase() === "remove-comments") {
-        // Accepted for compatibility; jsonc.parse always ignores comments.
-      } else {
-        throw new Error(`Unknown jsonpath option: ${tok}`);
-      }
-    }
-    if (matchers.length) {
-      keyFilter = k => matchers.some(m => m(k));
-    }
+  const path = raw.trim();
+  if (!path.endsWith("}")) {
+    return { path, trimBrackets: false, keyFilter: null };
   }
 
-  return { path, trimBrackets, keyFilter };
+  const lastBrace = path.lastIndexOf("{");
+  const tokens = path
+    .slice(lastBrace + 1, -1)
+    .trim()
+    .split(/\s*,\s*/);
+
+  let trimBrackets = false;
+  const matchers = [];
+  for (const tok of tokens) {
+    const decoded = decodeSuffixToken(tok);
+    if (decoded.matcher) {
+      matchers.push(decoded.matcher);
+    }
+    if (decoded.trimBrackets) {
+      trimBrackets = true;
+    }
+  }
+  const keyFilter = matchers.length ? k => matchers.some(m => m(k)) : null;
+
+  return { path: path.slice(0, lastBrace).trim(), trimBrackets, keyFilter };
+}
+
+function decodeSuffixToken(tok) {
+  if (/^'.+'$|^".+"$/.test(tok)) {
+    const name = tok.slice(1, -1);
+    return { matcher: k => k === name };
+  }
+  if (/^\/.+\/$/.test(tok)) {
+    let re;
+    try {
+      re = new RegExp(tok.slice(1, -1));
+    } catch (e) {
+      throw new Error(`Invalid jsonpath key regex ${tok}: ${e.message}`);
+    }
+    return { matcher: k => re.test(k) };
+  }
+  const lower = tok.toLowerCase();
+  if (lower === "trim-brackets") {
+    return { trimBrackets: true };
+  }
+
+  // remove-comments accepted for compatibility; jsonc.parse always ignores comments.
+  if (lower === "remove-comments") {
+    return {};
+  }
+  throw new Error(`Unknown jsonpath option: ${tok}`);
 }

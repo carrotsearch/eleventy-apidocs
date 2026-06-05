@@ -14,6 +14,19 @@ const SECTION_LIMIT = 8;
 const PAGE_LIMIT = 8;
 const SUB_LIMIT = 2; // sub-results per page
 
+function bucketSymbolHits(hits) {
+  const apiHits = [];
+  const sectionHits = [];
+  for (const h of hits) {
+    const bucket = h.obj.group === "section" ? sectionHits : apiHits;
+    const cap = h.obj.group === "section" ? SECTION_LIMIT : API_LIMIT;
+    if (bucket.length < cap) {
+      bucket.push(h);
+    }
+  }
+  return { apiHits, sectionHits };
+}
+
 // Deployment base path, recovered from where this bundle was loaded
 // from. The bundle lands at <BASE>/assets/apidocs/js/<file>; whatever
 // precedes that suffix is the base ("/" at site root, "/eleventy-apidocs/"
@@ -254,19 +267,7 @@ function init() {
     if (q !== lastQuery) {
       return;
     }
-    const apiHits = [];
-    const sectionHits = [];
-    for (const h of hits) {
-      if (h.obj.group === "section") {
-        if (sectionHits.length < SECTION_LIMIT) {
-          sectionHits.push(h);
-        }
-      } else {
-        if (apiHits.length < API_LIMIT) {
-          apiHits.push(h);
-        }
-      }
-    }
+    const { apiHits, sectionHits } = bucketSymbolHits(hits);
     renderApi(apiHits, q);
     renderSections(sectionHits, q);
   }

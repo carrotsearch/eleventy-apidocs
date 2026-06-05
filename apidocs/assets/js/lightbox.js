@@ -184,28 +184,32 @@ function lockAndCaptureUpgrade(source, clone) {
       return;
     }
     if (upgradeSources.length && clone.tagName === "PICTURE") {
-      const frag = document.createDocumentFragment();
-      for (const s of upgradeSources) {
-        const el = document.createElement("source");
-        if (s.type) {
-          el.type = s.type;
-        }
-        if (s.media) {
-          el.setAttribute("media", s.media);
-        }
-        if (s.srcset) {
-          el.setAttribute("srcset", s.srcset);
-        }
-        el.setAttribute("sizes", "100vw");
-        frag.appendChild(el);
-      }
-      clone.insertBefore(frag, clonedImg);
+      clone.insertBefore(buildSourceFrag(upgradeSources), clonedImg);
     }
     if (upgradeSrcset) {
       clonedImg.setAttribute("srcset", upgradeSrcset);
     }
     clonedImg.setAttribute("sizes", "100vw");
   };
+}
+
+function buildSourceFrag(specs) {
+  const frag = document.createDocumentFragment();
+  for (const s of specs) {
+    const el = document.createElement("source");
+    if (s.type) {
+      el.type = s.type;
+    }
+    if (s.media) {
+      el.setAttribute("media", s.media);
+    }
+    if (s.srcset) {
+      el.setAttribute("srcset", s.srcset);
+    }
+    el.setAttribute("sizes", "100vw");
+    frag.appendChild(el);
+  }
+  return frag;
 }
 
 // Prefetch the lightbox-resolution variant(s) for this figure via
