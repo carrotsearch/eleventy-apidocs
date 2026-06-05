@@ -6,6 +6,9 @@
 
 const MARKER = /fragment-(start|end)\{[\w-]+\}/;
 
+// A line-by-line inside/found state machine; the branches are the marker
+// grammar and read more clearly inline than split across helpers.
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: line-by-line marker state machine
 export function extractFragment(content, id) {
   if (!content) {
     return "";

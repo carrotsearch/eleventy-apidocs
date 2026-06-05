@@ -89,13 +89,7 @@ async function readTitleForSlug(contentDir, slug, cache) {
         return hit.title;
       }
     } catch (err) {
-      if (err.code === "ENOENT") {
-        console.warn(
-          `[apidocs] navigation: no source file for slug "${slug}" (looked for ${file})`
-        );
-        return null;
-      }
-      throw err;
+      return warnIfMissing(err, slug, file);
     }
   }
 
@@ -110,10 +104,15 @@ async function readTitleForSlug(contentDir, slug, cache) {
     }
     return title;
   } catch (err) {
-    if (err.code === "ENOENT") {
-      console.warn(`[apidocs] navigation: no source file for slug "${slug}" (looked for ${file})`);
-      return null;
-    }
-    throw err;
+    return warnIfMissing(err, slug, file);
   }
+}
+
+// Swallow a missing source file (warn + null); rethrow anything else.
+function warnIfMissing(err, slug, file) {
+  if (err.code === "ENOENT") {
+    console.warn(`[apidocs] navigation: no source file for slug "${slug}" (looked for ${file})`);
+    return null;
+  }
+  throw err;
 }

@@ -23,6 +23,9 @@ if (layout && toggle && nav) {
   // lets the link's navigation push the target URL cleanly on top.
   let historyPushed = false;
 
+  // DOM updates plus the three-way history reconciliation (push/back/replace)
+  // are one cohesive operation; splitting it would scatter the state machine.
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: cohesive open/close + history state machine
   const setOpen = (open, { fromPopstate = false, fromLink = false } = {}) => {
     if (open) {
       layout.setAttribute("data-nav-open", "");

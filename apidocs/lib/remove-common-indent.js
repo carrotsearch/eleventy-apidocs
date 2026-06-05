@@ -2,6 +2,9 @@
 // Detects whether the indent uses spaces or tabs based on the first non-empty
 // line; mixed indentation is left alone.
 
+// Three sequential linear scans (detect indent char, find shared width,
+// slice); each is simple and the sequence reads top-to-bottom.
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: sequential linear scans
 export function removeCommonIndent(content) {
   if (!content) {
     return "";

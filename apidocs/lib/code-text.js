@@ -96,12 +96,10 @@ function applyHide(content) {
     }
     const dir = parseDirective(lines[i]);
     if (dir && dir.action === "hide") {
-      const base = dir.type === "line" ? i : i + 1;
+      // start/end are offsets relative to the directive line, so the hidden
+      // indices are just i + k (line: {i}, next-line: {i+1}, range: i+start..).
       for (let k = dir.start; k < dir.end; k++) {
-        drop.add(base + (dir.type === "line" ? k : k - 1));
-      }
-      if (dir.type !== "line") {
-        continue;
+        drop.add(i + k);
       }
       continue;
     }
