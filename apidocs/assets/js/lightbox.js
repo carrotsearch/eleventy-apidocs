@@ -7,15 +7,12 @@
 // rendered in-page (locked to the source <img>'s currentSrc, with srcset
 // and <source> stripped). VT animates that. Only after the transition
 // settles do we restore srcset/<source>, letting the browser pick a higher
-// variant for the new 100vw display box if one is warranted. Hover/focus/
-// pointerdown over a figure also prefetches the upgrade via <link
-// rel=preload> so the swap is already cached by the time it kicks in.
+// variant for the new 100vw display box if one is warranted.
 
 const NAME = "apidocs-lightbox-image";
 
 let dialog;
 let lastSource = null;
-const preloaded = new WeakSet();
 
 function getDialog() {
   if (dialog) {
@@ -65,11 +62,6 @@ function openLightbox(figure, source) {
   const d = getDialog();
   const frame = d.querySelector(".frame");
   frame.replaceChildren();
-
-  // Belt-and-suspenders: a direct click (no prior hover, no keyboard focus)
-  // never had a chance to fire the preload listeners. Trigger here too —
-  // the WeakSet guard makes this cheap if it already ran.
-  preloadFigure(figure);
 
   const clone = source.cloneNode(true);
   // Wipe any inherited view-transition-name. If the user re-opens during a
@@ -284,47 +276,6 @@ function buildSourceFrag(specs) {
   return frag;
 }
 
-// Prefetch the lightbox-resolution variant(s) for this figure via
-// <link rel=preload as=image>. One link per <source> (with `type` so the
-// browser only fetches the format it supports) plus the fallback <img>'s
-// srcset as a backstop. Idempotent per figure.
-function preloadFigure(figure) {
-  if (preloaded.has(figure)) {
-    return;
-  }
-  if (figure.dataset.lightbox === "off") {
-    return;
-  }
-  const picture = figure.querySelector("picture");
-  if (!picture) {
-    return;
-  }
-  preloaded.add(figure);
-
-  for (const s of picture.querySelectorAll(":scope > source")) {
-    addImagePreload(s.getAttribute("srcset"), s.getAttribute("type"));
-  }
-  const img = picture.querySelector("img");
-  if (img) {
-    addImagePreload(img.getAttribute("srcset"), null);
-  }
-}
-
-function addImagePreload(srcset, type) {
-  if (!srcset) {
-    return;
-  }
-  const link = document.createElement("link");
-  link.rel = "preload";
-  link.as = "image";
-  if (type) {
-    link.type = type;
-  }
-  link.setAttribute("imagesrcset", srcset);
-  link.setAttribute("imagesizes", "100vw");
-  document.head.appendChild(link);
-}
-
 // The largest box that fits the source's natural aspect ratio inside the
 // dialog frame (viewport minus the .frame padding and a reserved row for
 // the caption). Mirrors `dialog.apidocs-lightbox > .frame` from lightbox.css.
@@ -481,20 +432,4 @@ function onClick(e) {
   openLightbox(hit.figure, hit.visual);
 }
 
-function onPreloadCue(e) {
-  if (dialog?.open) {
-    return;
-  }
-  const figure = e.target?.closest?.("figure");
-  if (figure) {
-    preloadFigure(figure);
-  }
-}
-
 document.addEventListener("click", onClick);
-
-// pointerover catches desktop hover; focusin catches keyboard tab; pointerdown
-// gives touch users some head start on the network fetch before click fires.
-document.addEventListener("pointerover", onPreloadCue);
-document.addEventListener("focusin", onPreloadCue);
-document.addEventListener("pointerdown", onPreloadCue);
