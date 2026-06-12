@@ -2,17 +2,19 @@
 // in a <dialog>. Uses the View Transitions API for the zoom animation when
 // available, otherwise opens/closes instantly. Close on ESC, click on the
 // backdrop, or click on the zoomed image.
-//
-// Resolution upgrade: the dialog initially shows the exact pixels already
-// rendered in-page (locked to the source <img>'s currentSrc, with srcset
-// and <source> stripped). VT animates that. Only after the transition
-// settles do we restore srcset/<source>, letting the browser pick a higher
-// variant for the new 100vw display box if one is warranted.
 
 const NAME = "apidocs-lightbox-image";
 
 let dialog;
 let lastSource = null;
+
+// Monotonic token guarding the async tails of overlapping transitions. A
+// view transition superseded by a newer startViewTransition still runs its
+// update callback and settles its `finished` promise; without the guard, a
+// stale close cleanup wipes the frame and name state the newer open just
+// set up (the dialog opens empty), and a stale open callback calls
+// showModal() on an already-open dialog, which throws.
+let session = 0;
 
 function getDialog() {
   if (dialog) {
@@ -47,10 +49,14 @@ function findVisual(target) {
   }
 
   // Prefer the element actually clicked when it's the visual itself
-  // (svg or img), but fall back to the figure's primary visual.
+  // (svg or img), but fall back to the figure's first *rendered* visual —
+  // light/dark figures carry both theme variants and one is display:none,
+  // so an unfiltered querySelector could zoom the wrong-theme image.
   let visual = target.closest("picture, img, svg");
   if (!visual || !figure.contains(visual)) {
-    visual = figure.querySelector("picture, img, svg");
+    visual = Array.from(figure.querySelectorAll("picture, img, svg")).find(
+      el => el.getClientRects().length > 0
+    );
   }
   if (!visual) {
     return null;
@@ -59,25 +65,23 @@ function findVisual(target) {
 }
 
 function openLightbox(figure, source) {
+  const mySession = ++session;
   const d = getDialog();
   const frame = d.querySelector(".frame");
   frame.replaceChildren();
 
+  // A close VT superseded by this open skips its cleanup (session guard in
+  // closeLightbox), so the previous source may still carry the close
+  // frame's inline view-transition-name. Remember it — `begin` clears it
+  // right before tagging the new source: a leftover name would
+  // duplicate-tag the named group and break capture.
+  const prevSource = lastSource;
+
   const clone = source.cloneNode(true);
-  // Wipe any inherited view-transition-name. If the user re-opens during a
-  // close VT's animation, the source still carries the close-frame's inline
-  // `view-transition-name: NAME` (cleared only in close's t.finished.finally).
-  // cloneNode then duplicates that name onto the new clone — both source and
-  // clone match the named group's OLD snapshot, and Chrome resolves the new
-  // clone's box at (0,0,0,0) (display:none, inside the closed dialog), so the
-  // morph animates the in-page image to top-left/zero instead of zooming in.
+  // The clone copies any stale inline view-transition-name along with the
+  // rest of the source's inline style; wipe it for the same reason.
   clone.style.viewTransitionName = "";
-  if (clone.tagName === "PICTURE") {
-    const img = clone.querySelector("img");
-    if (img) {
-      img.removeAttribute("loading");
-    }
-  }
+  const caption = figure.querySelector("figcaption");
 
   // Lock explicit pixel width/height on the clone — the largest box that
   // matches the source's natural aspect ratio inside the dialog frame. The
@@ -86,30 +90,45 @@ function openLightbox(figure, source) {
   // throttled loads the picture's auto/auto sizing inside the grid cell can
   // momentarily resolve to zero and Chrome captures a (0,0,0,0) box at
   // top-left, which morphs the in-page image off-screen instead of zooming.
-  const fit = fitBoxOf(source);
+  const fit = fitBoxOf(source, !!caption);
   if (fit) {
     clone.style.inlineSize = `${fit.w}px`;
     clone.style.blockSize = `${fit.h}px`;
-  } else {
-    const ar = aspectRatioOf(clone);
-    if (ar) {
-      clone.style.setProperty("--ar", ar);
-    }
   }
 
-  // Lock the clone to the source's already-rendered image so the VT
-  // captures exactly those pixels (no late load, no LQIP flash). Returns
-  // an upgrade() that restores srcset/<source> after the transition.
-  const upgrade = lockAndCaptureUpgrade(source, clone);
+  const clonedImg = pinClone(source, clone);
 
   frame.appendChild(clone);
-
-  const caption = figure.querySelector("figcaption");
   if (caption) {
     frame.appendChild(caption.cloneNode(true));
   }
 
   lastSource = source;
+
+  const begin = () => beginOpenTransition(mySession, source, prevSource, clone, d);
+
+  // A freshly created <img> loads and decodes asynchronously even when the
+  // bytes sit in the HTTP cache, and the VT's NEW side paints blank until
+  // the decode lands — visible as the zoomed image flashing blank at the
+  // start of the morph. Wait for the decode before starting the
+  // transition; the cap keeps a cold cache from freezing the click (the
+  // image then pops in mid-zoom instead). Warm-cache decodes land in
+  // single-digit milliseconds.
+  if (clonedImg) {
+    Promise.race([clonedImg.decode().catch(() => {}), new Promise(r => setTimeout(r, 300))]).then(
+      begin
+    );
+  } else {
+    begin();
+  }
+}
+
+function beginOpenTransition(mySession, source, prevSource, clone, d) {
+  // Superseded while waiting for the clone's decode — the newer session
+  // owns the dialog and the named group now.
+  if (mySession !== session) {
+    return;
+  }
 
   const finishOpen = () => {
     d.showModal();
@@ -118,19 +137,30 @@ function openLightbox(figure, source) {
 
   if (!document.startViewTransition) {
     finishOpen();
-    if (upgrade) {
-      upgrade();
-    }
     return;
   }
 
+  // Clear a stale name left by a superseded close VT before tagging the
+  // new source (order matters when both are the same element).
+  if (prevSource) {
+    prevSource.style.viewTransitionName = "";
+  }
   source.style.viewTransitionName = NAME;
 
   // Scope the root crossfade timing for the duration of this transition.
   // CSS in lightbox.css keys off the html class to fade the page out fast
-  // so the header is hidden before the image morph reaches the top.
+  // so the header is hidden before the image morph reaches the top. Remove
+  // the closing class too — a skipped close VT's cleanup never runs.
+  document.documentElement.classList.remove("apidocs-lightbox-closing");
   document.documentElement.classList.add("apidocs-lightbox-opening");
   const t = document.startViewTransition(() => {
+    // Superseded by a newer open (double-click inside the snapshot-capture
+    // window): leave everything to the newer session — wiping the source's
+    // name here would break the newer OLD capture, and a second
+    // showModal() on the now-open dialog would throw.
+    if (mySession !== session) {
+      return;
+    }
     source.style.viewTransitionName = "";
     // Open the dialog FIRST, then tag the clone. The clone has to be in a
     // rendered (display:block) box when its view-transition-name is set,
@@ -142,46 +172,41 @@ function openLightbox(figure, source) {
     clone.style.viewTransitionName = NAME;
   });
 
+  // A transition superseded during capture rejects `ready` with AbortError;
+  // nothing consumes `ready` here, so swallow it to keep the console clean.
+  t.ready.catch(() => {});
+
   // Keep the clone's view-transition-name so the close animation can
   // pick it up when the user dismisses.
   t.finished.finally(() => {
-    document.documentElement.classList.remove("apidocs-lightbox-opening");
-    if (upgrade) {
-      upgrade();
+    if (mySession !== session) {
+      return;
     }
+    document.documentElement.classList.remove("apidocs-lightbox-opening");
   });
 }
 
-// Strip srcset/<source>/sizes from the clone and pin its <img> to the
-// source's currentSrc. Returns a function that puts them back (or null if
-// there's nothing to upgrade — e.g. an SVG, or the source hasn't loaded
-// yet so we have no currentSrc to pin to).
-function lockAndCaptureUpgrade(source, clone) {
-  if (source.tagName === "svg" || source.tagName === "SVG") {
-    return null;
-  }
+// Pin the clone to the source's already-rendered image so the VT captures
+// exactly those pixels (no refetch, no LQIP flash): strip <source>/srcset/
+// sizes so the clone can't re-run candidate selection, and point its src at
+// the source's currentSrc. Pinning is skipped for images that haven't
+// loaded yet (no currentSrc) — the clone then loads candidates normally
+// once the dialog shows it. Returns the clone's inner <img> so the caller
+// can await its decode, or null for SVG.
+function pinClone(source, clone) {
   const sourceImg = source.tagName === "PICTURE" ? source.querySelector("img") : source;
   const clonedImg = clone.tagName === "PICTURE" ? clone.querySelector("img") : clone;
-  if (!sourceImg || !clonedImg) {
+  if (!clonedImg || clonedImg.tagName !== "IMG") {
     return null;
   }
-  const currentSrc = sourceImg.currentSrc || sourceImg.src;
+
+  // The dialog shows the clone immediately — never lazy-load it.
+  clonedImg.removeAttribute("loading");
+
+  const currentSrc = sourceImg?.currentSrc;
   if (!currentSrc) {
-    return null;
+    return clonedImg;
   }
-
-  // Read the upgrade attributes from `source`, not `clone` — we're about
-  // to mutate the clone, and reading from the live source is unambiguous.
-  const upgradeSrcset = sourceImg.getAttribute("srcset");
-  const upgradeSources =
-    source.tagName === "PICTURE"
-      ? Array.from(source.querySelectorAll(":scope > source")).map(s => ({
-          srcset: s.getAttribute("srcset"),
-          type: s.getAttribute("type"),
-          media: s.getAttribute("media")
-        }))
-      : [];
-
   if (clone.tagName === "PICTURE") {
     for (const s of clone.querySelectorAll(":scope > source")) {
       s.remove();
@@ -190,103 +215,21 @@ function lockAndCaptureUpgrade(source, clone) {
   clonedImg.removeAttribute("srcset");
   clonedImg.removeAttribute("sizes");
   clonedImg.src = currentSrc;
-
-  if (!upgradeSrcset && !upgradeSources.length) {
-    return null;
-  }
-
-  return async () => {
-    if (!clone.isConnected) {
-      return;
-    }
-
-    // Decode the upgrade variant off-DOM first. Under cache-disabled +
-    // throttled loads, mutating the live <picture>'s sources/srcset and
-    // letting it pick a fresh candidate makes Chrome briefly clear the
-    // visible image while the new bytes arrive — the dialog backdrop
-    // bleeds through as a black flash. Warming the image cache off-DOM
-    // turns the live mutation into a synchronous cache hit instead.
-    await preloadUpgrade(clonedImg.src, upgradeSrcset, upgradeSources, clone.tagName);
-
-    if (!clone.isConnected) {
-      return;
-    }
-    if (upgradeSources.length && clone.tagName === "PICTURE") {
-      clone.insertBefore(buildSourceFrag(upgradeSources), clonedImg);
-    }
-    if (upgradeSrcset) {
-      clonedImg.setAttribute("srcset", upgradeSrcset);
-    }
-    clonedImg.setAttribute("sizes", "100vw");
-  };
-}
-
-// Render a hidden picture/img with the upgrade attributes at the lightbox's
-// display width and await its decode. The browser then has the chosen
-// variant decoded in its image cache by the time the live clone re-runs the
-// picture algorithm.
-async function preloadUpgrade(fallbackSrc, upgradeSrcset, upgradeSources, tagName) {
-  const probe = document.createElement(tagName === "PICTURE" ? "picture" : "img");
-  let probeImg;
-  if (tagName === "PICTURE") {
-    probe.appendChild(buildSourceFrag(upgradeSources));
-    probeImg = document.createElement("img");
-    probe.appendChild(probeImg);
-  } else {
-    probeImg = probe;
-  }
-  probeImg.decoding = "async";
-  if (upgradeSrcset) {
-    probeImg.setAttribute("srcset", upgradeSrcset);
-  }
-  probeImg.setAttribute("sizes", "100vw");
-  probeImg.src = fallbackSrc;
-
-  // Render at viewport width but off-screen so the picture algorithm picks
-  // the same candidate the live clone will land on.
-  const host = tagName === "PICTURE" ? probe : probeImg;
-  host.style.cssText =
-    "position:fixed; inset-block-start:0; inset-inline-start:-100vw; " +
-    "inline-size:100vw; visibility:hidden; pointer-events:none; contain:strict;";
-  document.body.appendChild(host);
-  try {
-    await probeImg.decode();
-  } catch {
-    // Decode rejects on load failure; the live swap will fail the same way.
-  }
-  host.remove();
-}
-
-function buildSourceFrag(specs) {
-  const frag = document.createDocumentFragment();
-  for (const s of specs) {
-    const el = document.createElement("source");
-    if (s.type) {
-      el.type = s.type;
-    }
-    if (s.media) {
-      el.setAttribute("media", s.media);
-    }
-    if (s.srcset) {
-      el.setAttribute("srcset", s.srcset);
-    }
-    el.setAttribute("sizes", "100vw");
-    frag.appendChild(el);
-  }
-  return frag;
+  return clonedImg;
 }
 
 // The largest box that fits the source's natural aspect ratio inside the
-// dialog frame (viewport minus the .frame padding and a reserved row for
-// the caption). Mirrors `dialog.apidocs-lightbox > .frame` from lightbox.css.
-// Returning null lets the caller fall back to aspect-ratio-based sizing.
-function fitBoxOf(source) {
+// dialog frame (viewport minus the .frame padding, the grid gap and, when
+// the figure has one, a reserved row for the caption). Mirrors
+// `dialog.apidocs-lightbox > .frame` from lightbox.css. Returning null lets
+// the caller fall back to CSS auto sizing.
+function fitBoxOf(source, hasCaption) {
   const ratio = naturalRatio(source);
   if (!ratio) {
     return null;
   }
   const framePad = 24; // .frame padding (1.5rem)
-  const captionRow = 60; // figcaption row + grid gap, ample upper bound
+  const captionRow = hasCaption ? 60 : 16; // caption + gap, or just the gap
   const maxW = Math.max(0, window.innerWidth - framePad * 2);
   const maxH = Math.max(0, window.innerHeight - framePad * 2 - captionRow);
   if (!maxW || !maxH) {
@@ -296,6 +239,10 @@ function fitBoxOf(source) {
   return { w: Math.floor(ratio.w * k), h: Math.floor(ratio.h * k) };
 }
 
+// Derive a `<picture|img|svg>`'s intrinsic dimensions. For raster images
+// the width/height attributes set by the image pipeline are the
+// authoritative source, with the decoded naturalWidth as a fallback. For
+// inlined SVGs we read the viewBox.
 function naturalRatio(el) {
   if (el.tagName === "PICTURE") {
     const img = el.querySelector("img");
@@ -337,6 +284,7 @@ function closeLightbox() {
   if (!dialog?.open) {
     return;
   }
+  const mySession = ++session;
   const frame = dialog.querySelector(".frame");
   const clone = frame.querySelector("picture, img, svg");
 
@@ -357,6 +305,7 @@ function closeLightbox() {
 
   // The clone in the dialog currently owns NAME; flip it back to the
   // source so the snapshot animates to the in-page position.
+  document.documentElement.classList.remove("apidocs-lightbox-opening");
   document.documentElement.classList.add("apidocs-lightbox-closing");
   const t = document.startViewTransition(() => {
     if (clone) {
@@ -368,7 +317,17 @@ function closeLightbox() {
     dialog.close();
     document.body.classList.remove("apidocs-lightbox-open");
   });
+
+  // Same as the open path: swallow the AbortError of a superseded capture.
+  t.ready.catch(() => {});
+
   t.finished.finally(() => {
+    // Superseded by a re-open during the close animation: the new session
+    // owns the frame, lastSource and the html classes now — wiping them
+    // here would leave the freshly opened dialog empty.
+    if (mySession !== session) {
+      return;
+    }
     document.documentElement.classList.remove("apidocs-lightbox-closing");
     if (lastSource) {
       lastSource.style.viewTransitionName = "";
@@ -376,45 +335,6 @@ function closeLightbox() {
     lastSource = null;
     frame.replaceChildren();
   });
-}
-
-// Derive an `<picture|img|svg>`'s intrinsic aspect ratio. For raster
-// images the width/height attributes set by the image pipeline are the
-// authoritative source. For inlined SVGs we read the viewBox.
-function aspectRatioOf(el) {
-  if (el.tagName === "PICTURE") {
-    const img = el.querySelector("img");
-    if (!img) {
-      return null;
-    }
-    return arFromWH(img.getAttribute("width"), img.getAttribute("height"));
-  }
-  if (el.tagName === "IMG") {
-    return arFromWH(el.getAttribute("width"), el.getAttribute("height"));
-  }
-  if (el.tagName === "svg" || el.tagName === "SVG") {
-    const vb = el.getAttribute("viewBox");
-    if (vb) {
-      const parts = vb
-        .trim()
-        .split(/[\s,]+/)
-        .map(Number);
-      if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
-        return `${parts[2]} / ${parts[3]}`;
-      }
-    }
-    return arFromWH(el.getAttribute("width"), el.getAttribute("height"));
-  }
-  return null;
-}
-
-function arFromWH(w, h) {
-  const wn = parseFloat(w);
-  const hn = parseFloat(h);
-  if (wn > 0 && hn > 0) {
-    return `${wn} / ${hn}`;
-  }
-  return null;
 }
 
 function onClick(e) {

@@ -43,15 +43,14 @@ dialog.apidocs-lightbox > .frame {
   gap: 1rem;
 }
 
-/* Size the visual element to the image's aspect ratio so its box matches
-   the visible content exactly. This is what View Transitions captures —
-   if the box contained letterbox padding (e.g. object-fit:contain inside a
-   cell-filling picture), the OLD snapshot would stretch past the final
-   image content during the tween. JS sets --ar inline from the natural
-   dimensions before the transition starts. */
+/* The visual element's box must match the visible content exactly — it is
+   what View Transitions captures; letterbox padding (e.g. object-fit:contain
+   inside a cell-filling picture) would make the snapshot stretch past the
+   image during the tween. JS locks an explicit pixel inline/block-size on
+   the element before the transition starts; the max-size clamps guard that
+   locked box if the window shrinks while the dialog is open. */
 dialog.apidocs-lightbox > .frame > :is(picture, img, svg) {
   display: block;
-  aspect-ratio: var(--ar, auto);
   max-inline-size: 100%;
   max-block-size: 100%;
   inline-size: auto;
