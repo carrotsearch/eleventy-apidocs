@@ -87,7 +87,8 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       head: await loadSourceFile(opts.head, "html"),
       variables: opts.variables,
       buildTime: new Date().toISOString(),
-      assets
+      assets,
+      dev: currentRunMode === "serve"
     };
     return cachedShell;
   }
