@@ -89,7 +89,7 @@ h6 {
 a {
   color: var(--link);
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.1em;
   &:hover {
     color: var(--link-hover);
   }
