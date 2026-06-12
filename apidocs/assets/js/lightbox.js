@@ -72,6 +72,14 @@ function openLightbox(figure, source) {
   preloadFigure(figure);
 
   const clone = source.cloneNode(true);
+  // Wipe any inherited view-transition-name. If the user re-opens during a
+  // close VT's animation, the source still carries the close-frame's inline
+  // `view-transition-name: NAME` (cleared only in close's t.finished.finally).
+  // cloneNode then duplicates that name onto the new clone — both source and
+  // clone match the named group's OLD snapshot, and Chrome resolves the new
+  // clone's box at (0,0,0,0) (display:none, inside the closed dialog), so the
+  // morph animates the in-page image to top-left/zero instead of zooming in.
+  clone.style.viewTransitionName = "";
   if (clone.tagName === "PICTURE") {
     const img = clone.querySelector("img");
     if (img) {
@@ -79,12 +87,22 @@ function openLightbox(figure, source) {
     }
   }
 
-  // Pin the clone's aspect-ratio to the image's natural dimensions so the
-  // View Transitions snapshot box matches the image content exactly (no
-  // letterbox padding inside the captured box).
-  const ar = aspectRatioOf(clone);
-  if (ar) {
-    clone.style.setProperty("--ar", ar);
+  // Lock explicit pixel width/height on the clone — the largest box that
+  // matches the source's natural aspect ratio inside the dialog frame. The
+  // VT NEW snapshot then has a definite, correctly-sized box no matter when
+  // the inner <img> finishes loading. Without this, under cold-cache +
+  // throttled loads the picture's auto/auto sizing inside the grid cell can
+  // momentarily resolve to zero and Chrome captures a (0,0,0,0) box at
+  // top-left, which morphs the in-page image off-screen instead of zooming.
+  const fit = fitBoxOf(source);
+  if (fit) {
+    clone.style.inlineSize = `${fit.w}px`;
+    clone.style.blockSize = `${fit.h}px`;
+  } else {
+    const ar = aspectRatioOf(clone);
+    if (ar) {
+      clone.style.setProperty("--ar", ar);
+    }
   }
 
   // Lock the clone to the source's already-rendered image so the VT
@@ -122,8 +140,14 @@ function openLightbox(figure, source) {
   document.documentElement.classList.add("apidocs-lightbox-opening");
   const t = document.startViewTransition(() => {
     source.style.viewTransitionName = "";
-    clone.style.viewTransitionName = NAME;
+    // Open the dialog FIRST, then tag the clone. The clone has to be in a
+    // rendered (display:block) box when its view-transition-name is set,
+    // otherwise Chrome captures the NEW snapshot at the clone's pre-showModal
+    // (display:none) box — zero-sized at (0,0). That manifested as the image
+    // "flying" to the top-left and shrinking to nothing under cold-cache +
+    // throttled loads, where the layout race has more room to lose.
     finishOpen();
+    clone.style.viewTransitionName = NAME;
   });
 
   // Keep the clone's view-transition-name so the close animation can
@@ -179,7 +203,19 @@ function lockAndCaptureUpgrade(source, clone) {
     return null;
   }
 
-  return () => {
+  return async () => {
+    if (!clone.isConnected) {
+      return;
+    }
+
+    // Decode the upgrade variant off-DOM first. Under cache-disabled +
+    // throttled loads, mutating the live <picture>'s sources/srcset and
+    // letting it pick a fresh candidate makes Chrome briefly clear the
+    // visible image while the new bytes arrive — the dialog backdrop
+    // bleeds through as a black flash. Warming the image cache off-DOM
+    // turns the live mutation into a synchronous cache hit instead.
+    await preloadUpgrade(clonedImg.src, upgradeSrcset, upgradeSources, clone.tagName);
+
     if (!clone.isConnected) {
       return;
     }
@@ -191,6 +227,42 @@ function lockAndCaptureUpgrade(source, clone) {
     }
     clonedImg.setAttribute("sizes", "100vw");
   };
+}
+
+// Render a hidden picture/img with the upgrade attributes at the lightbox's
+// display width and await its decode. The browser then has the chosen
+// variant decoded in its image cache by the time the live clone re-runs the
+// picture algorithm.
+async function preloadUpgrade(fallbackSrc, upgradeSrcset, upgradeSources, tagName) {
+  const probe = document.createElement(tagName === "PICTURE" ? "picture" : "img");
+  let probeImg;
+  if (tagName === "PICTURE") {
+    probe.appendChild(buildSourceFrag(upgradeSources));
+    probeImg = document.createElement("img");
+    probe.appendChild(probeImg);
+  } else {
+    probeImg = probe;
+  }
+  probeImg.decoding = "async";
+  if (upgradeSrcset) {
+    probeImg.setAttribute("srcset", upgradeSrcset);
+  }
+  probeImg.setAttribute("sizes", "100vw");
+  probeImg.src = fallbackSrc;
+
+  // Render at viewport width but off-screen so the picture algorithm picks
+  // the same candidate the live clone will land on.
+  const host = tagName === "PICTURE" ? probe : probeImg;
+  host.style.cssText =
+    "position:fixed; inset-block-start:0; inset-inline-start:-100vw; " +
+    "inline-size:100vw; visibility:hidden; pointer-events:none; contain:strict;";
+  document.body.appendChild(host);
+  try {
+    await probeImg.decode();
+  } catch {
+    // Decode rejects on load failure; the live swap will fail the same way.
+  }
+  host.remove();
 }
 
 function buildSourceFrag(specs) {
@@ -251,6 +323,63 @@ function addImagePreload(srcset, type) {
   link.setAttribute("imagesrcset", srcset);
   link.setAttribute("imagesizes", "100vw");
   document.head.appendChild(link);
+}
+
+// The largest box that fits the source's natural aspect ratio inside the
+// dialog frame (viewport minus the .frame padding and a reserved row for
+// the caption). Mirrors `dialog.apidocs-lightbox > .frame` from lightbox.css.
+// Returning null lets the caller fall back to aspect-ratio-based sizing.
+function fitBoxOf(source) {
+  const ratio = naturalRatio(source);
+  if (!ratio) {
+    return null;
+  }
+  const framePad = 24; // .frame padding (1.5rem)
+  const captionRow = 60; // figcaption row + grid gap, ample upper bound
+  const maxW = Math.max(0, window.innerWidth - framePad * 2);
+  const maxH = Math.max(0, window.innerHeight - framePad * 2 - captionRow);
+  if (!maxW || !maxH) {
+    return null;
+  }
+  const k = Math.min(maxW / ratio.w, maxH / ratio.h);
+  return { w: Math.floor(ratio.w * k), h: Math.floor(ratio.h * k) };
+}
+
+function naturalRatio(el) {
+  if (el.tagName === "PICTURE") {
+    const img = el.querySelector("img");
+    return img ? whFromImg(img) : null;
+  }
+  if (el.tagName === "IMG") {
+    return whFromImg(el);
+  }
+  if (el.tagName === "svg" || el.tagName === "SVG") {
+    const vb = el.getAttribute("viewBox");
+    if (vb) {
+      const parts = vb
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number);
+      if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+        return { w: parts[2], h: parts[3] };
+      }
+    }
+    return whFromAttrs(el.getAttribute("width"), el.getAttribute("height"));
+  }
+  return null;
+}
+
+function whFromImg(img) {
+  return (
+    whFromAttrs(img.getAttribute("width"), img.getAttribute("height")) ||
+    (img.naturalWidth > 0 ? { w: img.naturalWidth, h: img.naturalHeight } : null)
+  );
+}
+
+function whFromAttrs(w, h) {
+  const wn = parseFloat(w);
+  const hn = parseFloat(h);
+  return wn > 0 && hn > 0 ? { w: wn, h: hn } : null;
 }
 
 function closeLightbox() {
