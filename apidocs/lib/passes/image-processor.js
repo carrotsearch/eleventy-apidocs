@@ -13,9 +13,15 @@ import Image from "@11ty/eleventy-img";
 import * as progress from "../progress.js";
 
 export const RASTER = /\.(png|jpe?g|gif|webp|avif)$/i;
-const DEFAULT_WIDTHS = [320, 640, 960, 1280, 1920];
+const DEFAULT_WIDTHS = [320, 640, 960, 1280, 1920, 2560, 3840];
 const DEFAULT_FORMATS = ["avif", "webp", "auto"]; // auto = original format
 const LQIP_WIDTH = 24;
+
+// Cap for the single-URL paths — the <picture>'s bare <img src> fallback and
+// the Markdown branch's <img src>. The responsive srcset carries the full
+// ladder (up to native) for modern browsers and the lightbox upgrade; this
+// keeps the no-srcset fallback from ballooning to a 3840/native variant.
+const FALLBACK_WIDTH = 1920;
 
 // Run an image through eleventy-img with the framework's standard widths
 // and formats. Both the HTML pipeline (this file's imageProcessor) and the
@@ -29,7 +35,10 @@ export async function loadImage(src, ctx) {
   const filePath = path.resolve(ctx.sourceDir || ".", src);
   try {
     return await Image(filePath, {
-      widths: [LQIP_WIDTH, ...DEFAULT_WIDTHS],
+      // null = the source's own intrinsic width — the true ceiling the
+      // lightbox upgrade can climb to. eleventy-img drops ladder rungs above
+      // the source, so small images are unaffected.
+      widths: [LQIP_WIDTH, ...DEFAULT_WIDTHS, null],
       formats: DEFAULT_FORMATS,
       outputDir: imgDir,
       urlPath,
@@ -52,6 +61,17 @@ export function pickFallbackFormat(metadata) {
     }
   }
   return Object.keys(metadata)[0];
+}
+
+// Pick the variant a single-URL consumer should point its src at: the largest
+// one no wider than FALLBACK_WIDTH (today's display default), so the bare
+// <img src> fallback and the Markdown branch don't reference a 3840/native
+// variant. Falls back to the largest available for sub-FALLBACK_WIDTH sources.
+// Used by both pipelines; the responsive srcset still carries the full ladder.
+export function pickFallbackVariant(entries) {
+  const capped = entries.filter(e => e.width <= FALLBACK_WIDTH);
+  const list = capped.length ? capped : entries;
+  return list[list.length - 1];
 }
 
 export async function imageProcessor($, ctx) {
@@ -79,10 +99,14 @@ async function processOne($, el, ctx) {
 
   progress.image(src);
 
-  // Pick the largest variant in the original format for dimensions.
+  // Pick the largest variant in the original format for dimensions, and the
+  // capped variant for the bare <img src> fallback (the srcset carries the
+  // rest). The ratio is identical across variants, so largest is purely for
+  // intrinsic width/height and the LQIP aspect-ratio.
   const fallbackFormat = pickFallbackFormat(metadata);
   const fallbackList = metadata[fallbackFormat];
   const largest = fallbackList[fallbackList.length - 1];
+  const fallbackVariant = pickFallbackVariant(fallbackList);
 
   // LQIP — read the tiny variant and base64 it for an instant inline preview.
   const lqip = await readLqip(metadata);
@@ -102,18 +126,23 @@ async function processOne($, el, ctx) {
         return "";
       }
       const srcset = visible.map(e => `${e.url} ${e.width}w`).join(", ");
-      return `<source type="${visible[0].sourceType}" srcset="${srcset}" sizes="100vw">`;
+
+      // sizes="auto" lets the browser select against each image's real
+      // laid-out box (the images are loading="lazy"), so the article fetches a
+      // column-sized variant instead of over-fetching for a 100vw lie. The
+      // lightbox re-selects against the full-viewport box on zoom.
+      return `<source type="${visible[0].sourceType}" srcset="${srcset}" sizes="auto">`;
     });
 
   const fallbackVisible = fallbackList.filter(e => e.width !== LQIP_WIDTH);
   const fallbackSrcset = fallbackVisible.map(e => `${e.url} ${e.width}w`).join(", ");
-  const fallbackSrcsetAttr = fallbackSrcset ? ` srcset="${fallbackSrcset}" sizes="100vw"` : "";
+  const fallbackSrcsetAttr = fallbackSrcset ? ` srcset="${fallbackSrcset}" sizes="auto"` : "";
 
   const titleAttr = title ? ` title="${escapeAttr(title)}"` : "";
   const picture =
     `<picture>` +
     sources.join("") +
-    `<img src="${largest.url}"${fallbackSrcsetAttr}` +
+    `<img src="${fallbackVariant.url}"${fallbackSrcsetAttr}` +
     ` width="${largest.width}" height="${largest.height}"` +
     ` alt="${escapeAttr(alt)}"${titleAttr}` +
     ` loading="lazy" decoding="async">` +

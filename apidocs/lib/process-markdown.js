@@ -27,7 +27,12 @@ import * as cheerio from "cheerio";
 import { cleanCodeText, readPreSource } from "./code-text.js";
 import { htmlToMarkdown } from "./markdown.js";
 import { embedCode } from "./passes/embed-code.js";
-import { loadImage, pickFallbackFormat, RASTER } from "./passes/image-processor.js";
+import {
+  loadImage,
+  pickFallbackFormat,
+  pickFallbackVariant,
+  RASTER
+} from "./passes/image-processor.js";
 import { linkRewriter } from "./passes/link-rewriter.js";
 import { substituteVariables } from "./passes/variables.js";
 
@@ -104,8 +109,7 @@ async function rewriteImageSrcs($, ctx) {
         return;
       }
       const fallback = metadata[pickFallbackFormat(metadata)];
-      const largest = fallback[fallback.length - 1];
-      $img.attr("src", largest.url);
+      $img.attr("src", pickFallbackVariant(fallback).url);
     })
   );
 }

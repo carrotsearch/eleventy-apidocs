@@ -61,6 +61,14 @@ function findVisual(target) {
   if (!visual) {
     return null;
   }
+
+  // A raster <img> rewrapped by the image pipeline lives inside a <picture>;
+  // a direct click resolves to the <img> itself. Zoom the <picture> instead so
+  // the clone keeps the AVIF/WebP <source>s — the bare <img> carries only the
+  // fallback-format srcset, so upgradeClone would re-select a heavy PNG/JPEG.
+  if (visual.tagName === "IMG" && visual.parentElement?.tagName === "PICTURE") {
+    visual = visual.parentElement;
+  }
   return { figure, visual };
 }
 
@@ -137,6 +145,7 @@ function beginOpenTransition(mySession, source, prevSource, clone, d) {
 
   if (!document.startViewTransition) {
     finishOpen();
+    upgradeClone(source, clone);
     return;
   }
 
@@ -183,7 +192,51 @@ function beginOpenTransition(mySession, source, prevSource, clone, d) {
       return;
     }
     document.documentElement.classList.remove("apidocs-lightbox-opening");
+
+    // The morph is done; only now restore the responsive markup so the
+    // browser can upgrade. Doing this earlier would feed the VT an
+    // unloaded/re-selecting image and capture a blank NEW snapshot.
+    upgradeClone(source, clone);
   });
+}
+
+// After the zoom settles, hand the full-viewport clone back its responsive
+// markup so the browser's own picture algorithm upgrades it. pinClone left the
+// clone showing the in-doc currentSrc (already decoded) and stripped its
+// candidates; we read the originals off the still-intact in-page source,
+// restore them, and set sizes="100vw" — honest now that the box is the whole
+// viewport. The pinned src stays as the img's current request, so the upgrade
+// loads as a pending request and swaps in atomically once fully decoded (no
+// blank, no progressive repaint). No-ops for SVG, single-res sources, or when
+// re-selection resolves to the same URL.
+function upgradeClone(source, clone) {
+  const sourceImg = source.tagName === "PICTURE" ? source.querySelector("img") : source;
+  const clonedImg = clone.tagName === "PICTURE" ? clone.querySelector("img") : clone;
+  if (!clonedImg || clonedImg.tagName !== "IMG") {
+    return;
+  }
+
+  // Re-attach the source's <source> candidates ahead of the clone's <img>.
+  if (clone.tagName === "PICTURE" && source.tagName === "PICTURE") {
+    for (const s of source.querySelectorAll(":scope > source")) {
+      clone.insertBefore(s.cloneNode(true), clonedImg);
+    }
+  }
+
+  const srcset = sourceImg?.getAttribute("srcset");
+  if (srcset) {
+    clonedImg.setAttribute("srcset", srcset);
+  }
+
+  // Nothing to upgrade if the source carries no candidates at all.
+  if (!srcset && !clone.querySelector(":scope > source")) {
+    return;
+  }
+
+  clonedImg.setAttribute("sizes", "100vw");
+  for (const s of clone.querySelectorAll(":scope > source")) {
+    s.setAttribute("sizes", "100vw");
+  }
 }
 
 // Pin the clone to the source's already-rendered image so the VT captures
