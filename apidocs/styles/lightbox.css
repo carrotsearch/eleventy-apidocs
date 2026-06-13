@@ -35,6 +35,8 @@ dialog.apidocs-lightbox > .frame {
   block-size: 100%;
   padding: 1.5rem;
   box-sizing: border-box;
+  /* Positioning context for the resolution-upgrade cover (see below). */
+  position: relative;
   display: grid;
   /* minmax(0, 1fr) lets the image row shrink below its intrinsic size so a
      tall image plus a tall caption still fit the viewport. */
@@ -63,6 +65,19 @@ dialog.apidocs-lightbox > .frame > picture > img {
   inline-size: 100%;
   block-size: 100%;
   border-radius: inherit;
+}
+
+/* Resolution-upgrade cover — a copy of the just-zoomed (lower-res) image laid
+   over the clone by lightbox.js, locked to the clone's exact box, then faded
+   out once the clone has swapped in the higher-res variant. The dissolve keeps
+   the sharpen from snapping. Out of the grid flow (absolute) so it doesn't
+   disturb the image/caption rows; pointer-events:none so clicks still close. */
+dialog.apidocs-lightbox > .frame > .apidocs-lightbox-upgrade {
+  position: absolute;
+  object-fit: fill;
+  border-radius: 0.25rem;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
 }
 
 dialog.apidocs-lightbox > .frame > figcaption {

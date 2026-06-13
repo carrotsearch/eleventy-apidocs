@@ -145,7 +145,7 @@ function beginOpenTransition(mySession, source, prevSource, clone, d) {
 
   if (!document.startViewTransition) {
     finishOpen();
-    upgradeClone(source, clone);
+    upgradeClone(mySession, source, clone);
     return;
   }
 
@@ -196,7 +196,7 @@ function beginOpenTransition(mySession, source, prevSource, clone, d) {
     // The morph is done; only now restore the responsive markup so the
     // browser can upgrade. Doing this earlier would feed the VT an
     // unloaded/re-selecting image and capture a blank NEW snapshot.
-    upgradeClone(source, clone);
+    upgradeClone(mySession, source, clone);
   });
 }
 
@@ -207,32 +207,75 @@ function beginOpenTransition(mySession, source, prevSource, clone, d) {
 // restore them, and set sizes="100vw" — honest now that the box is the whole
 // viewport. The pinned src stays as the img's current request, so the upgrade
 // loads as a pending request and swaps in atomically once fully decoded (no
-// blank, no progressive repaint). No-ops for SVG, single-res sources, or when
-// re-selection resolves to the same URL.
-function upgradeClone(source, clone) {
+// blank, no progressive repaint). No-ops for SVG and single-res sources.
+//
+// To make the sharpen read as a dissolve rather than a snap, a cheap copy of
+// the still-shown lower-res image is laid over the clone and faded out once the
+// clone has swapped in the higher-res variant. This is a plain CSS opacity
+// transition — deliberately not a second view transition, so it stays clear of
+// the open/close VT seams; the session token only gates the async tails, and
+// the cover lives in .frame, which openLightbox/closeLightbox already clear.
+function upgradeClone(mySession, source, clone) {
   const sourceImg = source.tagName === "PICTURE" ? source.querySelector("img") : source;
   const clonedImg = clone.tagName === "PICTURE" ? clone.querySelector("img") : clone;
   if (!clonedImg || clonedImg.tagName !== "IMG") {
     return;
   }
 
-  // Re-attach the source's <source> candidates ahead of the clone's <img>.
+  // Nothing to upgrade if the source carries no candidates at all.
+  const srcset = sourceImg?.getAttribute("srcset");
+  const hasSources = source.tagName === "PICTURE" && !!source.querySelector(":scope > source");
+  if (!srcset && !hasSources) {
+    return;
+  }
+
+  const frame = clone.parentElement;
+  const animate = frame && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Lay a copy of the currently-shown (lower-res) image over the clone, locked
+  // to the clone's exact rendered box, before the base starts upgrading. It
+  // loads instantly from cache (same pinned src) so there's no flash, and it
+  // hides the base's in-place swap until we dissolve it out.
+  let cover = null;
+  if (animate) {
+    cover = clonedImg.cloneNode(true);
+    cover.className = "apidocs-lightbox-upgrade";
+    cover.style.viewTransitionName = "";
+    cover.style.left = `${clone.offsetLeft}px`;
+    cover.style.top = `${clone.offsetTop}px`;
+    cover.style.inlineSize = `${clone.offsetWidth}px`;
+    cover.style.blockSize = `${clone.offsetHeight}px`;
+    frame.appendChild(cover);
+
+    // Dissolve the cover once the base finishes loading (and decoding) the
+    // higher-res variant — by then the sharp image sits ready underneath.
+    clonedImg.addEventListener(
+      "load",
+      async () => {
+        if (mySession !== session) {
+          return;
+        }
+        await clonedImg.decode().catch(() => {});
+        if (mySession !== session || !cover.isConnected) {
+          return;
+        }
+        cover.addEventListener("transitionend", () => cover.remove(), { once: true });
+        cover.style.opacity = "0";
+      },
+      { once: true }
+    );
+  }
+
+  // Re-attach the source's <source> candidates ahead of the clone's <img>,
+  // then restore srcset/sizes so the browser re-selects for the full viewport.
   if (clone.tagName === "PICTURE" && source.tagName === "PICTURE") {
     for (const s of source.querySelectorAll(":scope > source")) {
       clone.insertBefore(s.cloneNode(true), clonedImg);
     }
   }
-
-  const srcset = sourceImg?.getAttribute("srcset");
   if (srcset) {
     clonedImg.setAttribute("srcset", srcset);
   }
-
-  // Nothing to upgrade if the source carries no candidates at all.
-  if (!srcset && !clone.querySelector(":scope > source")) {
-    return;
-  }
-
   clonedImg.setAttribute("sizes", "100vw");
   for (const s of clone.querySelectorAll(":scope > source")) {
     s.setAttribute("sizes", "100vw");
