@@ -27,7 +27,8 @@
         { "slug": "search", "title": "Search" },
         { "slug": "themes", "title": "Themes" },
         { "slug": "pipeline", "title": "Pipeline extensions" },
-        { "slug": "deployment", "title": "Deployment" }
+        { "slug": "deployment", "title": "Deployment" },
+        { "slug": "releases", "title": "Releases" }
       ]
     }
   ]

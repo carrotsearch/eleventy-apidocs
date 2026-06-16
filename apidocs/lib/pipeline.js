@@ -17,6 +17,7 @@ import { imageProcessor } from "./passes/image-processor.js";
 import { liftSectionIds } from "./passes/lift-section-ids.js";
 import { linkRewriter } from "./passes/link-rewriter.js";
 import { tagPagefindIgnore } from "./passes/pagefind-ignore.js";
+import { renderDates } from "./passes/render-dates.js";
 import { sectionAnchors } from "./passes/section-anchors.js";
 import { svgInliner } from "./passes/svg-inliner.js";
 import { extractSymbols } from "./passes/symbol-extractor.js";
@@ -78,6 +79,10 @@ export async function processContent(html, ctx) {
   // after embed so external sources are highlighted, and before
   // fragmentIds so md5 ids don't get stamped on code text.
   await codeHighlight($, ctx);
+
+  // Render <time datetime> bodies. Order-independent; placed before
+  // fragmentIds only so it reads as part of content normalization.
+  renderDates($);
 
   // md5-based ids on p/li/dt for deep links. Stable across builds so
   // bookmarks survive unrelated content drift.

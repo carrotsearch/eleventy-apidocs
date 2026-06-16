@@ -400,3 +400,11 @@ article td p:first-child {
 .current-year {
   font-variant-numeric: tabular-nums;
 }
+
+/* A <time> right after a section heading reads as a dateline: its own line,
+   faint and small. renderDates fills the body from the datetime attribute. */
+:where(h2, h3) + time {
+  display: block;
+  color: var(--fg-faint);
+  font-size: var(--small);
+}

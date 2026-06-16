@@ -1,0 +1,155 @@
+<article class="releases">
+  <h1>Releases</h1>
+
+  <p>
+    Release notes for <code>@carrotsearch/eleventy-apidocs</code> — a short
+    summary of what each version contributed. The dates come from the
+    <code>&lt;time&gt;</code> element on each section; the theme fills in the
+    readable form from its <code>datetime</code> attribute.
+  </p>
+
+  <section id="0.1.6" data-toc="omit-children">
+    <h2>0.1.6</h2>
+    <time datetime="2026-06-13"></time>
+
+    <p>
+      Responsive images move to a browser-driven model and the lightbox upgrade
+      gets smoother.
+    </p>
+
+    <dl>
+      <dt>Browser-picked image resolution</dt>
+      <dd>
+        <p>
+          Article images now ship a low-res variant via <code>sizes=auto</code>
+          and let the browser request a higher-resolution source on demand —
+          the lightbox upgrades to the hi-res variant when you zoom.
+        </p>
+      </dd>
+      <dt>Cross-fading lightbox zoom</dt>
+      <dd>
+        <p>
+          Zooming an image cross-fades up to the hi-res source instead of
+          snapping between resolutions.
+        </p>
+      </dd>
+      <dt>Theme survives hot reloads</dt>
+      <dd>
+        <p>
+          The dev server re-applies the persisted light/dark theme after a hot
+          update, so it no longer flashes back to the default mid-edit.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
+  <section id="0.1.5" data-toc="omit-children">
+    <h2>0.1.5</h2>
+    <time datetime="2026-06-12"></time>
+
+    <p>
+      A lightbox reliability pass plus housekeeping on code complexity and
+      dependencies.
+    </p>
+
+    <dl>
+      <dt>Lightbox transition fixes</dt>
+      <dd>
+        <p>
+          The zoom now locks the cloned image to an explicit pixel box and
+          decodes the upgraded source before animating, fixing the races and
+          flicker that could appear on open and close.
+        </p>
+      </dd>
+      <dt>Cognitive-complexity gate</dt>
+      <dd>
+        <p>
+          Biome's <code>noExcessiveCognitiveComplexity</code> rule is enabled at
+          a threshold of 15, and three functions were simplified to clear it.
+        </p>
+      </dd>
+      <dt>Dependabot</dt>
+      <dd>
+        <p>
+          A Dependabot config keeps the npm and GitHub Actions dependencies up
+          to date.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
+  <section id="0.1.4" data-toc="omit-children">
+    <h2>0.1.4</h2>
+    <time datetime="2026-05-29"></time>
+
+    <p>
+      Small authoring and build improvements.
+    </p>
+
+    <dl>
+      <dt><code>http</code> code highlighting</dt>
+      <dd>
+        <p>
+          <code>http</code> joins the code-highlighting language allowlist, so
+          request/response snippets get highlighted.
+        </p>
+      </dd>
+      <dt>Two-column definition lists</dt>
+      <dd>
+        <p>
+          Definition lists only switch to their two-column layout below the
+          article's maximum measure, so they don't crowd narrow text columns.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
+  <section id="0.1.3">
+    <h2>0.1.3</h2>
+    <time datetime="2026-05-29"></time>
+
+    <p>
+      CI moves to the Node 24 majors and the search code is refactored into two
+      named query paths — no change in behavior.
+    </p>
+  </section>
+
+  <section id="0.1.2" data-toc="omit-children">
+    <h2>0.1.2</h2>
+    <time datetime="2026-05-29"></time>
+
+    <p>
+      Search dialog polish.
+    </p>
+
+    <dl>
+      <dt>Keyboard-shortcut hints</dt>
+      <dd>
+        <p>
+          The search dialog footer advertises its keyboard shortcuts, and the
+          input placeholder describes what's searchable.
+        </p>
+      </dd>
+      <dt>Version from the manifest</dt>
+      <dd>
+        <p>
+          The sample site derives its <code>$VERSION$</code> from the package
+          manifest instead of hard-coding it.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
+  <section id="0.1.1">
+    <h2>0.1.1</h2>
+    <time datetime="2026-05-29"></time>
+
+    <p>
+      First published release of the theme. It ships the full pipeline:
+      HTML-source articles, code blocks, responsive images with a zoom lightbox,
+      navigation and table of contents, unified Pagefind + fuzzysort search,
+      callouts, prev/next links, cross-document View Transitions, and a test
+      suite wired into CI.
+    </p>
+  </section>
+</article>
