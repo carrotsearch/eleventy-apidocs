@@ -44,7 +44,10 @@ article > p:first-of-type {
   }
 }
 
-:is(h2, h3, h4, h5):hover > .anchor {
+/* :not(:target) so the hover icon never reveals on the current target,
+   where it would overlap the manicule. */
+:is(h2, h3, h4, h5):not(:target):hover > .anchor,
+dt:not(:target):hover > .anchor {
   opacity: 1;
 }
 
@@ -54,17 +57,48 @@ article > p:first-of-type {
 }
 
 /* The lift-section-ids pass moves section ids onto their first heading in
-   the final HTML, so :target lands on the heading directly. */
-:is(h2, h3, h4, h5):target,
-code:target,
-li:target,
-dt:target,
-p:target {
+   the final HTML, so :target lands on the heading directly — only section
+   targets get the fill highlight. */
+:is(h2, h3, h4, h5):target {
+  position: relative;
   background: var(--accent-soft);
   box-shadow:
     0 -0.125em 0 var(--accent-soft),
     0 0.125em 0 var(--accent);
   border-radius: 2px;
+}
+
+/* Every target gets a manicule pointing at it. Non-section targets (dt,
+   inline code, list items, paragraphs) get it in place of a fill, which would
+   wash out against inline backgrounds or overflow short terms. The negative
+   start margin cancels its advance (like .anchor), so it overflows into the
+   gutter without widening the term and forcing an early wrap. */
+:is(h2, h3, h4, h5, code, li, dt, p):target::before {
+  content: "\1F449";
+  display: inline-block;
+  inline-size: 1em;
+  margin-inline-start: -1.25em;
+  margin-inline-end: 0.25em;
+  font-size: 1.3em;
+  vertical-align: -0.05em;
+}
+
+/* Section targets pull the manicule fully into the left gutter, beside the
+   heading like the hover anchor link, rather than just before the text. */
+:is(h2, h3, h4, h5):target::before {
+  position: absolute;
+  inset-inline-start: -1.3em;
+  margin-inline: 0;
+}
+
+/* Targeted inline code / option terms: swap the dark inline pill for the
+   accent highlight. accent-soft is translucent, so it must replace the pill
+   (not layer over it, where the dark bg would show through) and underline
+   with the accent rule. */
+dt:target > code,
+code:target {
+  background: var(--accent-soft);
+  box-shadow: 0 0.125em 0 var(--accent);
 }
 
 /* Pagefind highlight — wrapped on arrival from search by

@@ -35,6 +35,18 @@ export function sectionAnchors($) {
       `<a class="anchor" href="#${escapeAttr(id)}" aria-label="Link to this section">${ICON}</a>`
     );
   });
+
+  // Option terms carry their id on the <dt> itself, so the anchor goes there.
+  $("article dt[id]").each((_, dt) => {
+    const $dt = $(dt);
+    if ($dt.find("a.anchor").length) {
+      return;
+    }
+    const id = $dt.attr("id");
+    $dt.prepend(
+      `<a class="anchor" href="#${escapeAttr(id)}" aria-label="Link to this option">${ICON}</a>`
+    );
+  });
 }
 
 function escapeAttr(s) {
