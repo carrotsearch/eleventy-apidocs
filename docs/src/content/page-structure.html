@@ -126,6 +126,14 @@
       link, mark it <code>data-external</code>.
     </p>
     <p>
+      Use the same opt-out for links to HTML pages that live in the same
+      deployment but <em>outside</em> the doc set &mdash; standalone demos
+      and the like. Marking them <code>data-external</code>
+      keeps the <code>.html</code> intact and leaves the page-relative path
+      untouched:
+    </p>
+    <pre data-language="html">&lt;a href="../cookbook/labels-advanced.html" data-external&gt;Lots of labels&lt;/a&gt;</pre>
+    <p>
       Absolute URLs (anything starting with a protocol, with
       <code>//</code>, or with <code>mailto:</code>) are left alone. After
       rewriting, the relativize pass turns every internal URL into a
