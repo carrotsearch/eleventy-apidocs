@@ -32,8 +32,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # biome ci is the read-only mode used in CI: fails the job on any
-      # formatter, linter, or assist diagnostic.
-      - run: pnpm exec biome ci
+      # formatter, linter, or assist diagnostic. --error-on-warnings promotes
+      # warning-level lints to build failures too, so they can't accumulate.
+      - run: pnpm exec biome ci --error-on-warnings
 
       - run: pnpm test
 

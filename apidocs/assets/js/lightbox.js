@@ -218,7 +218,7 @@ function beginOpenTransition(mySession, source, prevSource, clone, d) {
 function upgradeClone(mySession, source, clone) {
   const sourceImg = source.tagName === "PICTURE" ? source.querySelector("img") : source;
   const clonedImg = clone.tagName === "PICTURE" ? clone.querySelector("img") : clone;
-  if (!clonedImg || clonedImg.tagName !== "IMG") {
+  if (clonedImg?.tagName !== "IMG") {
     return;
   }
 
@@ -292,7 +292,7 @@ function upgradeClone(mySession, source, clone) {
 function pinClone(source, clone) {
   const sourceImg = source.tagName === "PICTURE" ? source.querySelector("img") : source;
   const clonedImg = clone.tagName === "PICTURE" ? clone.querySelector("img") : clone;
-  if (!clonedImg || clonedImg.tagName !== "IMG") {
+  if (clonedImg?.tagName !== "IMG") {
     return null;
   }
 
