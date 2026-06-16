@@ -84,11 +84,22 @@ dt:not(:target):hover > .anchor {
 }
 
 /* Section targets pull the manicule fully into the left gutter, beside the
-   heading like the hover anchor link, rather than just before the text. */
+   heading like the hover anchor link, rather than just before the text. A
+   constant rem size (not the heading-relative 1.3em) keeps large headings
+   from pushing it far enough left to overlap the main nav scrollbar. */
 :is(h2, h3, h4, h5):target::before {
   position: absolute;
-  inset-inline-start: -1.3em;
+  inset-inline-start: -1.8rem;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
   margin-inline: 0;
+  font-size: 1.5rem;
+}
+
+/* Suppress the hover/focus link icon on the active section — the manicule
+   already marks it, and a clicked .anchor stays :focus-visible on top of it. */
+:is(h2, h3, h4, h5):target > .anchor {
+  opacity: 0;
 }
 
 /* Targeted inline code / option terms: swap the dark inline pill for the
