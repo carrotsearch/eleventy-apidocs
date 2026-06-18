@@ -8,6 +8,54 @@
     readable form from its <code>datetime</code> attribute.
   </p>
 
+  <section id="0.1.9" data-toc="omit-children">
+    <h2>0.1.9</h2>
+    <time datetime="2026-06-18"></time>
+
+    <p>Faster builds, cleaner search navigation, and self-cleaning images.</p>
+
+    <dl>
+      <dt>Markdown siblings reuse processed images</dt>
+      <dd>
+        <p>
+          The <code>.md</code> sibling of each page now reuses the image URLs the
+          HTML pipeline already resolved instead of running every image through
+          eleventy-img a second time, so builds with images are faster.
+        </p>
+      </dd>
+
+      <dt>Cleaner search-result links</dt>
+      <dd>
+        <p>
+          Symbol and section search hits no longer append a
+          <code>pagefind-highlight</code> query to their links: a fuzzy query
+          (e.g. <code>lbc</code> → <code>labelBoxColor</code>) rarely matches
+          literal prose, so the highlight only scattered stray marks. The hits
+          still jump straight to their <code>#anchor</code>.
+        </p>
+      </dd>
+
+      <dt>Stale image variants are pruned</dt>
+      <dd>
+        <p>
+          After a full build, any generated variant under
+          <code>assets/apidocs/img</code> that the build didn't emit is deleted,
+          so a changed or removed source image leaves no orphaned files behind in
+          the output (or in a restored CI cache).
+        </p>
+      </dd>
+
+      <dt>CI caches generated variants</dt>
+      <dd>
+        <p>
+          The sample workflows now persist <code>assets/apidocs/img</code> across
+          runs; eleventy-img re-encodes only new or changed images, and the prune
+          above keeps the cache free of orphans.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
   <section id="0.1.8" data-toc="omit-children">
     <h2>0.1.8</h2>
     <time datetime="2026-06-16"></time>
