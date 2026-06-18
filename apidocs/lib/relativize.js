@@ -47,6 +47,7 @@ function relativizeSrcset(value, fromUrl) {
       if (!trimmed) {
         return trimmed;
       }
+
       // "url [descriptor]" — split on whitespace; descriptor may be absent.
       const ws = trimmed.indexOf(" ");
       if (ws === -1) {

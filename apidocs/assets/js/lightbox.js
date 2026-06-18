@@ -86,6 +86,7 @@ function openLightbox(figure, source) {
   const prevSource = lastSource;
 
   const clone = source.cloneNode(true);
+
   // The clone copies any stale inline view-transition-name along with the
   // rest of the source's inline style; wipe it for the same reason.
   clone.style.viewTransitionName = "";
@@ -171,6 +172,7 @@ function beginOpenTransition(mySession, source, prevSource, clone, d) {
       return;
     }
     source.style.viewTransitionName = "";
+
     // Open the dialog FIRST, then tag the clone. The clone has to be in a
     // rendered (display:block) box when its view-transition-name is set,
     // otherwise Chrome captures the NEW snapshot at the clone's pre-showModal

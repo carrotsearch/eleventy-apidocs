@@ -61,6 +61,7 @@ test("does not double-inject when run twice", () => {
 
 test("escapes special characters in the href on serialization", () => {
   const $ = anchor(`<article><section id='&quot;weird&quot;'><h2>W</h2></section></article>`);
+
   // .attr() returns the decoded value; the escape is visible in serialized HTML.
   assert.equal($("a.anchor").attr("href"), `#"weird"`);
   assert.match($.html(), /href="#&quot;weird&quot;"/);

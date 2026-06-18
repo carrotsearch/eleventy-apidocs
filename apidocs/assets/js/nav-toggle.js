@@ -35,6 +35,7 @@ if (layout && toggle && nav) {
     toggle.setAttribute("aria-expanded", String(open));
     toggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
     nav.inert = !open && mql.matches;
+
     // Lock body scroll while the drawer is open so swipes scroll the nav.
     document.documentElement.style.overflow = open ? "hidden" : "";
 

@@ -83,9 +83,14 @@ grep -rE 'href="/|src="/' --include='*.html' docs/_site/ && echo FAILED || echo 
 ```
 
 ### Formatting (Biome 2.4.x)
-2-space indent, `lineWidth` 100, LF, double quotes, no trailing commas,
-`semicolons: always`, `arrowParentheses: asNeeded`. Don't hand-format — let
-`pnpm check:fix` do it. `_site/`, `node_modules/`, and the lockfile are excluded.
+Biome owns mechanical formatting — don't hand-format, let `pnpm check:fix` do it.
+`_site/`, `node_modules/`, and the lockfile are excluded. Conventions Biome
+**doesn't** enforce, do by hand:
+- Keep an empty line before `//`-style comments inside functions/methods for clarity.
+- One `let`/`const` per variable with a value initializer (no comma-separated
+  declarations) — Biome reflows those onto newlines, which hurts readability.
+- Always use `{ }`, even for single-statement bodies (`if (x) { fn(x); }`, never
+  `if (x) fn(x)`).
 
 ### Security
 Author content flows through Nunjucks with `autoescape` on; only the four raw

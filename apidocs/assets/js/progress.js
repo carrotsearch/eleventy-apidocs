@@ -52,6 +52,7 @@ document.addEventListener("click", event => {
   if (url.origin !== location.origin) {
     return;
   }
+
   // Same-page anchor / hash — no document fetch.
   if (url.pathname === location.pathname && url.search === location.search) {
     return;
