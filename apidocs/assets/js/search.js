@@ -212,6 +212,7 @@ function init() {
     }
     emptyEl.hidden = true;
     const hasHits = !groups.api.hidden || !groups.sections.hidden || !groups.pages.hidden;
+
     // Only declare "no results" once both sides have reported back.
     noHitsEl.hidden = !(apiRendered && pagesRendered && !hasHits);
   }
@@ -268,8 +269,8 @@ function init() {
       return;
     }
     const { apiHits, sectionHits } = bucketSymbolHits(hits);
-    renderApi(apiHits, q);
-    renderSections(sectionHits, q);
+    renderApi(apiHits);
+    renderSections(sectionHits);
   }
 
   // Pages path — pagefind handles its own debouncing.
@@ -293,12 +294,12 @@ function init() {
     renderPages(pageHits, q);
   }
 
-  function renderApi(apiHits, q) {
+  function renderApi(apiHits) {
     lists.api.replaceChildren();
     if (apiHits.length) {
       groups.api.hidden = false;
       for (const hit of apiHits) {
-        lists.api.appendChild(renderApiHit(hit, q));
+        lists.api.appendChild(renderApiHit(hit));
       }
     } else {
       groups.api.hidden = true;
@@ -308,12 +309,12 @@ function init() {
     updateEmptyState();
   }
 
-  function renderSections(sectionHits, q) {
+  function renderSections(sectionHits) {
     lists.sections.replaceChildren();
     if (sectionHits.length) {
       groups.sections.hidden = false;
       for (const hit of sectionHits) {
-        lists.sections.appendChild(renderSectionHit(hit, q));
+        lists.sections.appendChild(renderSectionHit(hit));
       }
     } else {
       groups.sections.hidden = true;
@@ -352,11 +353,15 @@ function init() {
     setActive(restored >= 0 ? restored : 0);
   }
 
-  function renderApiHit(hit, q) {
+  function renderApiHit(hit) {
     const li = document.createElement("li");
     li.className = "search-hit search-hit-api";
     const a = document.createElement("a");
-    a.href = withHighlight(symbolHref(hit.obj), q);
+
+    // No pagefind-highlight param: a fuzzysort hit resolves to a precise
+    // #anchor, and the fuzzy query (e.g. "lbc" → "labelBoxColor") rarely
+    // matches literal prose — highlighting would only scatter marks.
+    a.href = symbolHref(hit.obj);
     a.innerHTML = `
       <span class="search-hit-name">${highlightMatch(hit)}</span>
       ${renderCrumbs(hit.obj.crumbs)}
@@ -366,11 +371,11 @@ function init() {
     return li;
   }
 
-  function renderSectionHit(hit, q) {
+  function renderSectionHit(hit) {
     const li = document.createElement("li");
     li.className = "search-hit search-hit-section";
     const a = document.createElement("a");
-    a.href = withHighlight(symbolHref(hit.obj), q);
+    a.href = symbolHref(hit.obj);
     a.innerHTML = `
       <span class="search-hit-title">${highlightMatch(hit)}</span>
       ${renderCrumbs(hit.obj.crumbs)}
