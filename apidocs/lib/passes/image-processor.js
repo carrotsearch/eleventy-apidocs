@@ -110,6 +110,20 @@ async function processOne($, el, ctx) {
 
   progress.image(src);
 
+  // Record every emitted variant's filename (content-hashed, so unique) on the
+  // build-scoped set eleventy.after prunes against. eleventy-img returns full
+  // metadata even for variants it skipped re-encoding (a restored CI cache hit),
+  // so unchanged images stay recorded and only stale variants — from a changed
+  // or removed source — go missing and get pruned. Covers the LQIP and native
+  // variants too, which the HTML inlines/omits rather than URL-references.
+  if (ctx.imageOutputs) {
+    for (const entries of Object.values(metadata)) {
+      for (const e of entries) {
+        ctx.imageOutputs.add(path.basename(e.outputPath));
+      }
+    }
+  }
+
   // Pick the largest variant in the original format for dimensions, and the
   // capped variant for the bare <img src> fallback (the srcset carries the
   // rest). The ratio is identical across variants, so largest is purely for

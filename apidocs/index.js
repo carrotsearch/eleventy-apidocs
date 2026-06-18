@@ -57,6 +57,14 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
   // eleventy.after writes one .md file per URL alongside its .html.
   let markdownPages = [];
 
+  // Build-scoped set of responsive-image variant filenames eleventy-img emitted
+  // this build (content-hashed, so unique). The apidocs-shell transform fills it
+  // via ctx.imageOutputs; eleventy.after deletes any file under
+  // assets/apidocs/img not in it — the stale variants a restored CI image cache
+  // (see .github/workflows/ci.yml) leaves behind when a source image changes or
+  // is removed.
+  let imageOutputs = new Set();
+
   // Latched once we've emitted Pagefind + symbols.json in the dev server's
   // lifetime. Subsequent dev rebuilds skip both — search reflects the
   // start-up snapshot until the dev server restarts. Per design memo
@@ -113,6 +121,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     const hashed = currentRunMode !== "serve";
     symbols = [];
     markdownPages = [];
+    imageOutputs = new Set();
     const output = directories?.output || dir?.output;
     if (output) {
       assets.css = await progress.stage("css", () =>
@@ -154,7 +163,8 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       finalizers: opts.finalizers,
       variables: opts.variables,
       buildYear: new Date().getFullYear(),
-      symbols
+      symbols,
+      imageOutputs
     };
 
     const processed = await processContent(content, ctx);
@@ -241,6 +251,20 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
           );
         }
       });
+    }
+
+    // Prune stale responsive-image variants. A restored CI image cache (see
+    // .github/workflows/ci.yml) carries variants from earlier builds; when a
+    // source image changes or is removed, eleventy-img writes new content-hashed
+    // files but the superseded ones linger. Delete any file under
+    // assets/apidocs/img this build didn't emit, so the published output — and
+    // the cache it seeds — holds exactly the variants in use. Build-only: an
+    // incremental dev rebuild reprocesses only changed pages, so imageOutputs is
+    // partial and would delete live variants.
+    if (!isDev) {
+      await progress.stage("images", () =>
+        pruneImages(path.join(siteDir, "assets/apidocs/img"), imageOutputs)
+      );
     }
 
     if (isDev && devIndexedOnce) {
@@ -389,6 +413,30 @@ function compareSymbols(a, b) {
 
 function cmp(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
+}
+
+// Delete every file under imgDir whose name isn't in keep (the variant
+// filenames this build emitted). Names are unique content hashes, so a name
+// not in keep is a stale variant a restored cache left behind. No-op when the
+// dir doesn't exist (a site with no raster images).
+async function pruneImages(imgDir, keep) {
+  let entries;
+  try {
+    entries = await fs.readdir(imgDir);
+  } catch {
+    return;
+  }
+  let removed = 0;
+  await Promise.all(
+    entries.map(async name => {
+      if (keep.has(name)) {
+        return;
+      }
+      await fs.rm(path.join(imgDir, name), { force: true });
+      removed++;
+    })
+  );
+  progress.note(`${removed} stale removed`);
 }
 
 async function collectHtml(root) {

@@ -20,16 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # pnpm needs to be on PATH before setup-node can read it from
-      # packageManager / wire up the cache.
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
 
       # biome ci is the read-only mode used in CI: fails the job on any
       # formatter, linter, or assist diagnostic. --error-on-warnings promotes
@@ -38,7 +29,7 @@ jobs:
 
       - run: pnpm test
 
-      - run: pnpm build
+      - uses: ./.github/actions/build-site
 
       # Only stage the artifact when we're about to deploy.
       - uses: actions/upload-pages-artifact@v5

@@ -1,0 +1,18 @@
+name: Build
+description: Build the docs site, reusing eleventy-img's generated variants across runs.
+
+runs:
+  using: composite
+  steps:
+    # Persist eleventy-img's generated responsive variants across runs.
+    - name: Cache generated responsive images
+      uses: actions/cache@v5
+      with:
+        path: docs/_site/assets/apidocs/img
+        key: eleventy-img-${{ hashFiles('docs/src/content/**', 'apidocs/lib/passes/image-processor.js') }}
+        restore-keys: |
+          eleventy-img-
+
+    - name: Build
+      shell: bash
+      run: pnpm build

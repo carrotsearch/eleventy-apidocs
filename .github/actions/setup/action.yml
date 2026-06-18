@@ -1,0 +1,22 @@
+name: Setup
+description: Install pnpm and Node (with the pnpm store cached) and install dependencies.
+
+runs:
+  using: composite
+  steps:
+    # pnpm needs to be on PATH before setup-node can read it from
+    # packageManager / wire up the cache.
+    - uses: pnpm/action-setup@v6
+
+    # No registry-url on purpose: it writes an .npmrc auth line that expects
+    # NODE_AUTH_TOKEN, which OIDC doesn't provide — its presence breaks the
+    # trusted-publish exchange in publish.yml. lts/* is Node 24 (npm 11.13),
+    # comfortably above OIDC's npm >= 11.5.1 requirement.
+    - uses: actions/setup-node@v6
+      with:
+        node-version: lts/*
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

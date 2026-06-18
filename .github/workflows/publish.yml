@@ -36,20 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # pnpm needs to be on PATH before setup-node can read it from
-      # packageManager / wire up the cache.
-      - uses: pnpm/action-setup@v6
-
-      # No registry-url here on purpose: it writes an .npmrc auth line that
-      # expects NODE_AUTH_TOKEN, which OIDC doesn't provide — its presence
-      # breaks the trusted-publish exchange. lts/* is Node 24 (npm 11.13),
-      # comfortably above OIDC's npm >= 11.5.1 requirement.
-      - uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
 
       # Gate the publish on the same checks CI runs, so we never ship a build
       # that wouldn't pass on main.
@@ -57,7 +44,7 @@ jobs:
 
       - run: pnpm test
 
-      - run: pnpm build
+      - uses: ./.github/actions/build-site
 
       # Prereleases (1.2.0-rc.1) must not move the `latest` tag; route any
       # version containing a hyphen to `next` instead.
