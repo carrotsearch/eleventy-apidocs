@@ -8,9 +8,18 @@
 // assets/apidocs/img so it can't collide with an authored page slug.
 
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import Image from "@11ty/eleventy-img";
 import * as progress from "../progress.js";
+
+// eleventy-img's default queue concurrency floors at 8 regardless of core
+// count (Math.min(Math.max(8, availableParallelism()), 16)), so a 2-core CI
+// runner still runs 8 images in flight — each holding decoded buffers and
+// spawning sharp's own per-image threads, risking CPU thrash and OOM. Cap the
+// in-flight count (the dominant memory cost) to the real core count so it
+// scales down on small runners while still saturating a big dev machine.
+Image.concurrency = os.availableParallelism?.() ?? os.cpus().length;
 
 export const RASTER = /\.(png|jpe?g|gif|webp|avif)$/i;
 const DEFAULT_WIDTHS = [320, 640, 960, 1280, 1920, 2560, 3840];
