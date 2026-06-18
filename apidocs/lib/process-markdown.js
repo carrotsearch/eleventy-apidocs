@@ -16,8 +16,8 @@
 //     would show
 //   - image src rewriter (local, below): rewrite raster <img src> to the
 //     deployed /assets/apidocs/img/<hashed> URL without wrapping in
-//     <picture>. Shares loadImage() with imageProcessor so the second call
-//     hits eleventy-img's in-memory cache for free.
+//     <picture>. Reuses the URL imageProcessor already resolved (shared via
+//     ctx.imageUrls) rather than re-running eleventy-img on the source.
 //
 // Returns { markdown, title, summary } so the caller can both write the
 // per-page .md sibling and assemble an llms.txt index without having to
@@ -27,12 +27,7 @@ import * as cheerio from "cheerio";
 import { cleanCodeText, readPreSource } from "./code-text.js";
 import { htmlToMarkdown } from "./markdown.js";
 import { embedCode } from "./passes/embed-code.js";
-import {
-  loadImage,
-  pickFallbackFormat,
-  pickFallbackVariant,
-  RASTER
-} from "./passes/image-processor.js";
+import { RASTER } from "./passes/image-processor.js";
 import { linkRewriter } from "./passes/link-rewriter.js";
 import { substituteVariables } from "./passes/variables.js";
 
@@ -42,7 +37,7 @@ export async function processMarkdown(html, ctx) {
   await embedCode($, ctx);
   linkRewriter($, ctx);
   cleanPreText($);
-  await rewriteImageSrcs($, ctx);
+  rewriteImageSrcs($, ctx);
   const title = extractTitle($);
   const summary = extractSummary($);
   const markdown = htmlToMarkdown($.html());
@@ -90,26 +85,24 @@ function hasFlag($el, name) {
   return v === "" || v === name || v === "true" || v === "preserve";
 }
 
-async function rewriteImageSrcs($, ctx) {
-  const targets = $("img")
-    .toArray()
-    .filter(el => {
-      const src = $(el).attr("src");
-      return src && RASTER.test(src) && !$(el).parents("pre").length;
-    });
-  if (!targets.length) {
+// imageProcessor runs before this in the same per-page ctx, so ctx.imageUrls
+// already maps every raster src it handled to the emitted fallback variant.
+// Reuse those URLs instead of re-running eleventy-img; a src with no entry
+// (none in practice — both branches see the same author markup) is left as-is.
+function rewriteImageSrcs($, ctx) {
+  const urls = ctx.imageUrls;
+  if (!urls) {
     return;
   }
-
-  await Promise.all(
-    targets.map(async el => {
-      const $img = $(el);
-      const metadata = await loadImage($img.attr("src"), ctx);
-      if (!metadata) {
-        return;
-      }
-      const fallback = metadata[pickFallbackFormat(metadata)];
-      $img.attr("src", pickFallbackVariant(fallback).url);
-    })
-  );
+  $("img").each((_, el) => {
+    const $img = $(el);
+    const src = $img.attr("src");
+    if (!src || !RASTER.test(src) || $img.parents("pre").length) {
+      return;
+    }
+    const url = urls.get(src);
+    if (url) {
+      $img.attr("src", url);
+    }
+  });
 }

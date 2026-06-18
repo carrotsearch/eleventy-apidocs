@@ -24,11 +24,10 @@ const LQIP_WIDTH = 24;
 const FALLBACK_WIDTH = 1920;
 
 // Run an image through eleventy-img with the framework's standard widths
-// and formats. Both the HTML pipeline (this file's imageProcessor) and the
-// Markdown pipeline (process-markdown.js) call this — eleventy-img's
-// in-memory cache makes the second call a no-op as long as the options
-// match, so keeping a single entry point matters.
-export async function loadImage(src, ctx) {
+// and formats. Called once per image by imageProcessor; the resolved
+// fallback URL is published on ctx.imageUrls so the Markdown branch can
+// reuse it instead of reprocessing the same source.
+async function loadImage(src, ctx) {
   const outputDir = ctx.outputDir || "_site";
   const imgDir = path.join(outputDir, "assets/apidocs/img");
   const urlPath = "/assets/apidocs/img/";
@@ -52,9 +51,8 @@ export async function loadImage(src, ctx) {
 
 // Pick the original-format variant list from an eleventy-img metadata bag.
 // "Original" meaning the fallback browsers reach for when neither AVIF nor
-// WebP is acceptable. Exported so the Markdown branch can resolve the same
-// fallback URL we use for the HTML <picture>'s <img src>.
-export function pickFallbackFormat(metadata) {
+// WebP is acceptable.
+function pickFallbackFormat(metadata) {
   for (const fmt of ["jpeg", "png", "gif", "webp"]) {
     if (metadata[fmt]?.length) {
       return fmt;
@@ -65,10 +63,10 @@ export function pickFallbackFormat(metadata) {
 
 // Pick the variant a single-URL consumer should point its src at: the largest
 // one no wider than FALLBACK_WIDTH (today's display default), so the bare
-// <img src> fallback and the Markdown branch don't reference a 3840/native
-// variant. Falls back to the largest available for sub-FALLBACK_WIDTH sources.
-// Used by both pipelines; the responsive srcset still carries the full ladder.
-export function pickFallbackVariant(entries) {
+// <img src> fallback (and the Markdown sibling that reuses its URL) don't
+// reference a 3840/native variant. Falls back to the largest available for
+// sub-FALLBACK_WIDTH sources; the responsive srcset still carries the full ladder.
+function pickFallbackVariant(entries) {
   const capped = entries.filter(e => e.width <= FALLBACK_WIDTH);
   const list = capped.length ? capped : entries;
   return list[list.length - 1];
@@ -85,6 +83,10 @@ export async function imageProcessor($, ctx) {
     return;
   }
 
+  // Per-page map of author src → resolved fallback URL. The Markdown branch
+  // (process-markdown.js) reads it so it can link to the same emitted variant
+  // without re-running eleventy-img on the source.
+  ctx.imageUrls ??= new Map();
   await Promise.all(targets.map(el => processOne($, el, ctx)));
 }
 
@@ -107,6 +109,7 @@ async function processOne($, el, ctx) {
   const fallbackList = metadata[fallbackFormat];
   const largest = fallbackList[fallbackList.length - 1];
   const fallbackVariant = pickFallbackVariant(fallbackList);
+  ctx.imageUrls?.set(src, fallbackVariant.url);
 
   // LQIP — read the tiny variant and base64 it for an instant inline preview.
   const lqip = await readLqip(metadata);
