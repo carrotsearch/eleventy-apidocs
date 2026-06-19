@@ -109,6 +109,26 @@ export default async function (eleventyConfig) {
             Default: <code>{}</code>.
           </p>
         </dd>
+        <dt class="api" id="opt-linkCheck">linkCheck</dt>
+        <dd>
+          <p>
+            After a full build, crawl the generated site for broken links —
+            both 404s and in-page <code>#anchor</code> targets that don't exist
+            — and fail the build if any are found. External links are skipped
+            by default, so a third-party outage can't break your build. Runs
+            only on full builds, never under <code>--serve</code>. Default:
+            <code>true</code>.
+          </p>
+          <p>
+            Pass <code>false</code> to disable, or an object to tune it:
+            <code>external</code> (default <code>false</code>) also checks
+            off-site links; <code>skip</code> (default <code>[]</code>) is a
+            list of regular-expression strings whose matching URLs are ignored;
+            <code>fatal</code> (default <code>true</code>) throws on broken
+            links — set it <code>false</code> to report them without failing
+            the build.
+          </p>
+        </dd>
       </dl>
     </section>
     <section id="configure-eleventy:custom-pipeline-passes">
