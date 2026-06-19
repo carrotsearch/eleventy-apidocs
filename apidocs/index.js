@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import nunjucks from "nunjucks";
 import { buildCss } from "./lib/build-css.js";
 import { buildJs } from "./lib/build-js.js";
+import { checkLinks } from "./lib/check-links.js";
 import { extractH1 } from "./lib/extract-h1.js";
 import { writeHashedAsset } from "./lib/hashed-asset.js";
 import { buildLlmsFull, buildLlmsIndex } from "./lib/llms-txt.js";
@@ -32,8 +33,13 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     transformers: [],
     finalizers: [],
     styles: [],
+    linkCheck: true,
     ...userOptions
   };
+
+  // Normalize the link-check option once: `true` → default settings, anything
+  // falsy → off. The eleventy.after handler then just checks for an object.
+  const linkCheckOptions = opts.linkCheck === true ? {} : opts.linkCheck || null;
 
   // autoescape on: page titles, ToC headings, nav/prev-next labels and
   // section anchors all flow from author content and must be escaped. The
@@ -324,6 +330,14 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       }
     });
 
+    // Link check last, once every page, asset, Markdown sibling and the
+    // symbols/Pagefind output is on disk — so a crawl sees the same tree a
+    // visitor would. Full builds only: an incremental dev rebuild emits a
+    // partial tree, and broken-link noise on every keystroke is the opposite
+    // of useful. Throws on broken links (unless linkCheck.fatal is false),
+    // failing the build so CI catches dead anchors and 404s.
+    await runLinkCheck(siteDir, isDev, linkCheckOptions);
+
     if (isDev) {
       devIndexedOnce = true;
     }
@@ -335,6 +349,17 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     htmlTemplateEngine: false,
     markdownTemplateEngine: false
   };
+}
+
+// Gate the post-build link check: full builds only (an incremental dev
+// rebuild emits a partial tree), and only when the consumer hasn't opted out
+// (linkCheckOptions is null). Kept out of the eleventy.after handler so that
+// handler stays under the cognitive-complexity budget.
+async function runLinkCheck(siteDir, isDev, linkCheckOptions) {
+  if (isDev || !linkCheckOptions) {
+    return;
+  }
+  await progress.stage("links", () => checkLinks(siteDir, linkCheckOptions));
 }
 
 // Flatten the navigation manifest (chaptered or flat) into an ordered list

@@ -135,6 +135,17 @@ defaults are shown.
 | `styles`       | `[]`                  | Extra CSS files merged into the bundled, minified stylesheet. |
 | `transformers` | `[]`                  | Cheerio passes run on the raw article **before** the built-in passes. |
 | `finalizers`   | `[]`                  | Cheerio passes run on the article **after** the built-in passes. |
+| `linkCheck`    | `true`                | Crawl the built site after a full build for 404s and broken in-page `#anchor` targets; fail the build on any. Set `false` to disable, or an object to tune (see below). |
+
+`linkCheck` runs only on full builds (never `--serve`) and skips external links
+by default, so a third-party site being down can't break your build. Pass an
+object to adjust:
+
+| Field      | Default | Description |
+| ---------- | ------- | ----------- |
+| `external` | `false` | Also check external (off-site) links. Off by default to keep CI deterministic. |
+| `skip`     | `[]`    | Extra regular-expression strings; any link URL matching one is not checked. |
+| `fatal`    | `true`  | Throw (failing the build) on broken links. Set `false` to only report them. |
 
 A pass is an async `($, ctx) => {}` function receiving the cheerio root and a
 per-page context. See the **Pipeline extensions** page in the documentation for
