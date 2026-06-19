@@ -52,7 +52,7 @@
   "dependencies": {
     "@11ty/eleventy-img": "^6.0.4",
     "cheerio": "^1.2.0",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "fuzzysort": "^3.1.0",
     "jsonc-parser": "^3.3.1",
     "jsonpath-plus": "^10.4.0",
@@ -60,7 +60,7 @@
     "linkinator": "^7.6.1",
     "nunjucks": "^3.2.4",
     "pagefind": "^1.5.2",
-    "shiki": "^4.1.0",
+    "shiki": "^4.2.0",
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2"
   }
