@@ -129,6 +129,18 @@ export default async function (eleventyConfig) {
             the build.
           </p>
         </dd>
+        <dt class="api" id="opt-codeThemes">codeThemes</dt>
+        <dd>
+          <p>
+            Shiki themes used to syntax-highlight code blocks, as an object with
+            <code>light</code> and <code>dark</code> keys. Either key may be
+            overridden on its own; the other keeps its default. Values are Shiki
+            theme names (e.g. <code>nord</code>, <code>vitesse-dark</code>) or a
+            custom TextMate theme object. Both palettes are baked into the CSS
+            bundle at build time. Default:
+            <code>{ light: "github-light", dark: "github-dark" }</code>.
+          </p>
+        </dd>
       </dl>
     </section>
     <section id="configure-eleventy:custom-pipeline-passes">

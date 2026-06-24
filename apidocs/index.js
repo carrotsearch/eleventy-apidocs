@@ -179,6 +179,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       transformers: opts.transformers,
       finalizers: opts.finalizers,
       variables: opts.variables,
+      codeThemes: opts.codeThemes,
       buildYear: new Date().getFullYear(),
       symbols,
       imageOutputs

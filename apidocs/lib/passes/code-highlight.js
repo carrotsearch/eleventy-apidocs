@@ -21,7 +21,7 @@ const PRESERVED_DATA = new Set([
   "language"
 ]);
 
-const THEMES = { light: "github-light", dark: "github-dark" };
+const DEFAULT_THEMES = { light: "github-light", dark: "github-dark" };
 const LANGS = [
   "javascript",
   "typescript",
@@ -42,9 +42,9 @@ const LANGS = [
 ];
 
 let highlighterPromise;
-function getHighlighter() {
+function getHighlighter(themes) {
   if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({ themes: Object.values(THEMES), langs: LANGS });
+    highlighterPromise = createHighlighter({ themes: Object.values(themes), langs: LANGS });
   }
   return highlighterPromise;
 }
@@ -70,12 +70,16 @@ export function codeStylesCss() {
 
 const warnedLangs = new Set();
 
-export async function codeHighlight($, _ctx) {
+export async function codeHighlight($, ctx) {
   const targets = $("pre[data-language]").toArray();
   if (!targets.length) {
     return;
   }
-  const highlighter = await getHighlighter();
+
+  // Per-key merge so a site can override just light or just dark; the keys stay
+  // light/dark because code.css and downstream CSS read --shiki-light/-dark.
+  const themes = { ...DEFAULT_THEMES, ...(ctx?.codeThemes || {}) };
+  const highlighter = await getHighlighter(themes);
   const loaded = new Set(highlighter.getLoadedLanguages());
 
   for (const el of targets) {
@@ -104,7 +108,7 @@ export async function codeHighlight($, _ctx) {
     const safeLang = known ? lang : "text";
     const html = highlighter.codeToHtml(content, {
       lang: safeLang,
-      themes: THEMES,
+      themes,
       defaultColor: false,
       transformers: [
         getStyleToClass(),

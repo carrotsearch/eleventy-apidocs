@@ -136,6 +136,7 @@ defaults are shown.
 | `transformers` | `[]`                  | Cheerio passes run on the raw article **before** the built-in passes. |
 | `finalizers`   | `[]`                  | Cheerio passes run on the article **after** the built-in passes. |
 | `linkCheck`    | `true`                | Crawl the built site after a full build for 404s and broken in-page `#anchor` targets; fail the build on any. Set `false` to disable, or an object to tune (see below). |
+| `codeThemes`   | `{ light: "github-light", dark: "github-dark" }` | Shiki themes for code-block syntax highlighting. Override `light`/`dark` independently; values are Shiki theme names or custom TextMate theme objects. Both palettes are baked into the CSS bundle. |
 
 `linkCheck` runs only on full builds (never `--serve`) and skips external links
 by default, so a third-party site being down can't break your build. Pass an
