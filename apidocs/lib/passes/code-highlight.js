@@ -65,7 +65,15 @@ function getStyleToClass() {
 }
 
 export function codeStylesCss() {
-  return styleToClass ? styleToClass.getCSS() : "";
+  if (!styleToClass) {
+    return "";
+  }
+
+  // getCSS() emits rules in registry insertion order, which tracks the order
+  // pages/tokens were highlighted and isn't stable across builds. Sort the
+  // flat, single-level rules so the folded CSS bundle hashes deterministically
+  // — same reason the symbols manifest sorts before hashing (see index.js).
+  return (styleToClass.getCSS().match(/\.[^{]+\{[^}]*\}/g) ?? []).sort().join("");
 }
 
 const warnedLangs = new Set();
