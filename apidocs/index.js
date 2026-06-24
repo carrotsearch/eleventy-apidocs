@@ -10,6 +10,7 @@ import { writeHashedAsset } from "./lib/hashed-asset.js";
 import { buildLlmsFull, buildLlmsIndex } from "./lib/llms-txt.js";
 import { loadNavigation } from "./lib/load-navigation.js";
 import { loadSourceFile } from "./lib/load-source-file.js";
+import { codeStylesCss } from "./lib/passes/code-highlight.js";
 import { processContent, processDocument } from "./lib/pipeline.js";
 import { processMarkdown } from "./lib/process-markdown.js";
 import * as progress from "./lib/progress.js";
@@ -19,6 +20,13 @@ import { relativizeHtml, relativizeUrl } from "./lib/relativize.js";
 // a plain replace() across each generated HTML would clobber the identifier
 // too. Using `@@…@@` keeps the placeholder unique to the value position.
 const SYMBOLS_URL_PLACEHOLDER = "@@APIDOCS_SYMBOLS_URL@@";
+
+// The stylesheet href the layout emits in prod. The bundle can only be built in
+// eleventy.after (it folds in the Shiki classes collected as pages render), so
+// its hashed URL isn't known at render time. The layout bakes this placeholder
+// instead, substituted per page post-build. `@@…@@` doesn't start with "/", so
+// relativizeHtml leaves it untouched (see lib/relativize.js).
+const CSS_URL_PLACEHOLDER = "@@APIDOCS_CSS_URL@@";
 
 const themeRoot = path.dirname(fileURLToPath(import.meta.url));
 
@@ -130,11 +138,14 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     imageOutputs = new Set();
     const output = directories?.output || dir?.output;
     if (output) {
-      assets.css = await progress.stage("css", () =>
-        buildCss(themeRoot, output, opts.styles, { hashed })
-      );
       assets.js = await progress.stage("js", () => buildJs(themeRoot, output, { hashed }));
     }
+
+    // CSS is bundled in eleventy.after, not here: the bundle folds in the Shiki
+    // highlight classes, whose registry isn't complete until every page has
+    // rendered. The layout bakes a placeholder href (substituted per page
+    // post-build) in prod; in dev the stable filename is known up front.
+    assets.css = hashed ? CSS_URL_PLACEHOLDER : "/assets/apidocs/css/apidocs.css";
     assets.symbolsUrl = hashed ? SYMBOLS_URL_PLACEHOLDER : "/assets/apidocs/symbols.json";
   });
 
@@ -227,6 +238,22 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 
     const isDev = (runMode || currentRunMode) === "serve";
 
+    // Bundle the CSS now that every page has rendered, folding in the Shiki
+    // highlight classes collected during the build. Runs ahead of the dev
+    // short-circuit below so incremental rebuilds always refresh the bundle;
+    // the class registry is content-hashed and monotonic, so the dev bundle
+    // stays a superset and unchanged pages keep referencing valid classes. In
+    // prod, substitute the hashed URL into the placeholder the layout baked.
+    await progress.stage("css", async () => {
+      const url = await buildCss(themeRoot, output, opts.styles, {
+        hashed: !isDev,
+        extraCss: codeStylesCss()
+      });
+      if (!isDev) {
+        await substitutePlaceholder(siteDir, CSS_URL_PLACEHOLDER, url);
+      }
+    });
+
     // Per-page Markdown siblings (e.g. /foo/ → _site/foo.md). Runs on every
     // build — in dev with --incremental, markdownPages only carries the
     // pages that actually re-rendered, so the .md files stay in sync with
@@ -305,7 +332,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
         );
         progress.note(progress.formatBytes(buf.length));
         if (!isDev) {
-          await substituteSymbolsUrl(siteDir, `/assets/apidocs/${name}`);
+          await substitutePlaceholder(siteDir, SYMBOLS_URL_PLACEHOLDER, `/assets/apidocs/${name}`);
         }
       } catch (err) {
         console.warn("[apidocs] symbols.json write failed:", err?.message || err);
@@ -400,17 +427,20 @@ function articleHref(article) {
 // Walk every generated HTML file and replace the symbols-URL placeholder
 // (planted by the layout) with the hashed URL, relativized for that page so
 // the site still works from any URL prefix.
-async function substituteSymbolsUrl(siteDir, absUrl) {
+// Replace `placeholder` in every emitted HTML page with `absUrl` relativized to
+// that page — used for assets whose hashed URL can only be known post-build
+// (the CSS bundle, symbols.json), so the layout bakes a placeholder instead.
+async function substitutePlaceholder(siteDir, placeholder, absUrl) {
   const files = await collectHtml(siteDir);
   await Promise.all(
     files.map(async file => {
       const html = await fs.readFile(file, "utf8");
-      if (!html.includes(SYMBOLS_URL_PLACEHOLDER)) {
+      if (!html.includes(placeholder)) {
         return;
       }
       const pageUrl = pageUrlFromFile(siteDir, file);
       const url = relativizeUrl(absUrl, pageUrl);
-      await fs.writeFile(file, html.split(SYMBOLS_URL_PLACEHOLDER).join(url));
+      await fs.writeFile(file, html.split(placeholder).join(url));
     })
   );
 }

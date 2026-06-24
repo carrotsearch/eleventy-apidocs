@@ -11,6 +11,7 @@
 // The original (unrendered) plain text is preserved on the wrapper as
 // data-plain-text so <apidocs-code-box> can copy it to clipboard.
 
+import { transformerStyleToClass } from "@shikijs/transformers";
 import { createHighlighter } from "shiki";
 import { cleanCodeText, readPreSource } from "../code-text.js";
 
@@ -46,6 +47,25 @@ function getHighlighter() {
     highlighterPromise = createHighlighter({ themes: Object.values(THEMES), langs: LANGS });
   }
   return highlighterPromise;
+}
+
+// Hoists Shiki's per-token inline styles into deduplicated CSS classes plus a
+// generated stylesheet, instead of repeating `style="--shiki-light:…;
+// --shiki-dark:…"` on every span. One module-level instance accumulates a
+// build-scoped registry across all pages (same lifetime as the highlighter
+// above); index.js folds its getCSS() into the main bundle in eleventy.after.
+// Class names are content-hashed, so the registry is deterministic and safe to
+// grow monotonically across incremental dev rebuilds.
+let styleToClass;
+function getStyleToClass() {
+  if (!styleToClass) {
+    styleToClass = transformerStyleToClass({ classPrefix: "sk-" });
+  }
+  return styleToClass;
+}
+
+export function codeStylesCss() {
+  return styleToClass ? styleToClass.getCSS() : "";
 }
 
 const warnedLangs = new Set();
@@ -84,6 +104,7 @@ export async function codeHighlight($, _ctx) {
       themes: THEMES,
       defaultColor: false,
       transformers: [
+        getStyleToClass(),
         {
           line(node, line) {
             if (highlighted.has(line)) {

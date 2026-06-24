@@ -14,8 +14,20 @@ import { writeHashedAsset } from "./hashed-asset.js";
  * (so @import and url() resolve relative to its own location) and the
  * minified outputs are concatenated — theme first, user CSS last so it can
  * override theme rules without specificity tricks.
+ *
+ * Optional `extraCss` (string) is concatenated between the theme and user CSS.
+ * It carries the Shiki syntax-highlighting classes collected during the build
+ * (see code-highlight.js), which is why this runs in eleventy.after, not
+ * before — the registry isn't complete until every page has been highlighted.
+ * It's already plain, compact class rules, so it's concatenated raw rather than
+ * routed through bundleAsync (which expects a file path for @import/url()).
  */
-export async function buildCss(themeRoot, outputDir, userStyles, { hashed = true } = {}) {
+export async function buildCss(
+  themeRoot,
+  outputDir,
+  userStyles,
+  { hashed = true, extraCss = "" } = {}
+) {
   const themeEntry = path.join(themeRoot, "styles/apidocs.css");
   const outDir = path.join(outputDir, "assets/apidocs/css");
 
@@ -24,7 +36,19 @@ export async function buildCss(themeRoot, outputDir, userStyles, { hashed = true
     .map(p => path.resolve(process.cwd(), p));
 
   const chunks = [];
-  for (const entry of [themeEntry, ...userEntries]) {
+
+  const { code: themeCode } = await bundleAsync({
+    filename: themeEntry,
+    minify: true,
+    sourceMap: false
+  });
+  chunks.push(themeCode);
+
+  if (extraCss) {
+    chunks.push(Buffer.from(extraCss));
+  }
+
+  for (const entry of userEntries) {
     const { code } = await bundleAsync({
       filename: entry,
       minify: true,
