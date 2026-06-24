@@ -12,7 +12,7 @@
 // data-plain-text so <apidocs-code-box> can copy it to clipboard.
 
 import { transformerStyleToClass } from "@shikijs/transformers";
-import { createHighlighter } from "shiki";
+import { createHighlighter, isSpecialLang } from "shiki";
 import { cleanCodeText, readPreSource } from "../code-text.js";
 
 const PRESERVED_DATA = new Set([
@@ -90,7 +90,10 @@ export async function codeHighlight($, _ctx) {
       preserveNewlines
     });
 
-    const known = loaded.has(lang);
+    // Shiki's plain-text/ansi languages render without a grammar and never
+    // appear in getLoadedLanguages(); isSpecialLang covers them so an explicit
+    // data-language="text" doesn't trip the unknown-language warning below.
+    const known = loaded.has(lang) || isSpecialLang(lang);
     if (!known && !warnedLangs.has(lang)) {
       warnedLangs.add(lang);
       console.warn(
