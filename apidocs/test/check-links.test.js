@@ -72,3 +72,34 @@ test("fatal:false reports but does not throw", async () => {
   );
   await checkLinks(siteDir, { fatal: false });
 });
+
+// Generated responsive-image variants are validated against the build manifest
+// (imageOutputs), not the filesystem — the image pipeline owns their existence,
+// and crawling them races the writes / overloads the static server.
+test("skips a generated image variant that the manifest emitted", async () => {
+  await writeFile(
+    path.join(siteDir, "index.html"),
+    `<!doctype html><html><body>
+      <img src="assets/apidocs/img/pic-320.webp"
+           srcset="assets/apidocs/img/pic-320.webp 320w, assets/apidocs/img/pic-640.webp 640w">
+    </body></html>`
+  );
+
+  // The files are deliberately absent on disk; membership in the manifest is
+  // what satisfies them.
+  const manifest = new Set(["pic-320.webp", "pic-640.webp"]);
+  await checkLinks(siteDir, {}, manifest);
+});
+
+test("still catches a generated image URL the manifest did not emit", async () => {
+  await writeFile(
+    path.join(siteDir, "index.html"),
+    `<!doctype html><html><body>
+      <img src="assets/apidocs/img/stale-320.webp">
+    </body></html>`
+  );
+
+  // A stale/typo'd variant the build didn't emit (the prune pass would have
+  // deleted it) must still fail — no manifest entry, real 404.
+  await assert.rejects(() => checkLinks(siteDir, {}, new Set(["pic-320.webp"])), /broken link/);
+});

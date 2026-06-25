@@ -1,4 +1,10 @@
+import path from "node:path";
 import * as progress from "./progress.js";
+
+// URL prefix every generated responsive-image variant lives under (see
+// passes/image-processor.js). A crawled link whose path is in here and whose
+// basename the image pipeline emitted this build is satisfied by definition.
+const IMG_PREFIX = "/assets/apidocs/img/";
 
 // linkinator stands up a static web server over the built directory, so
 // internal links resolve against http://localhost:<port>/ while genuine
@@ -12,11 +18,31 @@ const SKIP_EXTERNAL = "^https?://(?!localhost)";
 // only on full builds (never dev --serve) — see index.js, where the dev
 // short-circuit skips it alongside Pagefind. Validates server-rendered HTML
 // only, which is exactly the static output this theme emits.
-export async function checkLinks(siteDir, options = {}) {
+export async function checkLinks(siteDir, options = {}, imageOutputs) {
   const { external = false, skip = [], fatal = true } = options;
   const { check } = await import("linkinator");
 
-  const linksToSkip = external ? [...skip] : [SKIP_EXTERNAL, ...skip];
+  const skipPatterns = (external ? [...skip] : [SKIP_EXTERNAL, ...skip]).map(p => new RegExp(p));
+
+  // Resolve generated image variants against the build manifest instead of
+  // crawling them. Their existence is the image pipeline's job — eleventy-img
+  // already fails the build on a missing source — and a single page can emit
+  // hundreds of variant URLs (widths × formats × srcset entries). Crawling all
+  // of them makes linkinator hammer its own static server with binary fetches,
+  // which under load reports transient false 404s (a different set each run).
+  // A variant *not* in imageOutputs falls through to a real crawl: the prune
+  // pass deletes anything this build didn't emit, so a stale/typo'd generated
+  // URL still 404s and fails the build. linkinator calls this function form
+  // before its regex-array form, so it folds in the external/user skips too.
+  const linksToSkip = async link => {
+    if (skipPatterns.some(re => re.test(link))) {
+      return true;
+    }
+    const { pathname } = new URL(link);
+    return (
+      pathname.includes(IMG_PREFIX) && Boolean(imageOutputs?.has(path.posix.basename(pathname)))
+    );
+  };
 
   const { links } = await check({
     path: siteDir,

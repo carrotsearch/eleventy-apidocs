@@ -364,7 +364,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     // partial tree, and broken-link noise on every keystroke is the opposite
     // of useful. Throws on broken links (unless linkCheck.fatal is false),
     // failing the build so CI catches dead anchors and 404s.
-    await runLinkCheck(siteDir, isDev, linkCheckOptions);
+    await runLinkCheck(siteDir, isDev, linkCheckOptions, imageOutputs);
 
     if (isDev) {
       devIndexedOnce = true;
@@ -383,11 +383,11 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
 // rebuild emits a partial tree), and only when the consumer hasn't opted out
 // (linkCheckOptions is null). Kept out of the eleventy.after handler so that
 // handler stays under the cognitive-complexity budget.
-async function runLinkCheck(siteDir, isDev, linkCheckOptions) {
+async function runLinkCheck(siteDir, isDev, linkCheckOptions, imageOutputs) {
   if (isDev || !linkCheckOptions) {
     return;
   }
-  await progress.stage("links", () => checkLinks(siteDir, linkCheckOptions));
+  await progress.stage("links", () => checkLinks(siteDir, linkCheckOptions, imageOutputs));
 }
 
 // Flatten the navigation manifest (chaptered or flat) into an ordered list
