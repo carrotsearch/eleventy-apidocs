@@ -252,6 +252,10 @@
     margin-block: 0 0.5rem;
     /* Same nudge as the first chapter title — land on h1's visible top. */
     padding-block-start: 0.55rem;
+    /* Entry links sit 2px in from their li edge — the width of the transparent
+       active-bar border below. Match that inset so the title aligns with the
+       links beneath it instead of hanging 2px to their left. */
+    padding-inline-start: 2px;
   }
   & ul {
     list-style: none;
