@@ -7,6 +7,10 @@
 
    Bare strings have their title pulled from the target page's <h1>.
 
+   A chapter may also carry an optional "section" string: a divider label
+   rendered above it that groups the chapters that follow until the next
+   chapter with its own "section". It is a flat marker, not a nesting level.
+
    The current page is marked .active by comparing page.url against the
    entry's "/slug/" path. #}
 
@@ -24,6 +28,7 @@
 {% if nav.chapters %}
 <ul class="chapters">
   {% for chapter in nav.chapters %}
+  {% if chapter.section %}<li class="chapter-section" aria-hidden="true">{{ chapter.section }}</li>{% endif %}
   <li class="chapter">
     {% if chapter.title %}<h3 class="chapter-title">{{ chapter.title }}</h3>{% endif %}
     <ul class="articles">

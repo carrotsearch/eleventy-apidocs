@@ -102,6 +102,22 @@ test("chaptered form: bare strings get titles from <h1>", async () => {
   });
 });
 
+test("chaptered form: a chapter's section divider label survives verbatim", async () => {
+  const file = await writeNav({
+    chapters: [{ section: "Guides", title: "Start", articles: ["install"] }]
+  });
+  const nav = await loadNavigation(file, "src/content");
+  assert.deepEqual(nav, {
+    chapters: [
+      {
+        section: "Guides",
+        title: "Start",
+        articles: [{ slug: "install", title: "How to install" }]
+      }
+    ]
+  });
+});
+
 test("missing source file: warns and falls back to slug as title", async () => {
   const file = await writeNav(["ghost"]);
   const nav = await loadNavigation(file, "src/content");

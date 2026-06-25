@@ -8,6 +8,7 @@
       ]
     },
     {
+      "section": "Guides",
       "title": "Authoring",
       "articles": [
         { "slug": "page-structure", "title": "Page structure" },
@@ -21,6 +22,7 @@
       ]
     },
     {
+      "section": "Reference",
       "title": "Reference",
       "articles": [
         { "slug": "navigation", "title": "Navigation" },
