@@ -64,6 +64,37 @@ test("data-api-name and data-api-kind override defaults", () => {
   ]);
 });
 
+test("a no-id .api on the page <article> wrapper is skipped, not warned", () => {
+  const warnings = [];
+  const orig = console.warn;
+  console.warn = msg => warnings.push(msg);
+  try {
+    const s = extract(`<article class="api"><h1>Reference</h1><p>Body.</p></article>`);
+    // Only the h1 page entry; the article wrapper itself is not indexed.
+    assert.deepEqual(s, [{ name: "Reference", kind: "page", group: "section", url: "/page/" }]);
+    assert.deepEqual(warnings, []);
+  } finally {
+    console.warn = orig;
+  }
+});
+
+test("no-anchor warning uses a short identifier, not the element's full text", () => {
+  const warnings = [];
+  const orig = console.warn;
+  console.warn = msg => warnings.push(msg);
+  try {
+    const body = "x".repeat(500);
+    extract(`<article><dl class="narrow api"><dt>${body}</dt></dl></article>`);
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /<dl class="narrow api">/);
+    // The 500-char body must not be dumped verbatim.
+    assert.ok(!warnings[0].includes(body));
+    assert.ok(warnings[0].length < 200);
+  } finally {
+    console.warn = orig;
+  }
+});
+
 // ---------- page (article > h1) pass ----------
 
 test("article h1 becomes a kind=page entry with no anchor", () => {

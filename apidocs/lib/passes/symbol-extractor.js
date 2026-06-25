@@ -32,13 +32,20 @@ export function extractSymbols($, ctx) {
 
   $(".api").each((_, el) => {
     const $el = $(el);
+
+    // The page wrapper is commonly authored as <article class="api">. It has
+    // no id of its own and is already indexed via its <h1> below, so skip it
+    // rather than warning with the whole page body as the symbol name.
+    if ($el.is("article") && !$el.attr("id")) {
+      return;
+    }
     const name = readName($el);
     if (!name) {
       return;
     }
     const anchor = readAnchor($el);
     if (!anchor) {
-      console.warn(`[apidocs] .api element without anchor: "${name}" on ${url}`);
+      console.warn(`[apidocs] .api element without anchor: ${describeElement($el)} on ${url}`);
       return;
     }
     const kind = $el.attr("data-api-kind") || inferKind($el, name);
@@ -131,6 +138,25 @@ function readHeadingText($h) {
   const $clone = $h.clone();
   $clone.find("a.anchor").remove();
   return $clone.text().trim();
+}
+
+// A short, single-line identifier for an element, for the no-anchor warning.
+// Using the element's full text() here would dump entire pages when a large
+// container (e.g. a stray .api on the page wrapper) lacks an id.
+function describeElement($el) {
+  let tag = `<${$el.get(0).tagName}`;
+  const id = $el.attr("id");
+  if (id) {
+    tag += ` id="${id}"`;
+  }
+  const cls = $el.attr("class");
+  if (cls) {
+    tag += ` class="${cls}"`;
+  }
+  tag += ">";
+  const text = $el.text().replace(/\s+/g, " ").trim();
+  const snippet = text.length > 50 ? `${text.slice(0, 50)}…` : text;
+  return snippet ? `${tag} "${snippet}"` : tag;
 }
 
 function readAnchor($el) {
