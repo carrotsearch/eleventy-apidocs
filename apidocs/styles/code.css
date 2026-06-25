@@ -15,6 +15,17 @@ apidocs-code-box {
   color: var(--code-fg);
 }
 
+/* On mobile the article gutter shrinks to var(--leading) so bare code boxes
+   pull out flush with the viewport edges (see layout.css) — square off their
+   corners there, since a rounded box can't sit flush against the edge. Boxes
+   nested in callouts stay inset (content.css zeroes their pull), so the :not()
+   leaves their radius alone. */
+@media (max-width: 47.99rem) {
+  apidocs-code-box:not(:is(.info, .warning, .box, .note) *) {
+    border-radius: 0;
+  }
+}
+
 apidocs-code-box > pre {
   margin: 0;
   padding: 1em 0 1em var(--leading);

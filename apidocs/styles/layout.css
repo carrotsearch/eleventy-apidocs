@@ -305,6 +305,23 @@
    hamburger. The sticky header (z=20) stays above the panel so the
    hamburger X remains tappable as the close affordance. */
 @media (max-width: 47.99rem) {
+  /* Tighten the page gutter to var(--leading) — the exact distance code boxes
+     and callouts pull out (see code.css / content.css). With no toc rail beside
+     the article on mobile, the base rule's extra 1em (which keeps overflowing
+     code off the toc scrollbar) isn't needed, so dropping to --leading lands
+     those full-bleed elements flush with the viewport edge. */
+  .article {
+    padding-inline: var(--leading);
+  }
+
+  /* Re-align the hamburger icon onto the new, narrower text edge (--leading).
+     The base -0.5rem cancels the icon's 0.5rem inset within the button to sit
+     it on the header gutter; add (--leading - --gutter) to push it out to the
+     article text edge instead. */
+  .nav-toggle {
+    margin-inline-start: calc(var(--leading) - var(--gutter) - 0.5rem);
+  }
+
   .main-nav {
     position: fixed;
     inset-block-start: var(--header-h);
