@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "pnpm -F docs dev",
     "build": "pnpm -F docs build",
+    "preview": "pnpm -F docs preview",
     "clean": "pnpm -F docs clean",
     "test": "pnpm -F @carrotsearch/eleventy-apidocs test",
     "format": "biome format --write",

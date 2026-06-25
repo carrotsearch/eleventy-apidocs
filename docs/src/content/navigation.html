@@ -79,6 +79,27 @@
         warning is logged so the gap is visible in the build output.
       </p>
     </section>
+
+    <section id="manifest:group-dividers">
+      <h3>Group dividers</h3>
+      <p>
+        A chapter can carry an optional <code>section</code> string: a divider
+        label rendered above it in the nav that groups the chapters following
+        it, up to the next chapter that declares its own <code>section</code>.
+        It&rsquo;s a flat marker, not an extra level of nesting &mdash; the
+        prev/next sequence and chapter structure are unaffected.
+      </p>
+      <pre data-language="json">{
+  "chapters": [
+    { "title": "Introduction", "articles": [ "", "getting-started" ] },
+    {
+      "section": "Guides",
+      "title": "Authoring",
+      "articles": [ "page-structure", "code-blocks" ]
+    }
+  ]
+}</pre>
+    </section>
   </section>
 
   <section id="entries">
