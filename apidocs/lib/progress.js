@@ -11,12 +11,14 @@ import { performance } from "node:perf_hooks";
 let runMode = "build";
 let firstServeBuildDone = false;
 let seenImages = new Set();
+let pageCount = 0;
 let buildStart = 0;
 let pendingNote = null;
 
 export function startBuild(mode) {
   runMode = mode || "build";
   seenImages = new Set();
+  pageCount = 0;
   buildStart = performance.now();
 }
 
@@ -28,7 +30,7 @@ export function endBuild() {
     return;
   }
   const dt = formatMs(performance.now() - buildStart);
-  console.log(`[apidocs] build done: ${seenImages.size} images, ${dt}`);
+  console.log(`[apidocs] build done: ${pageCount} pages, ${seenImages.size} images, ${dt}`);
   if (runMode === "serve") {
     firstServeBuildDone = true;
   }
@@ -67,6 +69,19 @@ export function formatBytes(n) {
     return `${(n / 1000).toFixed(1)} kB`;
   }
   return `${(n / 1_000_000).toFixed(2)} MB`;
+}
+
+// Per-page render counter. Page rendering runs inside Eleventy's own render
+// loop, not under a stage(), so the long gap between "js done" and the
+// post-build stages is otherwise silent — only image-bearing pages surfaced
+// anything (via image() below). One line per page makes that phase visible and
+// proportional to page count. Caller passes the page URL.
+export function page(url) {
+  if (!isVerbose()) {
+    return;
+  }
+  pageCount += 1;
+  console.log(`[apidocs] page #${pageCount}: ${url}`);
 }
 
 // Dedupe by src — the same image embedded on multiple pages still calls

@@ -212,7 +212,14 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       next
     });
     const finalized = processDocument(wrapped, ctx);
-    return relativizeHtml(finalized, this.page?.url || "/");
+    const html = relativizeHtml(finalized, this.page?.url || "/");
+
+    // Logged on completion, not entry: Eleventy enters every page's transform
+    // synchronously up to the first await, so an entry-time counter would dump
+    // all pages at once and leave the render gap silent. Completion order
+    // streams the lines across the work that fills "js done" → post-build.
+    progress.page(this.page?.url || outputPath);
+    return html;
   });
 
   for (const f of [opts.navigation, opts.logo, opts.footer, opts.head]) {
