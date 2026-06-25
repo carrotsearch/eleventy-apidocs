@@ -11,6 +11,12 @@
    rendered above it that groups the chapters that follow until the next
    chapter with its own "section". It is a flat marker, not a nesting level.
 
+   An article with `expand` in the manifest gets a `children` array
+   ({slug, anchor, title}) of the target page's top-level sections, attached
+   by the loader. They render as sibling links right after the article — at
+   the same level as ordinary pages, not as a deeper nesting — so an expanded
+   page reads like a chapter whose "pages" are its sections.
+
    The current page is marked .active by comparing page.url against the
    entry's "/slug/" path. #}
 
@@ -23,6 +29,11 @@
   <li{% if isActive %} class="active"{% endif %}>
     <a href="{{ href }}">{{ article.title }}</a>
   </li>
+  {%- if article.children %}
+  {% for child in article.children %}
+  <li><a href="/{{ child.slug }}/#{{ child.anchor }}">{{ child.title }}</a></li>
+  {% endfor %}
+  {%- endif %}
 {% endmacro %}
 
 {% if nav.chapters %}

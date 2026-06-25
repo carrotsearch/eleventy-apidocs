@@ -21,6 +21,16 @@ before(async () => {
     "<article><h1>Using <code>apidocs</code></h1></article>"
   );
   await writeFile("src/content/no-title.html", "<article><p>no h1 here</p></article>");
+  await writeFile(
+    "src/content/reference.html",
+    `<article>
+      <h1>Reference</h1>
+      <section id="alpha"><h2>Alpha</h2></section>
+      <section id="beta"><h3><a class="anchor" href="#beta">#</a>Beta</h3></section>
+      <section id="hidden" data-toc="omit"><h2>Hidden</h2></section>
+      <section><h2>No id</h2></section>
+    </article>`
+  );
 });
 
 after(async () => {
@@ -136,4 +146,35 @@ test("inline tags in <h1> are stripped", async () => {
   const file = await writeNav(["usage"]);
   const nav = await loadNavigation(file, "src/content");
   assert.equal(nav[0].title, "Using apidocs");
+});
+
+test("expand: true attaches the page's top-level sections as children", async () => {
+  const file = await writeNav([{ slug: "reference", expand: true }]);
+  const nav = await loadNavigation(file, "src/content");
+  assert.deepEqual(nav, [
+    {
+      slug: "reference",
+      title: "Reference",
+      expand: true,
+      children: [
+        { slug: "reference", anchor: "alpha", title: "Alpha" },
+        { slug: "reference", anchor: "beta", title: "Beta" }
+      ]
+    }
+  ]);
+});
+
+test('expand: "<slug>" expands a different page; children carry that target slug', async () => {
+  const file = await writeNav([{ slug: "usage", expand: "reference" }]);
+  const nav = await loadNavigation(file, "src/content");
+  assert.deepEqual(nav[0].children, [
+    { slug: "reference", anchor: "alpha", title: "Alpha" },
+    { slug: "reference", anchor: "beta", title: "Beta" }
+  ]);
+});
+
+test("expand on a page with no top-level sections yields no children", async () => {
+  const file = await writeNav([{ slug: "install", expand: true }]);
+  const nav = await loadNavigation(file, "src/content");
+  assert.deepEqual(nav, [{ slug: "install", title: "How to install", expand: true }]);
 });

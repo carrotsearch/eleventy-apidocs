@@ -130,6 +130,39 @@
           titled &ldquo;Installing @carrotsearch/eleventy-apidocs&rdquo;.
         </p>
       </dd>
+      <dt class="api" id="entry-expand">expand</dt>
+      <dd>
+        <p>
+          Optional. Surfaces a page&rsquo;s top-level
+          <code>&lt;section id&gt;</code> entries as extra links in the nav,
+          listed right after the article at the same level as ordinary pages
+          &mdash; so a long reference page (a command list, an env-var list)
+          reads like a chapter whose &ldquo;pages&rdquo; are its sections. Each
+          targets <code>/&lt;slug&gt;/#&lt;id&gt;</code>. Pair it with a chapter
+          of its own for the cleanest result.
+        </p>
+        <p>
+          Use <code>true</code> to expand the article&rsquo;s own page, or a
+          slug string to expand a different one:
+        </p>
+        <pre data-language="json">{
+  "chapters": [
+    {
+      "section": "Reference",
+      "title": "Reference",
+      "articles": [
+        { "slug": "api-reference", "expand": true }
+      ]
+    }
+  ]
+}</pre>
+        <p>
+          Children hang off the article as a nested list; they are not separate
+          steps in the prev/next sequence, and search already indexes every
+          section independently, so <code>expand</code> changes the sidebar
+          only.
+        </p>
+      </dd>
     </dl>
   </section>
 
