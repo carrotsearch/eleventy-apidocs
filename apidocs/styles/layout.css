@@ -286,6 +286,12 @@
     border-inline-start-color: var(--link);
   }
 }
+/* The disclosure trigger only exists on mobile (see the <48rem block); on
+   tablet/desktop the rail is always open and the .toc-title is the heading. */
+.toc-toggle {
+  display: none;
+}
+
 /* Hide the ToC rail when there's nothing to show — and let the article
    reclaim the column on desktop. :has lands the cascade based on whether
    the partial emitted any content. */
@@ -343,6 +349,79 @@
   .layout[data-nav-open] .main-nav {
     transform: translateX(0);
   }
+
+  /* On-page ToC: single column here, so the collapsible disclosure (styled
+     in the <64rem block below) simply stacks above the article. */
+  .layout-body {
+    grid-template-areas:
+      "nav"
+      "toc"
+      "article";
+  }
+
+  /* Align the label/list with the article text edge (matches .article). */
+  .toc {
+    padding-inline: var(--leading);
+  }
+}
+
+/* On-page ToC as a collapsible disclosure — the shared treatment for every
+   width below the desktop right rail (mobile and portrait tablet). A bottom-
+   of-page ToC can't serve its purpose (overview + jump-ahead before reading),
+   so it leads the content instead, collapsed by default to stay out of the
+   way. Each breakpoint below places it in its grid (top of body); this block
+   only handles the disclosure chrome. */
+@media (max-width: 63.99rem) {
+  .toc {
+    /* No longer a bottom rail — a divider under the disclosure instead. */
+    border-block-start: none;
+    border-block-end: 1px solid var(--rule-faint);
+    padding-block: 0;
+  }
+
+  /* The button replaces the .toc-title heading as the on-screen label here. */
+  .toc .toc-title {
+    display: none;
+  }
+  .toc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    inline-size: 100%;
+    gap: 0.5rem;
+    /* Zero the inline padding (buttons carry a UA default) so the label sits
+       on .toc's padding edge — flush with the article text — and the chevron
+       lands on the opposite edge, under the header's rightmost icon. */
+    padding: 0.85rem 0.15rem;
+    background: transparent;
+    border: 0;
+    color: var(--fg);
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+  }
+  .toc-toggle-chevron {
+    flex: none;
+    color: var(--fg-muted);
+    transition: transform 0.2s ease;
+    position: relative;
+    left: 0.25rem;
+  }
+  .toc-toggle[aria-expanded="true"] .toc-toggle-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Collapsed by default; the button's state reveals the list. */
+  .toc-list {
+    display: none;
+    padding-block-end: var(--gutter);
+  }
+  .toc-toggle[aria-expanded="true"] ~ .toc-list {
+    display: block;
+  }
 }
 
 /* Tablet — nav becomes a left rail. */
@@ -391,6 +470,26 @@
 
   .toc:empty + .article {
     /* nothing */
+  }
+}
+
+/* Portrait tablet — the nav is a left rail, but there's still no room for the
+   desktop ToC rail, so the disclosure (chrome from the <64rem block) spans the
+   full width at the top of the body, above both the nav rail and the article.
+   Spanning the top keeps the nav rail's first-chapter / article-h1 alignment
+   intact (both start in the second row). */
+@media (min-width: 48rem) and (max-width: 63.99rem) {
+  .layout-body {
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "toc toc"
+      "nav article";
+  }
+
+  /* Full-width bar — align the label with the page gutter (the nav rail and
+     header logo), not the far-right article text column. */
+  .toc {
+    padding-inline: var(--gutter);
   }
 }
 

@@ -13,7 +13,23 @@
 
 {% if toc and toc.length %}
 <div class="toc-inner">
+  {# Mobile disclosure trigger. Hidden on desktop, where .toc is an always-
+     visible right rail and the <h2> below is the heading. On mobile the rail
+     moves to the top of the body and collapses behind this button — see the
+     <48rem block in layout.css and toc-disclosure.js (toggles aria-expanded;
+     CSS keys the list's visibility off it). #}
+  <button type="button" class="toc-toggle" data-toc-toggle
+          aria-expanded="false" aria-controls="toc-list">
+    <span>On this page</span>
+    <svg class="toc-toggle-chevron" viewBox="0 0 24 24" width="18" height="18"
+         aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </button>
   <h2 class="toc-title">On this page</h2>
-  {{ renderEntries(toc) }}
+  <div id="toc-list" class="toc-list">
+    {{ renderEntries(toc) }}
+  </div>
 </div>
 {% endif %}
