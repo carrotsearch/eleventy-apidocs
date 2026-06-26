@@ -59,6 +59,7 @@
     "jsonpath-plus": "^10.4.0",
     "lightningcss": "^1.32.0",
     "linkinator": "^7.6.1",
+    "listr2": "^10.2.2",
     "nunjucks": "^3.2.4",
     "pagefind": "^1.5.2",
     "shiki": "^4.1.0",

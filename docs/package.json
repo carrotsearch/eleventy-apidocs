@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "eleventy --serve --incremental --quiet",
     "build": "eleventy",
+    "build:verbose": "APIDOCS_VERBOSE=1 eleventy",
     "preview": "http-server _site -p 3000 -c-1",
     "clean": "rm -rf _site"
   },

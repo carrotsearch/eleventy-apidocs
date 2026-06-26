@@ -318,7 +318,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     }
 
     if (isDev && devIndexedOnce) {
-      progress.endBuild();
+      await progress.endBuild();
       return;
     }
 
@@ -385,7 +385,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     if (isDev) {
       devIndexedOnce = true;
     }
-    progress.endBuild();
+    await progress.endBuild();
   });
 
   return {
