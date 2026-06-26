@@ -31,7 +31,10 @@
   </li>
   {%- if article.children %}
   {% for child in article.children %}
-  <li><a href="/{{ child.slug }}/#{{ child.anchor }}">{{ child.title }}</a></li>
+  {# data-nav-anchor only on the current page's children: it's the hook the
+     scrollspy uses to track the active section, and only same-page links
+     point at sections in this document. #}
+  <li><a href="/{{ child.slug }}/#{{ child.anchor }}"{% if isActive %} data-nav-anchor="{{ child.anchor }}"{% endif %}>{{ child.title }}</a></li>
   {% endfor %}
   {%- endif %}
 {% endmacro %}
