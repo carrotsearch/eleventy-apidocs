@@ -8,6 +8,35 @@
     readable form from its <code>datetime</code> attribute.
   </p>
 
+  <section id="0.1.14" data-toc="omit-children">
+    <h2>0.1.14</h2>
+    <time datetime="2026-06-26"></time>
+
+    <p>
+      Build progress now renders in place on an interactive terminal.
+    </p>
+
+    <dl>
+      <dt>In-place progress reporting</dt>
+      <dd>
+        <p>
+          When you run a build in a terminal, its steps now appear as a single
+          summary that updates in place &mdash; bundling, page rendering, link
+          checking and the rest &mdash; rather than a long scrolling log, with
+          the time each step took shown alongside it. The first
+          <code>--serve</code> build shows the same summary. When the output is
+          captured instead &mdash; piped to a file, or running in CI &mdash; the
+          build prints plain lines.
+        </p>
+        <p>
+          Set <code>APIDOCS_VERBOSE=1</code>, or run the sample site&rsquo;s
+          <code>build:verbose</code> script, for a detailed line-by-line log of
+          every step instead.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
   <section id="0.1.13" data-toc="omit-children">
     <h2>0.1.13</h2>
     <time datetime="2026-06-26"></time>
