@@ -68,13 +68,10 @@
     </script>
     {% if apidocs.dev %}
     <script>
-      // Dev-only: Eleventy's dev server re-syncs <html>'s attributes to the
-      // freshly-served markup after every hot update (matchRootAttributes,
-      // run because morphdom's childrenOnly skips the root). That markup has
-      // no data-theme, so the runtime theme is stripped — and since a DOM
-      // delta is not a navigation, the FOUC script above never re-runs. Watch
-      // for the attribute disappearing and re-apply from storage. Prod builds
-      // never remove it, so this is gated to --serve.
+      // Dev-only: the dev server re-syncs <html>'s attributes to the freshly
+      // served markup on each hot update, stripping the runtime data-theme; a
+      // DOM delta isn't a navigation, so the FOUC script above never re-runs.
+      // Re-apply from storage whenever the attribute disappears.
       (function () {
         var html = document.documentElement;
         new MutationObserver(function () {
