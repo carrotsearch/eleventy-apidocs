@@ -147,6 +147,15 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     // post-build) in prod; in dev the stable filename is known up front.
     assets.css = hashed ? CSS_URL_PLACEHOLDER : "/assets/apidocs/css/apidocs.css";
     assets.symbolsUrl = hashed ? SYMBOLS_URL_PLACEHOLDER : "/assets/apidocs/symbols.json";
+
+    // Warm the shell cache here rather than letting the first page's transform
+    // trigger it lazily. Navigation enrichment reads and parses source HTML per
+    // slug (titles, and sections for `expand` entries) — a cost proportional to
+    // page count that would otherwise be folded silently into the "js done" →
+    // "page #1" gap. Surfacing it as its own stage shortens that gap and gives
+    // the work an honest timing line. `assets` is mutated in place above, so the
+    // cached shell sees the final css/symbols URLs by reference.
+    await progress.stage("navigation", getShellData);
   });
 
   // Watch source so dev rebuilds pick up token/layout/script edits.
