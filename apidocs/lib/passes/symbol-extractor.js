@@ -57,7 +57,15 @@ export function extractSymbols($, ctx) {
     }
   });
 
-  if (pageName) {
+  // When the page is authored as <article class="api" id="…"> (the article
+  // itself is the top-level API element), the .api pass above already indexed
+  // it — with a better name and a #anchor — so the page-level entry would just
+  // be a near-duplicate in the "pages and sections" group. Skip it. A no-id
+  // .api article is not indexed there, so the page entry is still needed.
+  const $article = $("article").first();
+  const pageIsApi = $article.hasClass("api") && Boolean($article.attr("id"));
+
+  if (pageName && !pageIsApi) {
     ctx.symbols.push({ name: pageName, kind: "page", group: "section", url });
   }
 

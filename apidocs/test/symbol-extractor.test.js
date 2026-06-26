@@ -107,6 +107,22 @@ test("article without an h1 produces no page entry", () => {
   assert.deepEqual(s, []);
 });
 
+test("an .api article with an id is indexed once (api), with no duplicate page entry", () => {
+  const s = extract(`
+    <article class="api" id="matrix" data-api-name="AnalysisJsonMatrix" data-api-kind="object">
+      <h1>AnalysisJsonMatrix</h1>
+      <p>Body.</p>
+    </article>
+  `);
+
+  // The .api pass already indexed the article (better name + #anchor), so the
+  // page-level (kind:"page") entry that would otherwise duplicate it is dropped.
+  assert.equal(s.length, 1);
+  assert.equal(s[0].group, "api");
+  assert.equal(s[0].kind, "object");
+  assert.ok(!s.some(x => x.kind === "page"));
+});
+
 test("page entry strips a prepended anchor link from the h1", () => {
   const s = extract(`
     <article><h1><a class="anchor" href="#x">#</a>Title</h1></article>
