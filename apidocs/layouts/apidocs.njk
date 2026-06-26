@@ -33,6 +33,39 @@
         } catch (e) { /* private mode etc. */ }
       })();
     </script>
+    <script>
+      // Preserve the main-nav scroll offset across navigation. Inline in <head>
+      // — not in the deferred bundle — so the `pagereveal` listener is attached
+      // before the new document's first render, which a deferred module can miss.
+      (function () {
+        var KEY = "apidocs-nav-scroll";
+        var scroller = function () {
+          return document.querySelector(".main-nav > ul");
+        };
+        var save = function () {
+          var el = scroller();
+          if (el) {
+            try { sessionStorage.setItem(KEY, String(el.scrollTop)); } catch (e) { /* private mode etc. */ }
+          }
+        };
+        var restore = function () {
+          var el = scroller();
+          var y = null;
+          try { y = sessionStorage.getItem(KEY); } catch (e) { /* private mode etc. */ }
+          if (el && y !== null) {
+            el.scrollTop = Number(y);
+          }
+        };
+
+        if ("onpagereveal" in window) {
+          window.addEventListener("pageswap", save);
+          window.addEventListener("pagereveal", restore);
+        } else {
+          window.addEventListener("pagehide", save);
+          window.addEventListener("DOMContentLoaded", restore);
+        }
+      })();
+    </script>
     {% if apidocs.dev %}
     <script>
       // Dev-only: Eleventy's dev server re-syncs <html>'s attributes to the
