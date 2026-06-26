@@ -20,9 +20,21 @@ const SKIP_EXTERNAL = "^https?://(?!localhost)";
 // only, which is exactly the static output this theme emits.
 export async function checkLinks(siteDir, options = {}, imageOutputs) {
   const { external = false, skip = [], fatal = true } = options;
-  const { check } = await import("linkinator");
+  const { LinkChecker } = await import("linkinator");
 
   const skipPatterns = (external ? [...skip] : [SKIP_EXTERNAL, ...skip]).map(p => new RegExp(p));
+
+  // linkinator reports each URL prefixed with the synthetic localhost origin it
+  // serves the build under (and, for broken links, the on-disk crawl root).
+  // Strip both so lines read as site paths (/foo/#anchor) the author can map
+  // straight to a source file — used by the live crawl counter and the broken
+  // link report alike. `pagestart` hands us a WHATWG URL object (the broken-link
+  // report passes a string), so coerce via String() — it yields .href for a URL
+  // and is a no-op for a string.
+  const tidy = url => {
+    const u = String(url).replace(/^https?:\/\/localhost(?::\d+)?/, "");
+    return (u.startsWith(siteDir) ? u.slice(siteDir.length) : u) || "/";
+  };
 
   // Resolve generated image variants against the build manifest instead of
   // crawling them. Their existence is the image pipeline's job — eleventy-img
@@ -44,7 +56,13 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
     );
   };
 
-  const { links } = await check({
+  // Use the LinkChecker class (not the check() convenience wrapper) so we can
+  // subscribe to its `pagestart` event: one fires per built page as the crawl
+  // reaches it, which we stream as a counter to fill the otherwise-silent stage.
+  const checker = new LinkChecker();
+  checker.on("pagestart", url => progress.linkPage(tidy(url)));
+
+  const { links } = await checker.check({
     path: siteDir,
     recurse: true,
 
@@ -59,14 +77,6 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
   if (!broken.length) {
     return;
   }
-
-  // linkinator reports each URL prefixed with the on-disk crawl root (and,
-  // for some links, the synthetic localhost origin). Strip both so lines read
-  // as site paths (/foo/#anchor) the author can map straight to a source file.
-  const tidy = url => {
-    const u = url.replace(/^https?:\/\/localhost(?::\d+)?/, "");
-    return (u.startsWith(siteDir) ? u.slice(siteDir.length) : u) || "/";
-  };
 
   // One line per broken link — the target plus the page that links to it, so
   // a CI log points straight at the file to fix. Emitted before we throw so

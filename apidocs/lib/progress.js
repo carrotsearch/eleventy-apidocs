@@ -12,6 +12,7 @@ let runMode = "build";
 let firstServeBuildDone = false;
 let seenImages = new Set();
 let pageCount = 0;
+let linkPageCount = 0;
 let buildStart = 0;
 let pendingNote = null;
 
@@ -19,6 +20,7 @@ export function startBuild(mode) {
   runMode = mode || "build";
   seenImages = new Set();
   pageCount = 0;
+  linkPageCount = 0;
   buildStart = performance.now();
 }
 
@@ -82,6 +84,18 @@ export function page(url) {
   }
   pageCount += 1;
   console.log(`[apidocs] page #${pageCount}: ${url}`);
+}
+
+// Per-page counter for the link-check crawl, driven by linkinator's `pagestart`
+// event (see check-links.js). The crawl visits every built page to validate its
+// links and #fragment anchors — a cost proportional to page count that the
+// "links" stage would otherwise spend in silence. Mirrors page() above.
+export function linkPage(url) {
+  if (!isVerbose()) {
+    return;
+  }
+  linkPageCount += 1;
+  console.log(`[apidocs] link check #${linkPageCount}: ${url}`);
 }
 
 // Dedupe by src — the same image embedded on multiple pages still calls
