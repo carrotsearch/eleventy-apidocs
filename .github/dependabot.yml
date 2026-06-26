@@ -1,5 +1,7 @@
 version: 2
 updates:
+  # The root .npmrc pins the public npm registry so update jobs don't resolve
+  # via GitHub Packages (which serves a stale @types/hast and breaks shiki).
   - package-ecosystem: npm
     directory: /
     schedule:
