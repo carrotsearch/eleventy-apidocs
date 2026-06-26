@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372 283">
+  <title>Isometric diagram of stacked blocks</title>
   <path fill="#FFFFFF" stroke="#000000" stroke-linecap="round"
         stroke-linejoin="round" d="M241.887,18.16l36.924,18l-36.924,18
             l-36.922-18L241.887,18.16z" />
