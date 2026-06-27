@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   apiKindRank,
+  bucketSymbolHits,
   queryWords,
   regionCount,
-  regionsStartAtBoundary
+  regionsStartAtBoundary,
+  resolveSearchLimits
 } from "../assets/js/search-filters.js";
 
 // ---------- apiKindRank ----------
@@ -142,4 +144,115 @@ test("regionsStartAtBoundary honors .len over .length", () => {
 test("regionsStartAtBoundary returns true for empty indexes", () => {
   // Vacuously satisfied — no regions to validate.
   assert.equal(regionsStartAtBoundary([], "anything"), true);
+});
+
+// ---------- resolveSearchLimits ----------
+
+test("resolveSearchLimits returns defaults for a missing or empty map", () => {
+  const expected = { api: 8, sections: 8, pages: 8, kinds: {} };
+  assert.deepEqual(resolveSearchLimits(undefined), expected);
+  assert.deepEqual(resolveSearchLimits(null), expected);
+  assert.deepEqual(resolveSearchLimits({}), expected);
+});
+
+test("resolveSearchLimits overrides reserved group totals", () => {
+  assert.deepEqual(resolveSearchLimits({ api: 6, sections: 4, pages: 2 }), {
+    api: 6,
+    sections: 4,
+    pages: 2,
+    kinds: {}
+  });
+});
+
+test("resolveSearchLimits routes non-reserved keys into kinds", () => {
+  assert.deepEqual(resolveSearchLimits({ api: 6, endpoint: 3, option: 2 }), {
+    api: 6,
+    sections: 8,
+    pages: 8,
+    kinds: { endpoint: 3, option: 2 }
+  });
+});
+
+test("resolveSearchLimits ignores non-numeric values, keeping the default", () => {
+  assert.deepEqual(resolveSearchLimits({ api: "lots", endpoint: "many" }), {
+    api: 8,
+    sections: 8,
+    pages: 8,
+    kinds: {}
+  });
+});
+
+// ---------- bucketSymbolHits ----------
+
+// fuzzysort hits only need .obj.group and .obj.kind here; `n` tags identity.
+function hit(group, kind, n) {
+  return { obj: { group, kind }, n };
+}
+
+test("bucketSymbolHits caps each group at its total", () => {
+  const limits = { api: 2, sections: 1, pages: 8, kinds: {} };
+  const hits = [
+    hit("api", "method", 1),
+    hit("api", "method", 2),
+    hit("api", "method", 3),
+    hit("section", "section", 4),
+    hit("section", "section", 5)
+  ];
+  const { apiHits, sectionHits } = bucketSymbolHits(hits, limits, []);
+  assert.deepEqual(
+    apiHits.map(h => h.n),
+    [1, 2]
+  );
+  assert.deepEqual(
+    sectionHits.map(h => h.n),
+    [4]
+  );
+});
+
+test("bucketSymbolHits drops a kind past its sub-cap but fills the total from others", () => {
+  const limits = { api: 4, sections: 8, pages: 8, kinds: { endpoint: 2 } };
+  const hits = [
+    hit("api", "endpoint", 1),
+    hit("api", "endpoint", 2),
+    hit("api", "endpoint", 3),
+    hit("api", "option", 4),
+    hit("api", "option", 5)
+  ];
+  // endpoint #3 is dropped (sub-cap 2); options backfill toward the api total.
+  const { apiHits } = bucketSymbolHits(hits, limits, []);
+  assert.deepEqual(
+    apiHits.map(h => h.n),
+    [1, 2, 4, 5]
+  );
+});
+
+test("bucketSymbolHits leaves unlisted kinds bounded only by the api total", () => {
+  const limits = { api: 3, sections: 8, pages: 8, kinds: { endpoint: 1 } };
+  const hits = [
+    hit("api", "method", 1),
+    hit("api", "method", 2),
+    hit("api", "method", 3),
+    hit("api", "method", 4)
+  ];
+  const { apiHits } = bucketSymbolHits(hits, limits, []);
+  assert.deepEqual(
+    apiHits.map(h => h.n),
+    [1, 2, 3]
+  );
+});
+
+test("bucketSymbolHits applies kind-priority order to the capped API hits", () => {
+  const limits = { api: 8, sections: 8, pages: 8, kinds: {} };
+  const hits = [
+    hit("api", "method", 1),
+    hit("api", "stage", 2),
+    hit("api", "method", 3),
+    hit("api", "stage", 4)
+  ];
+  // stage front-loaded; relevance order preserved within each kind.
+  const { apiHits } = bucketSymbolHits(hits, limits, ["stage"]);
+  assert.deepEqual(
+    apiHits.map(h => h.n),
+    [2, 4, 1, 3]
+  );
 });

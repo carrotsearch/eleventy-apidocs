@@ -6,34 +6,25 @@
 // its own debouncedSearch and lags by PAGE_DEBOUNCE_MS, so API hits paint
 // instantly and prose hits stream in beside them.
 
-import { apiKindRank, queryWords, regionCount, regionsStartAtBoundary } from "./search-filters.js";
+import {
+  bucketSymbolHits,
+  queryWords,
+  regionCount,
+  regionsStartAtBoundary,
+  resolveSearchLimits
+} from "./search-filters.js";
 
 const PAGE_DEBOUNCE_MS = 80;
-const API_LIMIT = 8;
-const SECTION_LIMIT = 8;
-const PAGE_LIMIT = 8;
 const SUB_LIMIT = 2; // sub-results per page
 
-function bucketSymbolHits(hits) {
-  const apiHits = [];
-  const sectionHits = [];
-  for (const h of hits) {
-    const bucket = h.obj.group === "section" ? sectionHits : apiHits;
-    const cap = h.obj.group === "section" ? SECTION_LIMIT : API_LIMIT;
-    if (bucket.length < cap) {
-      bucket.push(h);
-    }
-  }
-
-  // Re-order the already relevance-capped API hits by kind priority. Sorting
-  // the limited list (not the full fuzzysort output) keeps the cap purely
-  // relevance-based — a weak `stage` match can't displace a strong one from the
-  // visible set — while Array.sort's stability preserves relevance order within
-  // each kind.
-  const order = window.__APIDOCS_API_KIND_ORDER__;
-  apiHits.sort((a, b) => apiKindRank(order, a.obj.kind) - apiKindRank(order, b.obj.kind));
-  return { apiHits, sectionHits };
-}
+// Display caps, kind front-load order and the fuzzysort retrieval count, all
+// configurable per site via the searchLimits / searchFetchLimit / apiKindOrder
+// theme options. The layout's inline head script sets these globals before this
+// deferred module evaluates (the same ordering __APIDOCS_SYMBOLS_URL__ relies
+// on), so resolving them once at module scope is safe.
+const SEARCH_LIMITS = resolveSearchLimits(window.__APIDOCS_SEARCH_LIMITS__);
+const KIND_ORDER = window.__APIDOCS_API_KIND_ORDER__;
+const FETCH_LIMIT = Number(window.__APIDOCS_SEARCH_FETCH_LIMIT__) || 32;
 
 // Deployment base path, recovered from where this bundle was loaded
 // from. The bundle lands at <BASE>/assets/apidocs/js/<file>; whatever
@@ -265,7 +256,7 @@ function init() {
       ? fuzzysort
           .go(q, symbols || [], {
             key: "name",
-            limit: (API_LIMIT + SECTION_LIMIT) * 2,
+            limit: FETCH_LIMIT,
             threshold: 0.3
           })
           .filter(
@@ -276,7 +267,7 @@ function init() {
     if (q !== lastQuery) {
       return;
     }
-    const { apiHits, sectionHits } = bucketSymbolHits(hits);
+    const { apiHits, sectionHits } = bucketSymbolHits(hits, SEARCH_LIMITS, KIND_ORDER);
     renderApi(apiHits);
     renderSections(sectionHits);
   }
@@ -295,7 +286,7 @@ function init() {
     if (r === null || q !== lastQuery) {
       return;
     }
-    const pageHits = await Promise.all(r.results.slice(0, PAGE_LIMIT).map(x => x.data()));
+    const pageHits = await Promise.all(r.results.slice(0, SEARCH_LIMITS.pages).map(x => x.data()));
     if (q !== lastQuery) {
       return;
     }

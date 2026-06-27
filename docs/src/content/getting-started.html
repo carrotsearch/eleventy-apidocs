@@ -154,6 +154,31 @@ export default async function (eleventyConfig) {
             <code>[]</code> (relevance order only).
           </p>
         </dd>
+        <dt class="api" id="opt-searchLimits">searchLimits</dt>
+        <dd>
+          <p>
+            Caps on how many search results each group shows. Three reserved
+            keys set per-group totals — <code>api</code>, <code>sections</code>
+            and <code>pages</code> (default <code>8</code> each). Any other key
+            is a <code>data-api-kind</code> sub-cap inside the API group: it
+            limits how many hits of that kind appear, bounded by the
+            <code>api</code> total, while kinds you don&rsquo;t list stay capped
+            only by that total. For example
+            <code>{ api: 6, endpoint: 3 }</code> shows at most six API hits,
+            no more than three of them <code>endpoint</code>s. Selection stays
+            relevance-ordered, with <code>apiKindOrder</code> applied after.
+            Default: <code>{}</code> (the built-in defaults above).
+          </p>
+        </dd>
+        <dt class="api" id="opt-searchFetchLimit">searchFetchLimit</dt>
+        <dd>
+          <p>
+            How many fuzzysort hits to retrieve from the symbol index before
+            bucketing them into the API and Sections groups. Raise it if larger
+            <code>searchLimits</code> totals need a deeper candidate pool to
+            fill from. Default: <code>32</code>.
+          </p>
+        </dd>
       </dl>
     </section>
     <section id="configure-eleventy:custom-pipeline-passes">

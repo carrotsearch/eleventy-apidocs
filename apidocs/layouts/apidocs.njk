@@ -26,6 +26,13 @@
       // API search group (relevance order within each kind, then any
       // unlisted kinds). Empty by default — see the apiKindOrder option.
       window.__APIDOCS_API_KIND_ORDER__ = {{ apidocs.apiKindOrder | dump | safe }};
+
+      // Per-group search result caps (reserved api/sections/pages keys) plus
+      // per-data-api-kind sub-caps, and the fuzzysort retrieval count. Both
+      // default to the previously hard-coded values — see the searchLimits and
+      // searchFetchLimit options.
+      window.__APIDOCS_SEARCH_LIMITS__ = {{ apidocs.searchLimits | dump | safe }};
+      window.__APIDOCS_SEARCH_FETCH_LIMIT__ = {{ apidocs.searchFetchLimit | dump | safe }};
     </script>
     <script>
       // FOUC-prevention: apply the persisted theme before paint.

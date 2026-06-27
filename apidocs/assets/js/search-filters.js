@@ -61,6 +61,76 @@ export function apiKindRank(order, kind) {
   return i === -1 ? Number.POSITIVE_INFINITY : i;
 }
 
+// Per-group display totals. The three reserved keys below are group caps; any
+// other key in the searchLimits map is a per-data-api-kind sub-cap within the
+// API group. Defaults match the limits that were hard-coded before the option
+// existed.
+const DEFAULT_SEARCH_LIMITS = { api: 8, sections: 8, pages: 8 };
+const RESERVED_LIMIT_KEYS = new Set(["api", "sections", "pages"]);
+
+// Normalize the injected searchLimits map into {api, sections, pages, kinds}.
+// Reserved keys become group totals (numeric override, else default); every
+// other numeric entry becomes a per-kind sub-cap in `kinds`. Tolerates a
+// missing/empty map (all defaults, no kind caps) and ignores non-numeric values.
+export function resolveSearchLimits(raw) {
+  const limits = { ...DEFAULT_SEARCH_LIMITS, kinds: {} };
+  if (!raw || typeof raw !== "object") {
+    return limits;
+  }
+  for (const [key, value] of Object.entries(raw)) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      continue;
+    }
+    if (RESERVED_LIMIT_KEYS.has(key)) {
+      limits[key] = n;
+    } else {
+      limits.kinds[key] = n;
+    }
+  }
+  return limits;
+}
+
+// Split fuzzysort symbol hits into the API and Sections display groups, honoring
+// the configured caps. Hits arrive in relevance order; we fill each group up to
+// its total, and within the API group drop a hit once its data-api-kind has hit
+// its per-kind sub-cap (kinds with no sub-cap are bounded only by the api total).
+// Capping the relevance-ordered stream — not the full fuzzysort output — keeps
+// the visible set purely relevance-based before the kind-priority re-sort below.
+export function bucketSymbolHits(hits, limits, order) {
+  const apiHits = [];
+  const sectionHits = [];
+  const kindCounts = new Map();
+  for (const h of hits) {
+    if (h.obj.group === "section") {
+      if (sectionHits.length < limits.sections) {
+        sectionHits.push(h);
+      }
+      continue;
+    }
+    if (apiHits.length >= limits.api) {
+      continue;
+    }
+    const kind = h.obj.kind;
+    const cap = limits.kinds[kind];
+    if (cap !== undefined) {
+      const used = kindCounts.get(kind) || 0;
+      if (used >= cap) {
+        continue;
+      }
+      kindCounts.set(kind, used + 1);
+    }
+    apiHits.push(h);
+  }
+
+  // Re-order the already capped API hits by kind priority. Sorting the limited
+  // list (not the full fuzzysort output) keeps the cap purely relevance-based —
+  // a weak `stage` match can't displace a strong one from the visible set —
+  // while Array.sort's stability preserves relevance order within each kind.
+  apiHits.sort((a, b) => apiKindRank(order, a.obj.kind) - apiKindRank(order, b.obj.kind));
+  return { apiHits, sectionHits };
+}
+
 function isWordBoundary(pos, target) {
   if (pos === 0) {
     return true;

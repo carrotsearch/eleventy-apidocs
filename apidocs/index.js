@@ -43,6 +43,8 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     styles: [],
     linkCheck: true,
     apiKindOrder: [],
+    searchLimits: {},
+    searchFetchLimit: 32,
     ...userOptions
   };
 
@@ -110,6 +112,8 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       head: await loadSourceFile(opts.head, "html"),
       variables: opts.variables,
       apiKindOrder: opts.apiKindOrder,
+      searchLimits: opts.searchLimits,
+      searchFetchLimit: opts.searchFetchLimit,
       buildTime: new Date().toISOString(),
       assets,
       dev: currentRunMode === "serve"
