@@ -8,6 +8,37 @@
     readable form from its <code>datetime</code> attribute.
   </p>
 
+  <section id="0.1.17" data-toc="omit-children">
+    <h2>0.1.17</h2>
+    <time datetime="2026-06-27"></time>
+
+    <p>
+      Configurable search result caps, and a dedicated configuration reference.
+    </p>
+
+    <dl>
+      <dt>Cap and size the search result groups</dt>
+      <dd>
+        <p>
+          The new
+          <a href="/configuration/#opt-searchLimits"><code>searchLimits</code></a>
+          option sets how many results each group shows &mdash; with per-kind
+          sub-caps inside the API group &mdash; and
+          <a href="/configuration/#opt-searchFetchLimit"><code>searchFetchLimit</code></a>
+          sizes the candidate pool the results are drawn from.
+        </p>
+      </dd>
+      <dt>Configuration reference page</dt>
+      <dd>
+        <p>
+          Every <code>eleventy.config.js</code> option now has a full write-up
+          on a dedicated <a href="/configuration/">Configuration</a> page;
+          Getting started keeps just the handful most sites set up front.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
   <section id="0.1.16" data-toc="omit-children">
     <h2>0.1.16</h2>
     <time datetime="2026-06-27"></time>
@@ -22,7 +53,7 @@
       <dd>
         <p>
           The new
-          <a href="/getting-started/#opt-apiKindOrder"><code>apiKindOrder</code></a>
+          <a href="/configuration/#opt-apiKindOrder"><code>apiKindOrder</code></a>
           option lists the <code>data-api-kind</code> values that should sort to
           the front of the
           API results &mdash; everything else follows in relevance order. A site
@@ -190,7 +221,7 @@
       <dd>
         <p>
           The new
-          <a href="/getting-started/#opt-codeThemes"><code>codeThemes</code></a>
+          <a href="/configuration/#opt-codeThemes"><code>codeThemes</code></a>
           option sets the themes used to syntax-highlight code blocks, with
           independent <code>light</code> and <code>dark</code> values.
         </p>
@@ -238,7 +269,7 @@
           exist — and fails the build if any turn up. External links are skipped
           by default so a third-party outage can't break your build. Configure
           or disable it with the
-          <a href="/getting-started/#opt-linkCheck"><code>linkCheck</code></a>
+          <a href="/configuration/#opt-linkCheck"><code>linkCheck</code></a>
           option.
         </p>
       </dd>
