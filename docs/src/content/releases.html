@@ -8,6 +8,40 @@
     readable form from its <code>datetime</code> attribute.
   </p>
 
+  <section id="0.1.16" data-toc="omit-children">
+    <h2>0.1.16</h2>
+    <time datetime="2026-06-27"></time>
+
+    <p>
+      Search refinements: a way to order the API results, and a fix for pages
+      that are themselves API elements.
+    </p>
+
+    <dl>
+      <dt>Order the API search group by kind</dt>
+      <dd>
+        <p>
+          The new
+          <a href="/getting-started/#opt-apiKindOrder"><code>apiKindOrder</code></a>
+          option lists the <code>data-api-kind</code> values that should sort to
+          the front of the
+          API results &mdash; everything else follows in relevance order. A site
+          whose API is built from, say, stages and components can surface those
+          ahead of individual methods and options.
+        </p>
+      </dd>
+      <dt>No duplicate hit for an API-element page</dt>
+      <dd>
+        <p>
+          When a page&rsquo;s top-level <code>&lt;article&gt;</code> is itself an
+          API element, it no longer appears twice in search &mdash; once under
+          &ldquo;API&rdquo; and again under &ldquo;Pages and sections.&rdquo; The
+          more specific API hit is kept.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
   <section id="0.1.15" data-toc="omit-children">
     <h2>0.1.15</h2>
     <time datetime="2026-06-26"></time>

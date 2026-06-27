@@ -141,6 +141,19 @@ export default async function (eleventyConfig) {
             <code>{ light: "github-light", dark: "github-dark" }</code>.
           </p>
         </dd>
+        <dt class="api" id="opt-apiKindOrder">apiKindOrder</dt>
+        <dd>
+          <p>
+            Array of <code>data-api-kind</code> values that sort to the front of
+            the API group in search results. Listed kinds appear in this order;
+            each kind&rsquo;s hits stay ranked by relevance among themselves, and
+            any unlisted kind follows. Use it to surface a site&rsquo;s primary
+            API concepts — say <code>["stage", "component"]</code> — ahead of
+            incidental ones. The ordering reshuffles only the results already
+            shown, so it never displaces a stronger match. Default:
+            <code>[]</code> (relevance order only).
+          </p>
+        </dd>
       </dl>
     </section>
     <section id="configure-eleventy:custom-pipeline-passes">
