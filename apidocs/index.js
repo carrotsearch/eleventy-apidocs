@@ -42,6 +42,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     finalizers: [],
     styles: [],
     linkCheck: true,
+    apiKindOrder: [],
     ...userOptions
   };
 
@@ -108,6 +109,7 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
       footer: await loadSourceFile(opts.footer, "html"),
       head: await loadSourceFile(opts.head, "html"),
       variables: opts.variables,
+      apiKindOrder: opts.apiKindOrder,
       buildTime: new Date().toISOString(),
       assets,
       dev: currentRunMode === "serve"

@@ -6,7 +6,7 @@
 // its own debouncedSearch and lags by PAGE_DEBOUNCE_MS, so API hits paint
 // instantly and prose hits stream in beside them.
 
-import { queryWords, regionCount, regionsStartAtBoundary } from "./search-filters.js";
+import { apiKindRank, queryWords, regionCount, regionsStartAtBoundary } from "./search-filters.js";
 
 const PAGE_DEBOUNCE_MS = 80;
 const API_LIMIT = 8;
@@ -24,6 +24,14 @@ function bucketSymbolHits(hits) {
       bucket.push(h);
     }
   }
+
+  // Re-order the already relevance-capped API hits by kind priority. Sorting
+  // the limited list (not the full fuzzysort output) keeps the cap purely
+  // relevance-based — a weak `stage` match can't displace a strong one from the
+  // visible set — while Array.sort's stability preserves relevance order within
+  // each kind.
+  const order = window.__APIDOCS_API_KIND_ORDER__;
+  apiHits.sort((a, b) => apiKindRank(order, a.obj.kind) - apiKindRank(order, b.obj.kind));
   return { apiHits, sectionHits };
 }
 

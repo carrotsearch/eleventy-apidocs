@@ -52,6 +52,15 @@ export function regionsStartAtBoundary(indexes, target) {
   return true;
 }
 
+// Rank of a data-api-kind within the configured front-load order. A listed
+// kind sorts to its index; anything unlisted (or kindless) falls to the back.
+// Drives the API group's kind-priority sort — Array.sort's stability then keeps
+// relevance order within each kind.
+export function apiKindRank(order, kind) {
+  const i = Array.isArray(order) ? order.indexOf(kind) : -1;
+  return i === -1 ? Number.POSITIVE_INFINITY : i;
+}
+
 function isWordBoundary(pos, target) {
   if (pos === 0) {
     return true;

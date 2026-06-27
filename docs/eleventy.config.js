@@ -7,6 +7,7 @@ export default async function (eleventyConfig) {
     logo: "src/logo.html",
     footer: "src/footer.html",
     contentDir: "src/content",
+    apiKindOrder: ["endpoint", "option"],
     variables: {
       VERSION: pkg.version,
       SITE_OWNER: "Carrot Search"

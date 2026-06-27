@@ -1,6 +1,46 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { queryWords, regionCount, regionsStartAtBoundary } from "../assets/js/search-filters.js";
+import {
+  apiKindRank,
+  queryWords,
+  regionCount,
+  regionsStartAtBoundary
+} from "../assets/js/search-filters.js";
+
+// ---------- apiKindRank ----------
+
+test("apiKindRank returns the kind's index in the order list", () => {
+  const order = ["stage", "component"];
+  assert.equal(apiKindRank(order, "stage"), 0);
+  assert.equal(apiKindRank(order, "component"), 1);
+});
+
+test("apiKindRank sends unlisted and kindless entries to the back", () => {
+  const order = ["stage", "component"];
+  assert.equal(apiKindRank(order, "method"), Number.POSITIVE_INFINITY);
+  assert.equal(apiKindRank(order, undefined), Number.POSITIVE_INFINITY);
+});
+
+test("apiKindRank treats a missing or non-array order as no ordering", () => {
+  assert.equal(apiKindRank(undefined, "stage"), Number.POSITIVE_INFINITY);
+  assert.equal(apiKindRank([], "stage"), Number.POSITIVE_INFINITY);
+});
+
+test("apiKindRank yields a stable, kind-grouped sort that preserves input order", () => {
+  const order = ["stage", "component"];
+  const hits = [
+    { kind: "method", n: 1 },
+    { kind: "component", n: 2 },
+    { kind: "stage", n: 3 },
+    { kind: "method", n: 4 },
+    { kind: "stage", n: 5 }
+  ];
+  const sorted = [...hits].sort((a, b) => apiKindRank(order, a.kind) - apiKindRank(order, b.kind));
+  assert.deepEqual(
+    sorted.map(h => h.n),
+    [3, 5, 2, 1, 4]
+  );
+});
 
 // ---------- queryWords ----------
 

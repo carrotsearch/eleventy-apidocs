@@ -21,6 +21,11 @@
       // dev the shell injects a stable absolute URL directly. See
       // eleventy.after in apidocs/index.js.
       window.__APIDOCS_SYMBOLS_URL__ = "{{ apidocs.assets.symbolsUrl }}";
+
+      // Ordered list of data-api-kind values that sort to the front of the
+      // API search group (relevance order within each kind, then any
+      // unlisted kinds). Empty by default — see the apiKindOrder option.
+      window.__APIDOCS_API_KIND_ORDER__ = {{ apidocs.apiKindOrder | dump | safe }};
     </script>
     <script>
       // FOUC-prevention: apply the persisted theme before paint.
