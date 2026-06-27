@@ -56,17 +56,25 @@ export default async function (eleventyConfig) {
   });
 }</pre>
     <section id="configure-eleventy:options">
-      <h3>Options</h3>
+      <h3>Common options</h3>
       <p>
-        The plugin accepts the following options. Each one is optional — paths
-        default to conventional locations under <code>src/</code>.
+        Every option is optional &mdash; paths default to conventional
+        locations under <code>src/</code>. The handful most sites set up front:
       </p>
       <dl class="options">
+        <dt class="api" id="opt-contentDir">contentDir</dt>
+        <dd>
+          <p>
+            Directory of article HTML files, relative to the project root.
+            Default: <code>src/content</code>.
+          </p>
+        </dd>
         <dt class="api" id="opt-navigation">navigation</dt>
         <dd>
           <p>
-            Path to the navigation manifest, either a flat array of articles
-            or a chaptered shape. Default: <code>src/navigation.json</code>.
+            Path to the <a href="/navigation/">navigation manifest</a> that
+            orders the sidebar and prev/next links. Default:
+            <code>src/navigation.json</code>.
           </p>
         </dd>
         <dt class="api" id="opt-logo">logo</dt>
@@ -83,110 +91,13 @@ export default async function (eleventyConfig) {
             Default: <code>src/footer.html</code>.
           </p>
         </dd>
-        <dt class="api" id="opt-head">head</dt>
-        <dd>
-          <p>
-            Path to an HTML fragment appended to the document
-            <code>&lt;head&gt;</code> on every page — use it for site-wide
-            <code>&lt;meta&gt;</code> tags (description, Open Graph, Twitter
-            cards), favicons, or analytics snippets. Default:
-            <code>src/head.html</code>. Missing file renders as nothing.
-          </p>
-        </dd>
-        <dt class="api" id="opt-contentDir">contentDir</dt>
-        <dd>
-          <p>
-            Directory of article HTML files, relative to the project root.
-            Eleventy's input directory is set from this. Default:
-            <code>src/content</code>.
-          </p>
-        </dd>
-        <dt class="api" id="opt-variables">variables</dt>
-        <dd>
-          <p>
-            Map of <code>$NAME$</code> placeholders to replacement values. The
-            pipeline substitutes them into every emitted page at build time.
-            Default: <code>{}</code>.
-          </p>
-        </dd>
-        <dt class="api" id="opt-linkCheck">linkCheck</dt>
-        <dd>
-          <p>
-            After a full build, crawl the generated site for broken links —
-            both 404s and in-page <code>#anchor</code> targets that don't exist
-            — and fail the build if any are found. External links are skipped
-            by default, so a third-party outage can't break your build. Runs
-            only on full builds, never under <code>--serve</code>. Default:
-            <code>true</code>.
-          </p>
-          <p>
-            Pass <code>false</code> to disable, or an object to tune it:
-            <code>external</code> (default <code>false</code>) also checks
-            off-site links; <code>skip</code> (default <code>[]</code>) is a
-            list of regular-expression strings whose matching URLs are ignored;
-            <code>fatal</code> (default <code>true</code>) throws on broken
-            links — set it <code>false</code> to report them without failing
-            the build.
-          </p>
-        </dd>
-        <dt class="api" id="opt-codeThemes">codeThemes</dt>
-        <dd>
-          <p>
-            Shiki themes used to syntax-highlight code blocks, as an object with
-            <code>light</code> and <code>dark</code> keys. Either key may be
-            overridden on its own; the other keeps its default. Values are Shiki
-            theme names (e.g. <code>nord</code>, <code>vitesse-dark</code>) or a
-            custom TextMate theme object. Both palettes are baked into the CSS
-            bundle at build time. Default:
-            <code>{ light: "github-light", dark: "github-dark" }</code>.
-          </p>
-        </dd>
-        <dt class="api" id="opt-apiKindOrder">apiKindOrder</dt>
-        <dd>
-          <p>
-            Array of <code>data-api-kind</code> values that sort to the front of
-            the API group in search results. Listed kinds appear in this order;
-            each kind&rsquo;s hits stay ranked by relevance among themselves, and
-            any unlisted kind follows. Use it to surface a site&rsquo;s primary
-            API concepts — say <code>["stage", "component"]</code> — ahead of
-            incidental ones. The ordering reshuffles only the results already
-            shown, so it never displaces a stronger match. Default:
-            <code>[]</code> (relevance order only).
-          </p>
-        </dd>
-        <dt class="api" id="opt-searchLimits">searchLimits</dt>
-        <dd>
-          <p>
-            Caps on how many search results each group shows. Three reserved
-            keys set per-group totals — <code>api</code>, <code>sections</code>
-            and <code>pages</code> (default <code>8</code> each). Any other key
-            is a <code>data-api-kind</code> sub-cap inside the API group: it
-            limits how many hits of that kind appear, bounded by the
-            <code>api</code> total, while kinds you don&rsquo;t list stay capped
-            only by that total. For example
-            <code>{ api: 6, endpoint: 3 }</code> shows at most six API hits,
-            no more than three of them <code>endpoint</code>s. Selection stays
-            relevance-ordered, with <code>apiKindOrder</code> applied after.
-            Default: <code>{}</code> (the built-in defaults above).
-          </p>
-        </dd>
-        <dt class="api" id="opt-searchFetchLimit">searchFetchLimit</dt>
-        <dd>
-          <p>
-            How many fuzzysort hits to retrieve from the symbol index before
-            bucketing them into the API and Sections groups. Raise it if larger
-            <code>searchLimits</code> totals need a deeper candidate pool to
-            fill from. Default: <code>32</code>.
-          </p>
-        </dd>
       </dl>
-    </section>
-    <section id="configure-eleventy:custom-pipeline-passes">
-      <h3>Custom pipeline passes</h3>
       <p>
-        Pass <code>transformers</code> and <code>finalizers</code> to hook
-        into the HTML pipeline before and after the built-in passes. Each
-        receives a Cheerio instance to mutate in place.
+        The plugin also takes options for the document head, build-time
+        variables, code highlighting, search ordering, link checking, and
+        custom pipeline passes. See the
+        <a href="/configuration/">Configuration reference</a> for the full
+        list.
       </p>
     </section>
   </section>

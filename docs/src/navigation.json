@@ -28,6 +28,7 @@
       "section": "Reference",
       "title": "Reference",
       "articles": [
+        { "slug": "configuration", "title": "Configuration" },
         { "slug": "navigation", "title": "Navigation" },
         { "slug": "search", "title": "Search" },
         { "slug": "themes", "title": "Themes" },
