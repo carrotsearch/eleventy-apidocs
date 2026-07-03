@@ -34,6 +34,17 @@ export function regionCount(indexes) {
   return runs;
 }
 
+// Final accept test for a fuzzysort symbol hit: keep it when its matched
+// indexes form few enough contiguous runs, OR every run starts at a word
+// boundary (initialism/prefix). The cap scales with query word count and floors
+// at 1, so a single-word query rejects any mid-word scatter — "re" landing on
+// "va<r>iabl<e>s" is two non-boundary runs over a one-region budget — while the
+// boundary escape still readmits "lbc"→"labelBoxColor" and the like.
+export function passesRegionFilter(indexes, target, q) {
+  const cap = Math.max(1, queryWords(q));
+  return regionCount(indexes) <= cap || regionsStartAtBoundary(indexes, target);
+}
+
 // True if every contiguous run of matched indexes *starts* at a word
 // boundary in target. A boundary is position 0, just after a non-alphanumeric
 // separator, or a capital letter right after a lowercase one (camelCase).

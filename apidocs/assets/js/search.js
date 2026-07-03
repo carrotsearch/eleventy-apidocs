@@ -6,13 +6,7 @@
 // its own debouncedSearch and lags by PAGE_DEBOUNCE_MS, so API hits paint
 // instantly and prose hits stream in beside them.
 
-import {
-  bucketSymbolHits,
-  queryWords,
-  regionCount,
-  regionsStartAtBoundary,
-  resolveSearchLimits
-} from "./search-filters.js";
+import { bucketSymbolHits, passesRegionFilter, resolveSearchLimits } from "./search-filters.js";
 
 const PAGE_DEBOUNCE_MS = 80;
 const SUB_LIMIT = 2; // sub-results per page
@@ -247,11 +241,10 @@ function init() {
 
     // fuzzysort v3 compresses scores to 0..1, so a single threshold no
     // longer separates good fuzzy hits from scattered ones. Pair the
-    // threshold with a region-count cap to drop "doc"→"labelShadowColor"
-    // noise, then let the boundary escape hatch readmit initialism and
-    // prefix-at-boundary matches ("lbc"→"labelBoxColor", "lab"→"labelBox")
-    // even when their region count exceeds the cap.
-    const maxRegions = Math.max(2, queryWords(q) + 1);
+    // threshold with passesRegionFilter, which caps the count of contiguous
+    // match runs (drops "re"→"va<r>iabl<e>s" and "doc"→"labelShadowColor"
+    // noise) but readmits initialism and prefix-at-boundary matches
+    // ("lbc"→"labelBoxColor", "lab"→"labelBox") via its boundary escape.
     const hits = fuzzysort
       ? fuzzysort
           .go(q, symbols || [], {
@@ -259,10 +252,7 @@ function init() {
             limit: FETCH_LIMIT,
             threshold: 0.3
           })
-          .filter(
-            h =>
-              regionCount(h._indexes) <= maxRegions || regionsStartAtBoundary(h._indexes, h.target)
-          )
+          .filter(h => passesRegionFilter(h._indexes, h.target, q))
       : [];
     if (q !== lastQuery) {
       return;

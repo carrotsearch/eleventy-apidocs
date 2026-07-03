@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   apiKindRank,
   bucketSymbolHits,
+  passesRegionFilter,
   queryWords,
   regionCount,
   regionsStartAtBoundary,
@@ -144,6 +145,34 @@ test("regionsStartAtBoundary honors .len over .length", () => {
 test("regionsStartAtBoundary returns true for empty indexes", () => {
   // Vacuously satisfied — no regions to validate.
   assert.equal(regionsStartAtBoundary([], "anything"), true);
+});
+
+// ---------- passesRegionFilter ----------
+
+test("passesRegionFilter rejects single-word mid-word scatter", () => {
+  // "re" → "va<r>iabl<e>s": r@2 and e@7 are two non-boundary runs. For a
+  // one-word query the cap is 1, and neither run starts at a boundary, so the
+  // hit is dropped. Same shape as the searchFetchLimit/processOrder noise.
+  assert.equal(passesRegionFilter([2, 7], "variables", "re"), false);
+  assert.equal(passesRegionFilter([3, 7], "searchFetchLimit", "re"), false);
+});
+
+test("passesRegionFilter keeps a single contiguous run", () => {
+  // "re" → "c<re>atedAt": one run, within the cap regardless of boundary.
+  assert.equal(passesRegionFilter([1, 2], "createdAt", "re"), true);
+});
+
+test("passesRegionFilter readmits boundary initialisms over the cap", () => {
+  // "lbc" → "labelBoxColor": three runs (l@0, B@5, C@8) exceed the one-word
+  // cap of 1, but each starts at a camelCase boundary, so the escape keeps it.
+  assert.equal(passesRegionFilter([0, 5, 8], "labelBoxColor", "lbc"), true);
+});
+
+test("passesRegionFilter scales the cap with query word count", () => {
+  // Two words → cap 2: two non-boundary runs are tolerated where one word
+  // would have rejected them.
+  assert.equal(passesRegionFilter([2, 7], "variables", "re"), false);
+  assert.equal(passesRegionFilter([2, 7], "variables", "two words"), true);
 });
 
 // ---------- resolveSearchLimits ----------
