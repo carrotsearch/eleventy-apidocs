@@ -164,7 +164,10 @@ export default async function (eleventyConfig) {
           list of regular-expression strings whose matching URLs are ignored;
           <code>fatal</code> (default <code>true</code>) throws on broken
           links &mdash; set it <code>false</code> to report them without
-          failing the build.
+          failing the build; <code>concurrency</code> (default <code>16</code>)
+          caps how many URLs the crawl fetches at once &mdash; kept modest so
+          the crawl can't overwhelm its own local server on a busy CI machine,
+          which surfaces as false 404 reports.
         </p>
       </dd>
     </dl>

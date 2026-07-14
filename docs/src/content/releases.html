@@ -8,6 +8,29 @@
     readable form from its <code>datetime</code> attribute.
   </p>
 
+  <section id="0.1.18" data-toc="omit-children">
+    <h2>0.1.18</h2>
+    <time datetime="2026-07-14"></time>
+
+    <p>
+      Reliable link checking on busy CI machines.
+    </p>
+
+    <dl>
+      <dt>Link-check concurrency cap</dt>
+      <dd>
+        <p>
+          The post-build link check now fetches at most 16 URLs at once instead of 100.
+          The new <code>concurrency</code> field of the
+          <a href="/configuration/#opt-linkCheck"><code>linkCheck</code></a>
+          option adjusts the cap. On a busy CI machine, the old default could
+          overwhelm the crawl&rsquo;s own local server, failing the build with
+          false 404 reports for pages that exist.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
   <section id="0.1.17" data-toc="omit-children">
     <h2>0.1.17</h2>
     <time datetime="2026-06-27"></time>
