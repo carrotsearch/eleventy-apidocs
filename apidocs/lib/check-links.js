@@ -19,8 +19,9 @@ const SKIP_EXTERNAL = "^https?://(?!localhost)";
 // short-circuit skips it alongside Pagefind. Validates server-rendered HTML
 // only, which is exactly the static output this theme emits.
 export async function checkLinks(siteDir, options = {}, imageOutputs) {
-  const { external = false, skip = [], fatal = true } = options;
+  const { external = false, skip = [], fatal = true, concurrency = 16 } = options;
   const { LinkChecker } = await import("linkinator");
+  const { Agent, getGlobalDispatcher, setGlobalDispatcher } = await import("undici");
 
   const skipPatterns = (external ? [...skip] : [SKIP_EXTERNAL, ...skip]).map(p => new RegExp(p));
 
@@ -62,15 +63,34 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
   const checker = new LinkChecker();
   checker.on("pagestart", url => progress.linkPage(tidy(url)));
 
-  const { links } = await checker.check({
-    path: siteDir,
-    recurse: true,
+  // linkinator 7.x starts every discovered link's HTTP check eagerly — its
+  // internal queue only awaits promises that are already running — so its
+  // `concurrency` option bounds nothing. Crawler, static server
+  // and the files it serves all share this one Node process, so an unbounded
+  // crawl exhausts file descriptors under load: fetches fail (BROKEN, status
+  // 0, never retried for crawled pages) and the server maps fs errors like
+  // EMFILE to 404 — the intermittent "broken link" pointing at a page that
+  // plainly exists, re-reported once per parent by the per-URL result cache.
+  // Until fixed upstream, cap true concurrency one level down: linkinator
+  // requests through Node's fetch, which honors undici's global dispatcher,
+  // and with pipelining 1 (the default) connections ≈ in-flight requests.
+  // linkCheck.concurrency sizes the cap.
+  const previousDispatcher = getGlobalDispatcher();
+  setGlobalDispatcher(new Agent({ connections: concurrency }));
+  let links;
+  try {
+    ({ links } = await checker.check({
+      path: siteDir,
+      recurse: true,
 
-    // The whole reason for shipping this: confirm every #id a link points at
-    // actually exists on the target page (broken section anchors / deep-links).
-    checkFragments: true,
-    linksToSkip
-  });
+      // The whole reason for shipping this: confirm every #id a link points at
+      // actually exists on the target page (broken section anchors / deep-links).
+      checkFragments: true,
+      linksToSkip
+    }));
+  } finally {
+    setGlobalDispatcher(previousDispatcher);
+  }
 
   const broken = links.filter(l => l.state === "BROKEN");
   progress.note(`${links.length} links, ${broken.length} broken`);
