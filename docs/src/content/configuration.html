@@ -152,23 +152,46 @@ export default async function (eleventyConfig) {
         <p>
           After a full build, crawl the generated site for broken links &mdash;
           both 404s and in-page <code>#anchor</code> targets that don't exist
-          &mdash; and fail the build if any are found. External links are
-          skipped by default, so a third-party outage can't break your build.
-          Runs only on full builds, never under <code>--serve</code>. Default:
-          <code>true</code>.
+          &mdash; and fail the build if any are found. Runs only on full
+          builds, never under <code>--serve</code>. Default: <code>true</code>.
         </p>
         <p>
-          Pass <code>false</code> to disable, or an object to tune it:
-          <code>external</code> (default <code>false</code>) also checks
-          off-site links; <code>skip</code> (default <code>[]</code>) is a
-          list of regular-expression strings whose matching URLs are ignored;
-          <code>fatal</code> (default <code>true</code>) throws on broken
-          links &mdash; set it <code>false</code> to report them without
-          failing the build; <code>concurrency</code> (default <code>16</code>)
-          caps how many URLs the crawl fetches at once &mdash; kept modest so
-          the crawl can't overwhelm its own local server on a busy CI machine,
-          which surfaces as false 404 reports.
+          Pass <code>false</code> to disable the check entirely, or an object
+          with any of the following fields:
         </p>
+        <dl class="options">
+          <dt class="api" id="opt-linkCheck-external">external</dt>
+          <dd>
+            <p>
+              Also check external (off-site) links. Off by default, so a
+              third-party site being slow or down can't break your build.
+              Default: <code>false</code>.
+            </p>
+          </dd>
+          <dt class="api" id="opt-linkCheck-skip">skip</dt>
+          <dd>
+            <p>
+              Array of regular-expression strings; a link whose URL matches
+              any of them is not checked. Default: <code>[]</code>.
+            </p>
+          </dd>
+          <dt class="api" id="opt-linkCheck-fatal">fatal</dt>
+          <dd>
+            <p>
+              Throw on broken links, failing the build. Set <code>false</code>
+              to report them without failing. Default: <code>true</code>.
+            </p>
+          </dd>
+          <dt class="api" id="opt-linkCheck-concurrency">concurrency</dt>
+          <dd>
+            <p>
+              How many URLs the crawl fetches at once. Kept modest by default
+              so the crawl can't overwhelm its own local server on a busy CI
+              machine, which surfaces as false 404 reports for pages that
+              exist. Default: <code>16</code>.
+            </p>
+          </dd>
+        </dl>
       </dd>
     </dl>
   </section>
