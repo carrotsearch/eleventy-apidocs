@@ -147,7 +147,6 @@ object to adjust:
 | `external` | `false` | Also check external (off-site) links. Off by default to keep CI deterministic. |
 | `skip`     | `[]`    | Extra regular-expression strings; any link URL matching one is not checked. |
 | `fatal`    | `true`  | Throw (failing the build) on broken links. Set `false` to only report them. |
-| `concurrency` | `16` | Maximum simultaneous fetches during the crawl. Kept modest by default so the crawl can't overwhelm its own local server on a busy CI machine (which surfaces as false 404s). |
 
 A pass is an async `($, ctx) => {}` function receiving the cheerio root and a
 per-page context. See the **Pipeline extensions** page in the documentation for

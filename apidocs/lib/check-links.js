@@ -19,7 +19,7 @@ const SKIP_EXTERNAL = "^https?://(?!localhost)";
 // short-circuit skips it alongside Pagefind. Validates server-rendered HTML
 // only, which is exactly the static output this theme emits.
 export async function checkLinks(siteDir, options = {}, imageOutputs) {
-  const { external = false, skip = [], fatal = true, concurrency = 16 } = options;
+  const { external = false, skip = [], fatal = true } = options;
   const { LinkChecker } = await import("linkinator");
 
   const skipPatterns = (external ? [...skip] : [SKIP_EXTERNAL, ...skip]).map(p => new RegExp(p));
@@ -65,14 +65,6 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
   const { links } = await checker.check({
     path: siteDir,
     recurse: true,
-
-    // linkinator's default of 100 concurrent fetches can overwhelm its own
-    // static server on a loaded CI box: the server turns any fs error (e.g.
-    // descriptor exhaustion) into a 404, and linkinator caches that BROKEN
-    // result and re-reports it for every page linking to the victim URL. The
-    // crawl is all-local, so the modest default cap costs little wall-clock
-    // time; linkCheck.concurrency overrides it.
-    concurrency,
 
     // The whole reason for shipping this: confirm every #id a link points at
     // actually exists on the target page (broken section anchors / deep-links).
