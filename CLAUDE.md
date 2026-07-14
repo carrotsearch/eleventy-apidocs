@@ -74,6 +74,15 @@ Pass order is fixed and load-bearing. See `lib/pipeline.js`.
 
 When adding a pass, place it deliberately and document why it sits where it does.
 
+### Authoring internal links
+Write internal page links as **relative `.html` links to the source file**
+(`href="./configuration.html"`, `href="./configuration.html#opt-linkCheck"`) —
+never as leading-slash directory URLs (`href="/configuration/"`). That's the
+point of Eleventy: `linkRewriter` resolves the source-relative `.html` link at
+build time (`./configuration.html` → `/configuration/`) and `relativizeHtml`
+then makes it portable. A `/page/` link skips `linkRewriter` entirely and only
+survives by accident. See `lib/passes/link-rewriter.js`.
+
 ### Portability invariant
 Emitted **HTML** must contain no leading-slash (`/…`) `href`/`src`/`srcset`.
 Markdown siblings (`*.md`, `llms.txt`, `llms-full.txt`) are *not* relativized —

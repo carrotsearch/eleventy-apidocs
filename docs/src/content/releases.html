@@ -8,6 +8,50 @@
     readable form from its <code>datetime</code> attribute.
   </p>
 
+  <section id="0.1.18" data-toc="omit-children">
+    <h2>0.1.18</h2>
+    <time datetime="2026-07-14"></time>
+
+    <p>
+      Reliable link checking on busy machines, and a tighter API search filter.
+    </p>
+
+    <dl>
+      <dt>Link-check concurrency cap</dt>
+      <dd>
+        <p>
+          The post-build link check now fetches at most 16 URLs at once instead
+          of the hundreds linkinator would launch eagerly, and the new
+          <a href="./configuration.html#opt-linkCheck-concurrency"><code>concurrency</code></a>
+          field of the
+          <a href="./configuration.html#opt-linkCheck"><code>linkCheck</code></a>
+          option adjusts the cap. The crawler, its static server and the files
+          it serves share one process, so an unbounded crawl could exhaust file
+          descriptors under load and fail the build with false 404s for pages
+          that exist.
+        </p>
+      </dd>
+
+      <dt>Tighter API search filter</dt>
+      <dd>
+        <p>
+          A single-word query no longer scatters across unrelated symbols, such as
+          <code>re</code> matching <code>va<b>r</b>iabl<b>e</b>s</code>. The
+          region filter now rejects mid-word scatter for one-word queries while
+          still admitting initialism and prefix matches
+          (<code>lbc</code> &rarr; <code>labelBoxColor</code>).
+        </p>
+      </dd>
+
+      <dt>Dependency maintenance</dt>
+      <dd>
+        <p>
+          Updated Biome and the production dependencies.
+        </p>
+      </dd>
+    </dl>
+  </section>
+
   <section id="0.1.17" data-toc="omit-children">
     <h2>0.1.17</h2>
     <time datetime="2026-06-27"></time>
@@ -21,10 +65,10 @@
       <dd>
         <p>
           The new
-          <a href="/configuration/#opt-searchLimits"><code>searchLimits</code></a>
+          <a href="./configuration.html#opt-searchLimits"><code>searchLimits</code></a>
           option sets how many results each group shows &mdash; with per-kind
           sub-caps inside the API group &mdash; and
-          <a href="/configuration/#opt-searchFetchLimit"><code>searchFetchLimit</code></a>
+          <a href="./configuration.html#opt-searchFetchLimit"><code>searchFetchLimit</code></a>
           sizes the candidate pool the results are drawn from.
         </p>
       </dd>
@@ -32,7 +76,7 @@
       <dd>
         <p>
           Every <code>eleventy.config.js</code> option now has a full write-up
-          on a dedicated <a href="/configuration/">Configuration</a> page;
+          on a dedicated <a href="./configuration.html">Configuration</a> page;
           Getting started keeps just the handful most sites set up front.
         </p>
       </dd>
@@ -53,7 +97,7 @@
       <dd>
         <p>
           The new
-          <a href="/configuration/#opt-apiKindOrder"><code>apiKindOrder</code></a>
+          <a href="./configuration.html#opt-apiKindOrder"><code>apiKindOrder</code></a>
           option lists the <code>data-api-kind</code> values that should sort to
           the front of the
           API results &mdash; everything else follows in relevance order. A site
@@ -182,7 +226,7 @@
       <dd>
         <p>
           A navigation entry can now
-          <a href="/navigation/#entry-expand">expand</a> a page&rsquo;s sections
+          <a href="./navigation.html#entry-expand">expand</a> a page&rsquo;s sections
           into the sidebar, listing them as links right beneath the page. A long
           page &mdash; a command list, a settings reference &mdash; then reads
           like a chapter whose pages are its own sections.
@@ -221,7 +265,7 @@
       <dd>
         <p>
           The new
-          <a href="/configuration/#opt-codeThemes"><code>codeThemes</code></a>
+          <a href="./configuration.html#opt-codeThemes"><code>codeThemes</code></a>
           option sets the themes used to syntax-highlight code blocks, with
           independent <code>light</code> and <code>dark</code> values.
         </p>
@@ -230,7 +274,7 @@
       <dd>
         <p>
           A chapter in the
-          <a href="/navigation/#manifest:group-dividers">navigation manifest</a>
+          <a href="./navigation.html#manifest:group-dividers">navigation manifest</a>
           can carry an optional <code>section</code> label that groups the
           chapters beneath it.
         </p>
@@ -269,7 +313,7 @@
           exist — and fails the build if any turn up. External links are skipped
           by default so a third-party outage can't break your build. Configure
           or disable it with the
-          <a href="/configuration/#opt-linkCheck"><code>linkCheck</code></a>
+          <a href="./configuration.html#opt-linkCheck"><code>linkCheck</code></a>
           option.
         </p>
       </dd>

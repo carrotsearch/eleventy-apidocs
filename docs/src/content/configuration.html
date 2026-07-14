@@ -17,7 +17,7 @@ export default async function (eleventyConfig) {
     Every option is optional &mdash; paths default to conventional locations
     under <code>src/</code>, and the rest fall back to sensible defaults. The
     sections below describe each one in full. For the minimal set most sites
-    start with, see <a href="/getting-started/#configure-eleventy">Getting
+    start with, see <a href="./getting-started.html#configure-eleventy">Getting
     started</a>.
   </p>
 
@@ -39,7 +39,7 @@ export default async function (eleventyConfig) {
         <p>
           Path to the navigation manifest, either a flat array of articles
           or a chaptered shape. Default: <code>src/navigation.json</code>.
-          See <a href="/navigation/">Navigation</a> for the manifest format.
+          See <a href="./navigation.html">Navigation</a> for the manifest format.
         </p>
       </dd>
       <dt class="api" id="opt-logo">logo</dt>
@@ -72,7 +72,7 @@ export default async function (eleventyConfig) {
           Map of <code>$NAME$</code> placeholders to replacement values. Each
           placeholder is replaced with its value across every page, including
           layout markup such as the header and footer. Default: <code>{}</code>.
-          See <a href="/variables/">Variables</a> for details.
+          See <a href="./variables.html">Variables</a> for details.
         </p>
       </dd>
     </dl>
@@ -100,7 +100,7 @@ export default async function (eleventyConfig) {
     <p>
       Tune how search results are ordered and capped. The defaults work
       without configuration; reach for these when a site has many API symbols
-      to prioritize. See <a href="/search/">Search</a> for the full picture.
+      to prioritize. See <a href="./search.html">Search</a> for the full picture.
     </p>
     <dl class="options">
       <dt class="api" id="opt-apiKindOrder">apiKindOrder</dt>
@@ -217,7 +217,7 @@ export default async function (eleventyConfig) {
     </dl>
     <p>
       Both take an array of functions, each receiving a Cheerio instance to
-      mutate in place. See <a href="/pipeline/">Pipeline extensions</a> for the
+      mutate in place. See <a href="./pipeline.html">Pipeline extensions</a> for the
       pass signature, the per-page context, and worked examples.
     </p>
   </section>

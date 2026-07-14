@@ -1,6 +1,6 @@
 {
   "name": "@carrotsearch/eleventy-apidocs",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Eleventy plugin for HTML-source product documentation",
   "keywords": [
     "eleventy",
