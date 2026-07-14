@@ -62,6 +62,9 @@ importers:
       turndown-plugin-gfm:
         specifier: ^1.0.2
         version: 1.0.2
+      undici:
+        specifier: ^7.16.0
+        version: 7.28.0
 
   docs:
     dependencies:

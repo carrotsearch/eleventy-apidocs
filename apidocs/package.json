@@ -64,6 +64,7 @@
     "pagefind": "^1.5.2",
     "shiki": "^4.3.0",
     "turndown": "^7.2.4",
-    "turndown-plugin-gfm": "^1.0.2"
+    "turndown-plugin-gfm": "^1.0.2",
+    "undici": "^7.16.0"
   }
 }
