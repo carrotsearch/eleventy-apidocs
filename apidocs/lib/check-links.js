@@ -19,7 +19,7 @@ const SKIP_EXTERNAL = "^https?://(?!localhost)";
 // short-circuit skips it alongside Pagefind. Validates server-rendered HTML
 // only, which is exactly the static output this theme emits.
 export async function checkLinks(siteDir, options = {}, imageOutputs) {
-  const { external = false, skip = [], fatal = true } = options;
+  const { external = false, skip = [], fatal = true, concurrency = 16 } = options;
   const { LinkChecker } = await import("linkinator");
   const { Agent, getGlobalDispatcher, setGlobalDispatcher } = await import("undici");
 
@@ -65,8 +65,7 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
 
   // linkinator 7.x starts every discovered link's HTTP check eagerly — its
   // internal queue only awaits promises that are already running — so its
-  // `concurrency` option bounds nothing (measured: >1000 in-flight requests
-  // crawling a ~100-page site with `concurrency: 10`). Crawler, static server
+  // `concurrency` option bounds nothing. Crawler, static server
   // and the files it serves all share this one Node process, so an unbounded
   // crawl exhausts file descriptors under load: fetches fail (BROKEN, status
   // 0, never retried for crawled pages) and the server maps fs errors like
@@ -75,8 +74,9 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
   // Until fixed upstream, cap true concurrency one level down: linkinator
   // requests through Node's fetch, which honors undici's global dispatcher,
   // and with pipelining 1 (the default) connections ≈ in-flight requests.
+  // linkCheck.concurrency sizes the cap.
   const previousDispatcher = getGlobalDispatcher();
-  setGlobalDispatcher(new Agent({ connections: 16 }));
+  setGlobalDispatcher(new Agent({ connections: concurrency }));
   let links;
   try {
     ({ links } = await checker.check({
