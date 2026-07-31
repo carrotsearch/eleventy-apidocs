@@ -57,7 +57,7 @@
     "fuzzysort": "^3.1.0",
     "jsonc-parser": "^3.3.1",
     "jsonpath-plus": "^10.4.0",
-    "lightningcss": "^1.32.0",
+    "lightningcss": "^1.33.0",
     "linkinator": "^7.6.1",
     "listr2": "^10.2.2",
     "nunjucks": "^3.2.4",
@@ -65,6 +65,6 @@
     "shiki": "^4.3.1",
     "turndown": "^7.2.4",
     "turndown-plugin-gfm": "^1.0.2",
-    "undici": "^7.16.0"
+    "undici": "^7.29.0"
   }
 }
