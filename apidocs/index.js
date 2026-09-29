@@ -173,6 +173,15 @@ export default function apidocs(eleventyConfig, userOptions = {}) {
     }
   }
 
+  // Collections are computed once all templates are read and before any page
+  // renders, so this is the earliest point that knows how many pages the
+  // render and link-check counters are counting towards.
+  eleventyConfig.addCollection("apidocsPages", api => {
+    const all = api.getAll();
+    progress.setPageTotal(all.length);
+    return all;
+  });
+
   eleventyConfig.addTransform("apidocs-shell", async function (content, outputPath) {
     if (!outputPath?.endsWith(".html")) {
       return content;

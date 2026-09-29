@@ -15,11 +15,34 @@ let runMode = "build";
 let firstServeBuildDone = false;
 let seenImages = new Set();
 let pageCount = 0;
+let pageTotal = 0;
 let linkPageCount = 0;
 let buildStart = 0;
 let pendingNote = null;
 let lastActivity = null;
 let backend = null;
+
+// "1 page", "2 pages": every counter in the progress output goes through here so
+// singular counts don't read as "1 pages".
+export function plural(count, noun) {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
+// Number of pages this build will render, reported by the plugin once Eleventy
+// has collected all templates (before any renders). Lets the per-page counters
+// show a percentage; without it they fall back to a bare count.
+export function setPageTotal(n) {
+  pageTotal = n;
+}
+
+// "3 of 17 pages (18%)", or "3 pages" when the total isn't known yet.
+export function progressOf(count, noun) {
+  if (!pageTotal) {
+    return plural(count, noun);
+  }
+  const pct = Math.min(100, Math.round((count / pageTotal) * 100));
+  return `${count} of ${plural(pageTotal, noun)} (${pct}%)`;
+}
 
 // Full builds always drive the listr tree (live on a TTY, append-only `simple`
 // lines in CI — listr switches automatically). For dev `--serve`, only the
@@ -41,6 +64,7 @@ export function startBuild(mode) {
   runMode = mode || "build";
   seenImages = new Set();
   pageCount = 0;
+  pageTotal = 0;
   linkPageCount = 0;
   lastActivity = null;
   buildStart = performance.now();
@@ -61,7 +85,9 @@ export async function endBuild() {
       firstServeBuildDone = true;
     }
     const dt = formatMs(performance.now() - buildStart);
-    console.log(`[apidocs] build done: ${pageCount} pages, ${seenImages.size} images, ${dt}`);
+    console.log(
+      `[apidocs] build done: ${plural(pageCount, "page")}, ${plural(seenImages.size, "image")}, ${dt}`
+    );
     return;
   }
   if (!isVerbose()) {
@@ -71,7 +97,9 @@ export async function endBuild() {
     return;
   }
   const dt = formatMs(performance.now() - buildStart);
-  console.log(`[apidocs] build done: ${pageCount} pages, ${seenImages.size} images, ${dt}`);
+  console.log(
+    `[apidocs] build done: ${plural(pageCount, "page")}, ${plural(seenImages.size, "image")}, ${dt}`
+  );
   if (runMode === "serve") {
     firstServeBuildDone = true;
   }
@@ -150,7 +178,7 @@ export function page(url) {
 export function linkPage(url) {
   linkPageCount += 1;
   if (backend) {
-    backend.setLinkPage(`${linkPageCount} pages — ${url}`);
+    backend.setLinkPage(`Checked ${progressOf(linkPageCount, "page")} — ${url}`);
     return;
   }
   if (!isVerbose()) {
@@ -179,12 +207,12 @@ export function image(src) {
   console.log(`[apidocs] image #${seenImages.size}: ${src}`);
 }
 
-// One-line summary for the render task's live output: page and image counts
-// plus the most recent path, so the phase reads as proportional progress.
+// One-line summary for the render task's live output: running page and image
+// counts plus the most recent path, so the phase reads as proportional progress.
 function renderText() {
-  let text = `${pageCount} pages`;
+  let text = `Processed ${progressOf(pageCount, "page")}`;
   if (seenImages.size) {
-    text += `, ${seenImages.size} images`;
+    text += `, ${plural(seenImages.size, "image")}`;
   }
   if (lastActivity) {
     text += ` — ${lastActivity}`;
