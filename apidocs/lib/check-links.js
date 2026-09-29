@@ -93,7 +93,7 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
   }
 
   const broken = links.filter(l => l.state === "BROKEN");
-  progress.note(`${links.length} links, ${broken.length} broken`);
+  progress.note(`${progress.plural(links.length, "link")}, ${broken.length} broken`);
   if (!broken.length) {
     return;
   }
@@ -104,9 +104,11 @@ export async function checkLinks(siteDir, options = {}, imageOutputs) {
   const detail = broken
     .map(l => `  ${tidy(l.url)}${l.parent ? ` (linked from ${tidy(l.parent)})` : ""}`)
     .join("\n");
-  console.error(`[apidocs] ${broken.length} broken link(s):\n${detail}`);
+  console.error(`[apidocs] ${progress.plural(broken.length, "broken link")}:\n${detail}`);
 
   if (fatal) {
-    throw new Error(`[apidocs] link check failed: ${broken.length} broken link(s)`);
+    throw new Error(
+      `[apidocs] link check failed: ${progress.plural(broken.length, "broken link")}`
+    );
   }
 }
