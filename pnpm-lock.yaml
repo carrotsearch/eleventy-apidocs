@@ -63,8 +63,8 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2
       undici:
-        specifier: ^7.29.1
-        version: 7.29.1
+        specifier: ^7.30.0
+        version: 7.30.0
 
   docs:
     dependencies:
@@ -1611,8 +1611,8 @@ packages:
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
 
-  undici@7.29.1:
-    resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
+  undici@7.30.0:
+    resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
     engines: {node: '>=20.18.1'}
 
   union@0.5.0:
@@ -2221,7 +2221,7 @@ snapshots:
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 7.29.1
+      undici: 7.30.0
       whatwg-mimetype: 4.0.0
 
   chokidar@3.6.0:
@@ -2722,7 +2722,7 @@ snapshots:
       meow: 14.1.0
       mime: 4.1.0
       srcset: 5.0.3
-      undici: 7.29.1
+      undici: 7.30.0
 
   liquidjs@10.27.0:
     dependencies:
@@ -3169,7 +3169,7 @@ snapshots:
 
   uc.micro@2.1.0: {}
 
-  undici@7.29.1: {}
+  undici@7.30.0: {}
 
   union@0.5.0:
     dependencies:
