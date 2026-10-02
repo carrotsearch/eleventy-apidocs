@@ -40,7 +40,7 @@ built with this plugin, so it doubles as a living example and an integration tes
 ## Requirements
 
 - [Eleventy](https://www.11ty.dev/) 3.x (declared as a peer dependency)
-- Node.js &ge; 20.11
+- Node.js &ge; 22
 - ESM &mdash; the plugin ships as ES modules only
 
 ## Install

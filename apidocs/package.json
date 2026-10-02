@@ -1,6 +1,6 @@
 {
   "name": "@carrotsearch/eleventy-apidocs",
-  "version": "0.1.19",
+  "version": "0.2.0",
   "description": "Eleventy plugin for HTML-source product documentation",
   "keywords": [
     "eleventy",
@@ -44,13 +44,13 @@
     "test": "node --test 'test/*.test.js'"
   },
   "engines": {
-    "node": ">=20.11.0"
+    "node": ">=22"
   },
   "peerDependencies": {
     "@11ty/eleventy": ">=3.0.0"
   },
   "dependencies": {
-    "@11ty/eleventy-img": "^6.0.4",
+    "@11ty/eleventy-img": "^7.0.0",
     "@shikijs/transformers": "^4.4.3",
     "cheerio": "^1.2.0",
     "esbuild": "^0.28.2",

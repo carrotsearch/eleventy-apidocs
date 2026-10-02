@@ -8,7 +8,7 @@ Guidance for working in this repository. Read it before writing or changing code
 replacing the unmaintained `gatsby-theme-apidocs`. It's a pnpm workspace with
 two packages:
 
-- `apidocs/` — the theme, published as `@carrotsearch/eleventy-apidocs`. ESM only, Node >= 20.11.
+- `apidocs/` — the theme, published as `@carrotsearch/eleventy-apidocs`. ESM only, Node >= 22.
 - `docs/` — a sample site that consumes the theme. It doubles as a **living
   integration test**: if a theme change isn't reflected (correctly) in the
   built sample site, the change isn't done.

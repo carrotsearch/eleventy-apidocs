@@ -8,15 +8,35 @@
     readable form from its <code>datetime</code> attribute.
   </p>
 
-  <section id="0.1.19" data-toc="omit-children">
-    <h2>0.1.19</h2>
+  <section id="0.2.0" data-toc="omit-children">
+    <h2>0.2.0</h2>
     <time datetime="2026-10-02"></time>
 
     <p>
-      Clearer build progress output.
+      Node 22 or later required, eleventy-img 7, and clearer build progress output.
     </p>
 
     <dl>
+      <dt>Node 22 or later required</dt>
+      <dd>
+        <p>
+          The minimum Node version rises from 20.11 to 22, following
+          <code>@11ty/eleventy-img</code> 7. Sites still on Node 20 should
+          stay on 0.1.18 until they upgrade.
+        </p>
+      </dd>
+
+      <dt>eleventy-img 7</dt>
+      <dd>
+        <p>
+          Responsive images now go through <code>@11ty/eleventy-img</code> 7,
+          which uses much less memory on image-heavy builds and moves to
+          sharp 0.35, clearing the security advisories against sharp 0.33 and
+          image-size. Generated markup and variant filenames are unchanged;
+          image bytes differ slightly because of the newer encoder.
+        </p>
+      </dd>
+
       <dt>Page progress as a percentage</dt>
       <dd>
         <p>
@@ -37,7 +57,9 @@
       <dt>Dependency maintenance</dt>
       <dd>
         <p>
-          Updated Biome, Shiki, esbuild, Lightning CSS and undici.
+          Updated Biome, Shiki, esbuild, Lightning CSS and undici, and
+          refreshed transitive dependencies with security fixes (markdown-it,
+          brace-expansion, js-yaml, liquidjs, qs).
         </p>
       </dd>
     </dl>
