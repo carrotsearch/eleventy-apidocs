@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# The build only reads the repository; the Pages deployment job declares its own permissions.
+permissions:
+  contents: read
+
 # Cancel an in-flight CI run when a new commit lands on the same ref.
 # The deploy job below uses its own concurrency group ("pages") so it
 # queues rather than cancels — Pages doesn't tolerate parallel deploys.
@@ -14,13 +18,18 @@ concurrency:
 
 jobs:
   test-and-build:
+    name: Test and build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: ./.github/actions/setup
+      - uses: $/.github/actions/setup
 
       # biome ci is the read-only mode used in CI: fails the job on any
       # formatter, linter, or assist diagnostic. --error-on-warnings promotes
@@ -29,15 +38,16 @@ jobs:
 
       - run: pnpm test
 
-      - uses: ./.github/actions/build-site
+      - uses: $/.github/actions/build-site
 
       # Only stage the artifact when we're about to deploy.
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           path: docs/_site
 
   deploy:
+    name: Deploy to Pages
     needs: test-and-build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -50,8 +60,8 @@ jobs:
       cancel-in-progress: false
 
     permissions:
-      pages: write
-      id-token: write
+      pages: write # deploys the staged artifact to GitHub Pages
+      id-token: write # the Pages deployment is authenticated with an OIDC token
 
     environment:
       name: github-pages
@@ -59,4 +69,4 @@ jobs:
 
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
