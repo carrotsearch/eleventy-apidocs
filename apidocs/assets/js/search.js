@@ -339,7 +339,7 @@ function init() {
       return;
     }
     const restored = prevHref ? rows.findIndex(a => a.href === prevHref) : -1;
-    setActive(restored >= 0 ? restored : 0);
+    setActive(Math.max(restored, 0));
   }
 
   function renderApiHit(hit) {
